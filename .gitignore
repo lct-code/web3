@@ -1,0 +1,10 @@
+/node_modules
+/vendor
+
+.env
+
+.htaccess
+public/.htaccess
+public/install_files/install.log
+public/vendor
+

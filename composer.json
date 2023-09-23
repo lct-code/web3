@@ -51,10 +51,10 @@
     "torann/geoip": "^3.0",
     "willdurand/negotiation": "^3.1",
     "james-heinrich/getid3": "^1.9",
-    "league/color-extractor": "0.3.*"
+    "league/color-extractor": "0.3.*",
+    "nunomaduro/collision": "^6.1"
   },
   "require-dev": {
-    "nunomaduro/collision": "^6.1",
     "nunomaduro/larastan": "^2.0",
     "phpstan/phpstan": "^1.8",
     "rector/rector": "^0.13.10",
