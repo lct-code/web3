@@ -33,7 +33,7 @@ export function useLogin(form: UseFormReturn<LoginPayload>) {
 }
 
 function login(payload: LoginPayload): Promise<Response> {
-  let phone_token = (payload.phone.match(/^\+/) ? '' : '966') + payload.phone.replace(/^[0-9]/,'');
+  let phone_token = (payload.phone.match(/^\+/) ? '' : '966') + payload.phone.replace(/[^0-9]/,'');
   payload.email = phone_token + '@dohaty-sa.com';
   payload.password = phone_token + '-secret';
   return apiClient.post('auth/login', payload).then(response => response.data);

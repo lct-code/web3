@@ -9,6 +9,8 @@ import {SocialAuthSection} from './social-auth-section';
 import {AuthLayout} from './auth-layout/auth-layout';
 import {Trans} from '../../i18n/trans';
 import {FormCheckbox} from '../../ui/forms/toggle/checkbox';
+import {FormComboBox} from '../../ui/forms/combobox/form-combobox';
+import {Item} from '../../ui/forms/listbox/item';
 import {CustomMenuItem} from '../../menus/custom-menu';
 import {useRecaptcha} from '../../recaptcha/use-recaptcha';
 import {StaticPageTitle} from '../../seo/static-page-title';
@@ -49,6 +51,13 @@ export function RegisterPage() {
     heading = <Trans message="First, let's create your account" />;
   }
 
+  let subOptions = [
+    {id: null, label: 'No Subscription'},
+    {id: "1000045459", label: "Daily"},
+    {id: "1000045461", label: "Weekly"},
+    {id: "1000045179", label: "Monthly"},
+  ]
+
   const message = (
     <Trans
       values={{
@@ -68,7 +77,7 @@ export function RegisterPage() {
         <Trans message="Login" />
       </StaticPageTitle>
       <Form
-        form={form}
+      form={form}
         onSubmit={async payload => {
           const isValid = await verify();
           if (isValid) {
@@ -84,6 +93,20 @@ export function RegisterPage() {
           label={<Trans message="Phone" />}
           required
         />
+        <FormComboBox
+          className="mb-32"
+          required
+          items={subOptions}
+          name="subscription"
+          openMenuOnFocus
+          label={<Trans message="Subscription" />}
+        >
+          {item => (
+            <Item value={item.id} key={item.id}>
+              {item.label}
+            </Item>
+          )}
+        </FormComboBox>
         <PolicyCheckboxes />
         <Button
           className="block w-full"
