@@ -22,6 +22,7 @@
     "guzzlehttp/guzzle": "^7.4",
     "http-interop/http-factory-guzzle": "^1.2",
     "intervention/image": "^2.7",
+    "james-heinrich/getid3": "^1.9",
     "jenssegers/agent": "^2.6",
     "laravel/fortify": "^1.13",
     "laravel/framework": "^9.2",
@@ -29,6 +30,7 @@
     "laravel/sanctum": "^3.0",
     "laravel/scout": "^9.4",
     "laravel/socialite": "^5.5",
+    "league/color-extractor": "0.3.*",
     "league/flysystem-aws-s3-v3": "^3.2",
     "league/flysystem-ftp": "^3.0",
     "maennchen/zipstream-php": "^2.2",
@@ -37,6 +39,7 @@
     "moneyphp/money": "^4.1",
     "pda/pheanstalk": "^4.0",
     "predis/predis": "^2.0",
+    "propaganistas/laravel-phone": "^5.0",
     "pusher/pusher-php-server": "^7.0",
     "sentry/sentry-laravel": "^3.12",
     "spatie/color": "^1.5",
@@ -49,10 +52,7 @@
     "symfony/postmark-mailer": "^6.0",
     "teamtnt/laravel-scout-tntsearch-driver": "^11.6",
     "torann/geoip": "^3.0",
-    "willdurand/negotiation": "^3.1",
-    "james-heinrich/getid3": "^1.9",
-    "league/color-extractor": "0.3.*",
-    "nunomaduro/collision": "^6.1"
+    "willdurand/negotiation": "^3.1"
   },
   "require-dev": {
     "nunomaduro/larastan": "^2.0",
@@ -71,7 +71,6 @@
   "extra": {
     "laravel": {
       "dont-discover": [
-        "itsgoingd/clockwork"
       ]
     }
   },
