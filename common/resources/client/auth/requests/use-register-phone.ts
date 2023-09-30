@@ -8,33 +8,38 @@ import {useAuth} from '../use-auth';
 import {useBootstrapData} from '../../core/bootstrap-data/bootstrap-data-context';
 
 interface Response extends BackendResponse {
-  bootstrapData: string;
+  bootstrapData?: string;
+  message?: string;
+  status: 'success' | 'needs_phone_verification';
 }
 
-export interface LoginPayload {
-  email?: string;
-  password?: string;
+export interface RegisterPayloadPhone {
   phone: string;
-  remember: boolean;
-  token_name: string;
+  password: string;
+  password_confirmation: string;
 }
 
-export function useLogin(form: UseFormReturn<LoginPayload>) {
+export function useRegisterPhone(form: UseFormReturn<RegisterPayloadPhone>) {
   const navigate = useNavigate();
   const {getRedirectUri} = useAuth();
   const {setBootstrapData} = useBootstrapData();
-  return useMutation(login, {
+
+  return useMutation(register, {
     onSuccess: response => {
-      setBootstrapData(response.bootstrapData);
-      navigate(getRedirectUri(), {replace: true});
+      setBootstrapData(response.bootstrapData!);
+      if (response.status === 'needs_phone_verification') {
+        navigate('/');
+      } else {
+        navigate(getRedirectUri(), {replace: true});
+      }
     },
     onError: r => onFormQueryError(r, form),
   });
 }
 
-function login(payload: LoginPayload): Promise<Response> {
-  let phone_token = (payload.phone.match(/^\+/) ? '' : '966') + payload.phone.replace(/^[0-9]/,'');
-  payload.email = phone_token + '@dohaty-sa.com';
-  payload.password = phone_token + '-secret';
-  return apiClient.post('auth/login', payload).then(response => response.data);
+function register(payload: RegisterPayloadPhone): Promise<Response> {
+  return apiClient
+    .post('auth/register', payload)
+    .then(response => response.data);
 }
+

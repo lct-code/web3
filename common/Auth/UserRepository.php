@@ -163,6 +163,8 @@ class UserRepository
             $formatted['password'] = Arr::get($params, 'password')
                 ? Hash::make($params['password'])
                 : null;
+            $formatted['phone'] = $params['phone'];
+            $formatted['phone_entered'] = $params['phone_entered'];
         } elseif ($type === 'update' && Arr::get($params, 'password')) {
             $formatted['password'] = Hash::make($params['password']);
         }

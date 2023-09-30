@@ -4,7 +4,7 @@ import {FormTextField} from '../../ui/forms/input-field/text-field/text-field';
 import {Button} from '../../ui/buttons/button';
 import {Form} from '../../ui/forms/form';
 import {LinkStyle} from '../../ui/buttons/external-link';
-import {RegisterPayload, useRegister} from '../requests/use-register';
+import {RegisterPayloadPhone, useRegisterPhone} from '../requests/use-register-phone';
 import {SocialAuthSection} from './social-auth-section';
 import {AuthLayout} from './auth-layout/auth-layout';
 import {Trans} from '../../i18n/trans';
@@ -26,12 +26,12 @@ export function RegisterPage() {
 
   const isWorkspaceRegister = pathname.includes('workspace');
   const isBillingRegister = searchParams.get('redirectFrom') === 'pricing';
-  const searchParamsEmail = searchParams.get('email') || undefined;
+  const searchParamsPhone = searchParams.get('phone') || undefined;
 
-  const form = useForm<RegisterPayload>({
-    defaultValues: {email: searchParamsEmail},
+  const form = useForm<RegisterPayloadPhone>({
+    defaultValues: {phone: searchParamsPhone},
   });
-  const register = useRegister(form);
+  const register = useRegisterPhone(form);
 
   if (disable) {
     return <Navigate to="/login" replace />;
@@ -78,24 +78,10 @@ export function RegisterPage() {
       >
         <FormTextField
           className="mb-32"
-          name="email"
-          type="email"
-          disabled={!!searchParamsEmail}
-          label={<Trans message="Email" />}
-          required
-        />
-        <FormTextField
-          className="mb-32"
-          name="password"
-          type="password"
-          label={<Trans message="Password" />}
-          required
-        />
-        <FormTextField
-          className="mb-32"
-          name="password_confirmation"
-          type="password"
-          label={<Trans message="Confirm password" />}
+          name="phone"
+          type="text"
+          disabled={!!searchParamsPhone}
+          label={<Trans message="Phone" />}
           required
         />
         <PolicyCheckboxes />

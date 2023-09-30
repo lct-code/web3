@@ -1358,12 +1358,9 @@ Search results include hits from all the specified types.'
             schema:
               type: object
               properties:
-                email:
+                phone:
                   type: string
-                  example: 'example@gmail.com'
-                password:
-                  type: string
-                  example: 'password'
+                  example: '0111234567'
                 token_name:
                   type: string
                   example: 'iphone 12'

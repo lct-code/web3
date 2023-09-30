@@ -14,28 +14,52 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Laravel\Fortify\Contracts\RegisterResponse;
 use Laravel\Fortify\Fortify;
+use Propaganistas\LaravelPhone\PhoneNumber;
+use Illuminate\Support\Facades\Log;
 
 class MobileAuthController extends BaseController
 {
+    public function __construct() {
+      Log::debug('constructing controller: '.get_class($this));
+      xdebug_break();
+    }
+
     public function login(Request $request)
     {
+      Log::debug('login.'.json_encode($request->all()));
+
         $this->validate($request, [
-            Fortify::username() => 'required|string|email_verified',
-            'password' => 'required|string',
+            'phone' => 'required|string',
             'token_name' => 'required|string|min:3|max:100',
         ]);
 
-        $user = User::where(
-            Fortify::username(),
-            $request->get(Fortify::username()),
-        )->first();
+        try {
+          // fetch entered phone number
+          $phone_entered = $request->get('phone');
+
+          // process phone number
+          $phone = new PhoneNumber($phone_entered, ['SA','INTERNATIONAL']);
+
+          // convert to E.164 format for lookup
+          $phone_formatted = $phone->formatE164();
+
+          // fetch user model
+          $user = User::where(
+            'phone',
+            $phone_formatted,
+          )->first();
+        }
+        catch (\Exception $e) {
+            throw ValidationException::withMessages([
+                'phone' => [trans('validation.phone')],
+            ]);
+        }
 
         if (
-            !$user ||
-            !Hash::check($request->get('password'), $user->password)
+            !$user
         ) {
             throw ValidationException::withMessages([
-                Fortify::username() => [trans('auth.failed')],
+                'phone' => [trans('auth.failed')],
             ]);
         }
 

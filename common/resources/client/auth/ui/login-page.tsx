@@ -22,15 +22,15 @@ export function LoginPage() {
   const {pathname} = useLocation();
 
   const isWorkspaceLogin = pathname.includes('workspace');
-  const searchParamsEmail = searchParams.get('email') || undefined;
+  const searchParamsPhone = searchParams.get('phone') || undefined;
 
   const {branding, registration, site} = useSettings();
   const siteConfig = useContext(SiteConfigContext);
 
   const demoDefaults =
-    site.demo && !searchParamsEmail ? getDemoFormDefaults(siteConfig) : {};
+    site.demo && !searchParamsPhone ? getDemoFormDefaults(siteConfig) : {};
   const form = useForm<LoginPayload>({
-    defaultValues: {remember: true, email: searchParamsEmail, ...demoDefaults},
+    defaultValues: {remember: true, phone: searchParamsPhone, ...demoDefaults},
   });
   const login = useLogin(form);
 
@@ -71,24 +71,11 @@ export function LoginPage() {
       >
         <FormTextField
           className="mb-32"
-          name="email"
-          type="email"
-          label={<Trans message="Email" />}
-          disabled={!!searchParamsEmail}
+          name="phone"
+          type="text"
+          disabled={!!searchParamsPhone}
+          label={<Trans message="Phone" />}
           invalid={isInvalid}
-          required
-        />
-        <FormTextField
-          className="mb-12"
-          name="password"
-          type="password"
-          label={<Trans message="Password" />}
-          invalid={isInvalid}
-          labelSuffix={
-            <Link className={LinkStyle} to="/forgot-password" tabIndex={-1}>
-              <Trans message="Forgot your password?" />
-            </Link>
-          }
           required
         />
         <FormCheckbox name="remember" className="block mb-32">
@@ -112,17 +99,15 @@ export function LoginPage() {
 
 function getDemoFormDefaults(siteConfig: SiteConfigContextValue) {
   if (siteConfig.demo.loginPageDefaults === 'randomAccount') {
-    // random number between 0 and 100, padded to 3 digits
-    const number = Math.floor(Math.random() * 100) + 1;
-    const paddedNumber = String(number).padStart(3, '0');
+    // random number between 0 and 10000000, padded to 7 digits
+    const number = Math.floor(Math.random() * 10000000) + 1;
+    const paddedNumber = String(number).padStart(7, '0');
     return {
-      email: `admin@demo${paddedNumber}.com`,
-      password: 'admin',
+      phone: `011${paddedNumber}`,
     };
   } else {
     return {
-      email: 'admin@admin.com',
-      password: 'admin',
+      phone: `0110000000`,
     };
   }
 }

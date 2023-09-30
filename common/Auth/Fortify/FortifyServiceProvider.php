@@ -10,6 +10,9 @@ use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
 use Laravel\Fortify\Fortify;
+use Propaganistas\LaravelPhone\PhoneNumber;
+use Illuminate\Support\Facades\Log;
+use App\User;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -31,9 +34,40 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
 
+        Fortify::authenticateUsing(function (Request $request) {
+          Log::debug('login.'.json_encode($request->all()));
+
+          try {
+            // fetch entered phone number
+            $phone_entered = $request->get('phone');
+
+            // process phone number
+            $phone = new PhoneNumber($phone_entered, ['SA','INTERNATIONAL']);
+
+            // convert to E.164 format for lookup
+            $phone_formatted = $phone->formatE164();
+
+            // fetch user model
+            $user = User::where(
+              'phone',
+              $phone_formatted,
+            )->first();
+          }
+          catch (\Exception $e) {
+            return null;
+              throw ValidationException::withMessages([
+                  'phone' => [trans('validation.phone')],
+              ]);
+          }
+
+          if ($user) {
+            return $user;
+          }
+        });
+
         RateLimiter::for('login', function (Request $request) {
-            $email = (string) $request->email;
-            return Limit::perMinute(5)->by($email . $request->ip());
+            $phone = (string) $request->phone;
+            return Limit::perMinute(5)->by($phone . $request->ip());
         });
 
         RateLimiter::for('two-factor', function (Request $request) {

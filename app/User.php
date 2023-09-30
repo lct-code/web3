@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends BaseUser
@@ -27,6 +28,13 @@ class User extends BaseUser
         'available_space' => 'integer',
         'email_verified_at' => 'datetime',
         'artist_id' => 'integer',
+    ];
+
+    protected $fillable = [
+      'name',
+      'email',
+      'password',
+      'phone',
     ];
 
     public function getOrCreateArtist(array $values = []): Artist {
@@ -128,9 +136,69 @@ class User extends BaseUser
         return $this->morphMany(ProfileLink::class, 'linkeable');
     }
 
+    public function scopeCompact(Builder $query): Builder
+    {
+        return $query->select(
+            'users.id',
+            'users.avatar',
+            'users.email',
+            'users.first_name',
+            'users.last_name',
+            'users.username',
+            'users.phone',
+        );
+    }
+
     public function scopeOrderByPopularity(Builder $query, $direction = 'desc')
     {
         return $query->orderBy('email', $direction);
+    }
+
+    public function toArray(bool $showAll = false)
+    {
+        if (
+            (!$showAll && !Auth::id()) ||
+            (Auth::id() !== $this->id &&
+                !Auth::user()?->hasPermission('users.update'))
+        ) {
+            $this->hidden = array_merge($this->hidden, [
+                'first_name',
+                'last_name',
+                'avatar_url',
+                'gender',
+                'email',
+                'card_brand',
+                'has_password',
+                'confirmed',
+                'stripe_id',
+                'roles',
+                'permissions',
+                'card_last_four',
+                'created_at',
+                'updated_at',
+                'available_space',
+                'email_verified_at',
+                'timezone',
+                'confirmation_code',
+                'subscriptions',
+                'phone',
+            ]);
+        }
+        return \Illuminate\Foundation\Auth\User::toArray();
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'username' => $this->username,
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
+            'email' => $this->email,
+            'created_at' => $this->created_at->timestamp ?? '_null',
+            'updated_at' => $this->updated_at->timestamp ?? '_null',
+            'phone' => $this->phone,
+        ];
     }
 
     public static function getModelTypeAttribute(): string
