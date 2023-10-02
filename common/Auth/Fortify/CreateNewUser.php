@@ -68,7 +68,6 @@ class CreateNewUser implements CreatesNewUsers
             ]);
              */
           }
-          xdebug_break();
         }
 
         Log::debug('inserting new user: '.json_encode($input));

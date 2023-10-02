@@ -19,11 +19,6 @@ use Illuminate\Support\Facades\Log;
 
 class MobileAuthController extends BaseController
 {
-    public function __construct() {
-      Log::debug('constructing controller: '.get_class($this));
-      xdebug_break();
-    }
-
     public function login(Request $request)
     {
       Log::debug('login.'.json_encode($request->all()));
