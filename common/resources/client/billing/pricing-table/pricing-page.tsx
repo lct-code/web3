@@ -34,7 +34,7 @@ export function PricingPage() {
         </h1>
 
         <BillingCycleRadio
-          products={query.data?.products}
+          products={query.data?.products??[]}
           selectedCycle={selectedCycle}
           onChange={setSelectedCycle}
           className="mb-40 md:mb-70 flex justify-center"

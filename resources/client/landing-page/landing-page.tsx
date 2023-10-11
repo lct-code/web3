@@ -354,7 +354,7 @@ function PricingSection({content}: PricingSectionProps) {
           )}
         </div>
         <BillingCycleRadio
-          products={query.data?.products}
+          products={query.data?.products ?? []}
           selectedCycle={selectedCycle}
           onChange={setSelectedCycle}
           className="my-50 flex justify-center"

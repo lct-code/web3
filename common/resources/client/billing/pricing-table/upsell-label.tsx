@@ -5,8 +5,8 @@ import {Fragment, memo} from 'react';
 import {Trans} from '../../i18n/trans';
 
 interface UpsellLabelProps {
-  products?: Product[];
-  cycle?: UpsellBillingCycle;
+  products: Product[];
+  cycle: UpsellBillingCycle;
 }
 export const UpsellLabel = memo(({products, cycle}: UpsellLabelProps) => {
   const upsellPercentage = calcHighestUpsellPercentage(products, cycle);
@@ -30,7 +30,7 @@ export const UpsellLabel = memo(({products, cycle}: UpsellLabelProps) => {
   );
 });
 
-function calcHighestUpsellPercentage(products?: Product[], cycle?: UpsellBillingCycle|undefined) {
+function calcHighestUpsellPercentage(products: Product[], cycle: UpsellBillingCycle) {
   if (!products?.length) return 0;
   if (!cycle) {
     cycle = 'yearly';

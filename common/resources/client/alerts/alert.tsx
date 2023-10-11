@@ -3,7 +3,7 @@ import {ReactNode} from 'react'
 type Props = {
   title?:  string | ReactNode | undefined,
   message: string | ReactNode | undefined,
-  type?:   string
+  type?:   'warning' | 'info'
 }
 
 export function Alert({title, message, type}: Props) {

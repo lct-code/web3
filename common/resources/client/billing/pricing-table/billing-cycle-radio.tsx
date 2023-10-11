@@ -11,7 +11,7 @@ import {Product} from '../product';
 interface BillingCycleRadioProps extends Omit<RadioGroupProps, 'children'> {
   selectedCycle: UpsellBillingCycle;
   onChange: (value: UpsellBillingCycle) => void;
-  products?: Product[];
+  products: Product[];
 }
 export function BillingCycleRadio({
   selectedCycle,

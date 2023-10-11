@@ -54,7 +54,7 @@ function PlanList() {
   return (
     <Fragment key="plan-list">
       <BillingCycleRadio
-        products={query.data?.products}
+        products={query.data?.products ?? []}
         selectedCycle={selectedCycle}
         onChange={setSelectedCycle}
         className="mb-20"
