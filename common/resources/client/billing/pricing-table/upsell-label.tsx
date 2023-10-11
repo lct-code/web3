@@ -1,14 +1,15 @@
 // find the highest percentage decrease between monthly and yearly prices of specified products
 import {Product} from '../product';
-import {findBestPrice} from './find-best-price';
+import {findBestPrice, UpsellBillingCycleList, UpsellBillingCycle} from './find-best-price';
 import {Fragment, memo} from 'react';
 import {Trans} from '../../i18n/trans';
 
 interface UpsellLabelProps {
   products?: Product[];
+  cycle?: UpsellBillingCycle;
 }
-export const UpsellLabel = memo(({products}: UpsellLabelProps) => {
-  const upsellPercentage = calcHighestUpsellPercentage(products);
+export const UpsellLabel = memo(({products, cycle}: UpsellLabelProps) => {
+  const upsellPercentage = calcHighestUpsellPercentage(products, cycle);
 
   if (upsellPercentage <= 0) {
     return null;
@@ -29,21 +30,34 @@ export const UpsellLabel = memo(({products}: UpsellLabelProps) => {
   );
 });
 
-function calcHighestUpsellPercentage(products?: Product[]) {
+function calcHighestUpsellPercentage(products?: Product[], cycle?: UpsellBillingCycle|undefined) {
   if (!products?.length) return 0;
+  if (!cycle) {
+    cycle = 'yearly';
+  }
 
   const decreases = products.map(product => {
-    const monthly = findBestPrice('monthly', product.prices);
-    const yearly = findBestPrice('yearly', product.prices);
+    const bestPrice = {
+      'daily': findBestPrice('daily', product.prices),
+      'weekly': findBestPrice('weekly', product.prices),
+      'monthly': findBestPrice('monthly', product.prices),
+      'yearly': findBestPrice('yearly', product.prices),
+    }
 
-    if (!monthly || !yearly) return 0;
+    if (!bestPrice[cycle]) return 0;
 
-    // monthly plan per year amount
-    const monthlyAmount = monthly.amount * 12;
-    const yearlyAmount = yearly.amount;
+    // all plans per year amount
+    const amountPerYear = {
+      'daily': (bestPrice.daily?.amount ?? 0) * 365,
+      'weekly': (bestPrice.weekly?.amount ?? 0) * 52,
+      'monthly': (bestPrice.monthly?.amount ?? 0) * 12,
+      'yearly': bestPrice.yearly?.amount ?? 0,
+    }
+
+    const worstAmount = Object.entries(amountPerYear).reduce((max, [key, current]) => Math.max(max, current), 0);
 
     const savingsPercentage = Math.round(
-      ((monthlyAmount - yearlyAmount) / monthlyAmount) * 100
+      ((worstAmount - amountPerYear[cycle]) / worstAmount) * 100
     );
 
     if (savingsPercentage > 0 && savingsPercentage <= 200) {

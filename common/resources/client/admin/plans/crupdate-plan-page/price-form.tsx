@@ -83,6 +83,12 @@ export function PriceForm({index, onRemovePrice}: PriceFormProps) {
       {billingPeriodPreset === 'custom' && (
         <CustomBillingPeriodField disabled={!allowPriceChanges} index={index} />
       )}
+      <FormTextField
+        label={<Trans message="SUB product id" />}
+        type="text"
+        name={`prices.${index}.sub_product_id`}
+        className="mb-20"
+      />
       <div className="text-right">
         <Button
           size="xs"

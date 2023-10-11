@@ -57,6 +57,8 @@ return [
     ['name' => 'billing.stripe_test_mode', 'value' => true],
     ['name' => 'billing.stripe.enable', 'value' => false],
     ['name' => 'billing.paypal.enable', 'value' => false],
+    ['name' => 'billing.phonesub.enable', 'value' => true],
+    ['name' => 'billing.phonesub_test_mode', 'value' => true],
     [
         'name' => 'billing.accepted_cards',
         'value' => json_encode([

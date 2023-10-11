@@ -33,4 +33,6 @@ export interface User {
   card_brand?: string;
   card_expires?: string;
   model_type: typeof USER_MODEL;
+  phone: string;
+  phone_entered: string;
 }

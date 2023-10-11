@@ -25,6 +25,7 @@ use Common\Auth\Controllers\UserController;
 use Common\Auth\Roles\RolesController;
 use Common\Billing\Gateways\Paypal\PaypalController;
 use Common\Billing\Gateways\Stripe\StripeController;
+use Common\Billing\Gateways\Phonesub\PhonesubController;
 use Common\Billing\Gateways\SyncProductsController;
 use Common\Billing\Invoices\InvoiceController;
 use Common\Billing\Products\ProductsController;
@@ -190,6 +191,9 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('billing/stripe/change-default-payment-method', [StripeController::class, 'changeDefaultPaymentMethod']);
         Route::post('billing/stripe/store-subscription-details-locally', [StripeController::class, 'storeSubscriptionDetailsLocally']);
         Route::post('billing/paypal/store-subscription-details-locally', [PaypalController::class, 'storeSubscriptionDetailsLocally']);
+        Route::post('billing/phonesub/subscribe-start', [PhonesubController::class, 'subscribeStart']);
+        Route::post('billing/phonesub/subscribe-verify', [PhonesubController::class, 'subscribeVerify']);
+        Route::post('billing/phonesub/store-subscription-details-locally', [PhonesubController::class, 'storeSubscriptionDetailsLocally']);
 
         // INVOICES
         Route::get('billing/invoices', [InvoiceController::class, 'index']);

@@ -44,6 +44,7 @@ export function SubscriptionSettings() {
               <Trans message="Enable subscriptions" />
             </FormSwitch>
             <SettingsSeparator />
+            <PhoneSubSection />
             <PaypalSection />
             <StripeSection />
             <SettingsSeparator />
@@ -73,6 +74,44 @@ export function SubscriptionSettings() {
         </TabPanels>
       </Tabs>
     </SettingsPanel>
+  );
+}
+
+function PhoneSubSection() {
+  const {watch} = useFormContext<AdminSettings>();
+  const phoneSubIsEnabled = watch('client.billing.phonesub.enable');
+  return (
+    <div className="mb-30">
+      <FormSwitch
+        name="client.billing.phonesub.enable"
+        description={
+          <div>
+            <Trans message="Enable PhoneSub payment gateway integration." />
+          </div>
+        }
+      >
+        <Trans message="PhoneSub gateway" />
+      </FormSwitch>
+      {phoneSubIsEnabled && (
+        <SettingsErrorGroup name="phonesub_group">
+          {isInvalid => (
+            <Fragment>
+              <FormSwitch
+                name="client.billing.phonesub_test_mode"
+                invalid={isInvalid}
+                description={
+                  <div>
+                    <Trans message="Allows testing PhoneSub payments." />
+                  </div>
+                }
+              >
+                <Trans message="PhoneSub test mode" />
+              </FormSwitch>
+            </Fragment>
+          )}
+        </SettingsErrorGroup>
+      )}
+    </div>
   );
 }
 

@@ -21,10 +21,12 @@ trait Billable
 
         if ($price->interval === 'year') {
             $renewsAt = Carbon::now()->addYears($price->interval_count);
+        } elseif ($price->interval === 'month') {
+            $renewsAt = Carbon::now()->addMonths($price->interval_count);
         } elseif ($price->interval === 'week') {
             $renewsAt = Carbon::now()->addWeeks($price->interval_count);
         } else {
-            $renewsAt = Carbon::now()->addMonths($price->interval_count);
+            $renewsAt = Carbon::now()->addDays($price->interval_count);
         }
 
         $subscription = $this->subscriptions()->create([

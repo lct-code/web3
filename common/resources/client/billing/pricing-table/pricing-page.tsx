@@ -14,7 +14,7 @@ import {PricingTable} from '@common/billing/pricing-table/pricing-table';
 export function PricingPage() {
   const query = useProducts();
   const [selectedCycle, setSelectedCycle] =
-    useState<UpsellBillingCycle>('yearly');
+    useState<UpsellBillingCycle>('monthly');
 
   return (
     <div className="flex flex-col h-full overflow-auto">

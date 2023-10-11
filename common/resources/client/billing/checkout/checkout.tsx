@@ -4,6 +4,7 @@ import {CheckoutLayout} from './checkout-layout';
 import {CheckoutProductSummary} from './checkout-product-summary';
 import {usePaypal} from './paypal/use-paypal';
 import {StripeElementsForm} from './stripe/stripe-elements-form';
+import {PhonesubElementsForm} from './phonesub/phonesub-elements-form';
 import {Fragment} from 'react';
 import {useProducts} from '../pricing-table/use-products';
 import {FullPageLoader} from '../../ui/progress/full-page-loader';
@@ -18,7 +19,7 @@ export function Checkout() {
   });
   const {
     base_url,
-    billing: {stripe},
+    billing: {stripe, phonesub},
   } = useSettings();
 
   if (productQuery.isLoading) {
@@ -41,6 +42,20 @@ export function Checkout() {
         <h1 className="text-4xl mb-40">
           <Trans message="Checkout" />
         </h1>
+        {phonesub.enable ? (
+          <Fragment>
+            <PhonesubElementsForm
+              productId={productId}
+              priceId={priceId}
+              submitLabel={<Trans message="Upgrade" />}
+              verifyLabel={<Trans message="Verify code" />}
+              resendLabel={<Trans message="Resend code" />}
+              type="subscription"
+              returnUrl={`/checkout/${productId}/${priceId}/phonesub/done`}
+            />
+            <Separator />
+          </Fragment>
+        ) : null}
         {stripe.enable ? (
           <Fragment>
             <StripeElementsForm

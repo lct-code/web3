@@ -5,14 +5,15 @@ import {Link} from 'react-router-dom';
 import {EditIcon} from '../../../icons/material/Edit';
 import {Fragment} from 'react';
 import paypalSvg from './paypal.svg';
+import {SmartphoneIcon} from '../../../icons/material/Smartphone';
 import {SvgImage} from '../../../ui/images/svg-image/svg-image';
 
 export function PaymentMethodPanel() {
   const {user, subscription} = useBillingUser();
   if (!user || !subscription) return null;
 
-  const isPaypal = subscription.gateway_name === 'paypal';
-  const PaymentMethod = isPaypal ? PaypalPaymentMethod : CardPaymentMethod;
+  const PaymentMethod = subscription.gateway_name === 'phonesub' ? PhonesubPaymentMethod : 
+    (subscription.gateway_name === 'paypal' ? PaypalPaymentMethod : CardPaymentMethod);
 
   return (
     <BillingPlanPanel title={<Trans message="Payment method" />}>
@@ -28,6 +29,21 @@ interface PaymentMethodProps {
   methodClassName: string;
   linkClassName: string;
 }
+function PhonesubPaymentMethod({
+  methodClassName,
+  linkClassName,
+}: PaymentMethodProps) {
+  const {user} = useBillingUser();
+  if (!user) return null;
+  return (
+    <Fragment>
+      <div className={methodClassName}>
+        <SmartphoneIcon /> <span className="capitalize">{user.phone}</span>
+      </div>
+    </Fragment>
+  );
+}
+
 function CardPaymentMethod({
   methodClassName,
   linkClassName,

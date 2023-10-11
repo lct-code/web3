@@ -5,6 +5,7 @@ use Carbon\Carbon;
 use Common\Billing\Gateways\Contracts\CommonSubscriptionGatewayActions;
 use Common\Billing\Gateways\Paypal\Paypal;
 use Common\Billing\Gateways\Stripe\Stripe;
+use Common\Billing\Gateways\Phonesub\Phonesub;
 use Common\Billing\Models\Price;
 use Common\Billing\Models\Product;
 use Common\Billing\Subscriptions\SubscriptionFactory;
@@ -237,6 +238,8 @@ class Subscription extends Model
             return app(Stripe::class);
         } elseif ($this->gateway_name === 'paypal') {
             return app(Paypal::class);
+        } elseif ($this->gateway_name === 'phonesub') {
+            return app(Phonesub::class);
         }
 
         return null;

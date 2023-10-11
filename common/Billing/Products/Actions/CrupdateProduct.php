@@ -64,6 +64,7 @@ class CrupdateProduct
                 'interval_count' => $price['interval_count'],
                 'interval' => $price['interval'],
                 'currency' => $price['currency'],
+                'sub_product_id' => $price['sub_product_id'],
             ];
 
             // existing prices can't be updated for existing products, if it has active subscribers. We can add new price though.

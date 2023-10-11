@@ -15,6 +15,7 @@ import {CustomMenuItem} from '../../menus/custom-menu';
 import {useRecaptcha} from '../../recaptcha/use-recaptcha';
 import {StaticPageTitle} from '../../seo/static-page-title';
 import {useSettings} from '../../core/settings/use-settings';
+import {Alert} from '../../alerts/alert';
 
 export function RegisterPage() {
   const {
@@ -34,6 +35,7 @@ export function RegisterPage() {
     defaultValues: {phone: searchParamsPhone},
   });
   const register = useRegisterPhone(form);
+  const watchFields = form.watch();
 
   if (disable) {
     return <Navigate to="/login" replace />;
@@ -51,12 +53,18 @@ export function RegisterPage() {
     heading = <Trans message="First, let's create your account" />;
   }
 
-  let subOptions = [
-    {id: null, label: 'No Subscription'},
-    {id: "1000045459", label: "Daily"},
-    {id: "1000045461", label: "Weekly"},
-    {id: "1000045179", label: "Monthly"},
+  type SubOption = {
+    id: string,
+    label: string,
+    price: number,
+  }
+  const subOptions: SubOption[] = [
+    {id: "", label: 'No Subscription',   price: 0},
+    {id: "1000045459", label: "Daily",   price: 1.5},
+    {id: "1000045461", label: "Weekly",  price: 5},
+    {id: "1000045179", label: "Monthly", price: 10},
   ]
+  const subSelected = subOptions.filter(opts => opts.id === watchFields?.subscription).shift()
 
   const message = (
     <Trans
@@ -96,9 +104,10 @@ export function RegisterPage() {
         <FormComboBox
           className="mb-32"
           required
-          items={subOptions}
+          items={subOptions.map(opt => {return {id:opt.id,label:opt.label}})}
           name="subscription"
           openMenuOnFocus
+          useOptionLabelAsInputValue={true}
           label={<Trans message="Subscription" />}
         >
           {item => (
@@ -107,6 +116,16 @@ export function RegisterPage() {
             </Item>
           )}
         </FormComboBox>
+        {watchFields?.subscription && (
+          <Alert
+            title={<Trans message="Heads up" />}
+            message={
+              <Trans message="You are about to subscribe to the daily Dohaty service using your saved phone number: :phone for :amount SR"
+              values={{phone: watchFields?.phone, amount: subSelected?.price}}
+              />
+            }
+            />
+        )}
         <PolicyCheckboxes />
         <Button
           className="block w-full"

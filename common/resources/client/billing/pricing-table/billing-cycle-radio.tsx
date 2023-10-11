@@ -22,16 +22,6 @@ export function BillingCycleRadio({
   return (
     <RadioGroup {...radioGroupProps}>
       <Radio
-        value="yearly"
-        checked={selectedCycle === 'yearly'}
-        onChange={e => {
-          onChange(e.target.value as UpsellBillingCycle);
-        }}
-      >
-        <Trans message="Annual" />
-        <UpsellLabel products={products} />
-      </Radio>
-      <Radio
         value="monthly"
         checked={selectedCycle === 'monthly'}
         onChange={e => {
@@ -39,6 +29,26 @@ export function BillingCycleRadio({
         }}
       >
         <Trans message="Monthly" />
+        <UpsellLabel products={products} cycle="monthly" />
+      </Radio>
+      <Radio
+        value="weekly"
+        checked={selectedCycle === 'weekly'}
+        onChange={e => {
+          onChange(e.target.value as UpsellBillingCycle);
+        }}
+      >
+        <Trans message="Weekly" />
+        <UpsellLabel products={products} cycle="weekly" />
+      </Radio>
+      <Radio
+        value="daily"
+        checked={selectedCycle === 'daily'}
+        onChange={e => {
+          onChange(e.target.value as UpsellBillingCycle);
+        }}
+      >
+        <Trans message="Daily" />
       </Radio>
     </RadioGroup>
   );

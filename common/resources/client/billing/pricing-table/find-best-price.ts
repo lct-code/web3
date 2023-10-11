@@ -1,11 +1,34 @@
 import {Price} from '../price';
 
-export type UpsellBillingCycle = 'monthly' | 'yearly';
+export type UpsellBillingCycle = 'daily' | 'weekly' | 'monthly' | 'yearly';
+
+export const UpsellBillingCycleList: UpsellBillingCycle[] = ['daily', 'weekly', 'monthly', 'yearly']
+
+const intervalMultipliers = {
+  'year': 1,
+  'month': 12,
+  'week': 52,
+  'day': 365,
+}
+
+export function yearlyPriceAmount(price: Price) {
+  return price.amount * intervalMultipliers[price.interval] / price.interval_count;
+}
 
 export function findBestPrice(
   token: UpsellBillingCycle,
   prices: Price[]
 ): Price | undefined {
+  if (token === 'daily') {
+    const match = findDailyPrice(prices);
+    if (match) return match;
+  }
+
+  if (token === 'weekly') {
+    const match = findWeeklyPrice(prices);
+    if (match) return match;
+  }
+
   if (token === 'monthly') {
     const match = findMonthlyPrice(prices);
     if (match) return match;
@@ -16,11 +39,17 @@ export function findBestPrice(
     if (match) return match;
   }
 
-  return prices[0];
+  return prices.sort((a,b) => yearlyPriceAmount(a) < yearlyPriceAmount(b) ? -1 : 1)[0];
 }
 
 function findYearlyPrice(prices: Price[]) {
   return prices.find(price => {
+    if (price.interval === 'day' && price.interval_count >= 365) {
+      return price;
+    }
+    if (price.interval === 'week' && price.interval_count >= 52) {
+      return price;
+    }
     if (price.interval === 'month' && price.interval_count >= 12) {
       return price;
     }
@@ -35,7 +64,29 @@ function findMonthlyPrice(prices: Price[]) {
     if (price.interval === 'day' && price.interval_count >= 30) {
       return price;
     }
+    if (price.interval === 'week' && price.interval_count >= 4) {
+      return price;
+    }
     if (price.interval === 'month' && price.interval_count >= 1) {
+      return price;
+    }
+  });
+}
+
+function findWeeklyPrice(prices: Price[]) {
+  return prices.find(price => {
+    if (price.interval === 'day' && price.interval_count >= 7) {
+      return price;
+    }
+    if (price.interval === 'week' && price.interval_count >= 1) {
+      return price;
+    }
+  });
+}
+
+function findDailyPrice(prices: Price[]) {
+  return prices.find(price => {
+    if (price.interval === 'day' && price.interval_count >= 1) {
       return price;
     }
   });

@@ -6,6 +6,7 @@ use Common\Core\Bootstrap\BootstrapData;
 use Common\Core\Bootstrap\MobileBootstrapData;
 use Illuminate\Http\JsonResponse;
 use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
+use Session;
 
 class RegisterResponse implements RegisterResponseContract
 {
@@ -27,6 +28,14 @@ class RegisterResponse implements RegisterResponseContract
         } else {
             $bootstrapData = app(BootstrapData::class)->init();
             $response['bootstrapData'] = $bootstrapData->getEncoded();
+        }
+
+        if (Session::has('message')) {
+          $response['message'] = Session::get('message');
+        }
+
+        if (Session::has('registerRedirectUri')) {
+          $response['redirectUri'] = Session::get('registerRedirectUri');
         }
 
         return response()->json($response);

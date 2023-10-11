@@ -60,6 +60,9 @@ export interface Settings {
     stripe: {
       enable: boolean;
     };
+    phonesub: {
+      enable: boolean;
+    };
   };
   notifications: {
     integrated: boolean;

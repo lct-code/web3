@@ -6,17 +6,20 @@ import {useNavigate} from '../../utils/hooks/use-navigate';
 import {apiClient} from '../../http/query-client';
 import {useAuth} from '../use-auth';
 import {useBootstrapData} from '../../core/bootstrap-data/bootstrap-data-context';
+import {toast} from '../../ui/toast/toast';
 
 interface Response extends BackendResponse {
   bootstrapData?: string;
   message?: string;
-  status: 'success' | 'needs_phone_verification';
+  status: 'success' | 'needs_subscription';
+  redirectUri?: string;
 }
 
 export interface RegisterPayloadPhone {
   phone: string;
-  password: string;
-  password_confirmation: string;
+  subscription: string;
+  password?: string;
+  password_confirmation?: string;
 }
 
 export function useRegisterPhone(form: UseFormReturn<RegisterPayloadPhone>) {
@@ -27,8 +30,11 @@ export function useRegisterPhone(form: UseFormReturn<RegisterPayloadPhone>) {
   return useMutation(register, {
     onSuccess: response => {
       setBootstrapData(response.bootstrapData!);
-      if (response.status === 'needs_phone_verification') {
-        navigate('/');
+      if (response.message) {
+        toast.positive(response.message);
+      }
+      if (response.redirectUri) {
+        navigate(response.redirectUri);
       } else {
         navigate(getRedirectUri(), {replace: true});
       }
