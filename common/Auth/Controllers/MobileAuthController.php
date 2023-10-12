@@ -21,12 +21,14 @@ class MobileAuthController extends BaseController
 {
     public function login(Request $request)
     {
-      Log::debug('login.'.json_encode($request->all()));
+        Log::debug('login-controller '.json_encode($request->all()));
 
         $this->validate($request, [
             'phone' => 'required|string',
             'token_name' => 'required|string|min:3|max:100',
         ]);
+
+        $user = null;
 
         try {
           // fetch entered phone number
@@ -45,14 +47,28 @@ class MobileAuthController extends BaseController
           )->first();
         }
         catch (\Exception $e) {
+            Log::debug('login-exception-response');
             throw ValidationException::withMessages([
                 'phone' => [trans('validation.phone')],
             ]);
         }
 
+        Log::debug('login-data '.json_encode([$phone_entered, $phone_formatted, $user]));
+
         if (
             !$user
         ) {
+            // @TODO this won't be called
+            if (!empty($phone_formatted)) {
+                $uri = '/register?phone='.$phone_formatted;
+                Log::debug('login-redirect-response: '.$uri);
+                return response()->json([
+                    'result' => 'register',
+                    'redirectUri' => $uri,
+                ], 422);
+            }
+
+            Log::debug('login-fail-response');
             throw ValidationException::withMessages([
                 'phone' => [trans('auth.failed')],
             ]);

@@ -35,7 +35,7 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
 
         Fortify::authenticateUsing(function (Request $request) {
-          Log::debug('login.'.json_encode($request->all()));
+          Log::debug('login-fortify-auth '.json_encode($request->all()));
 
           try {
             // fetch entered phone number
@@ -54,14 +54,11 @@ class FortifyServiceProvider extends ServiceProvider
             )->first();
           }
           catch (\Exception $e) {
-            return null;
-              throw ValidationException::withMessages([
-                  'phone' => [trans('validation.phone')],
-              ]);
+              return null;
           }
 
           if ($user) {
-            return $user;
+              return $user;
           }
         });
 
