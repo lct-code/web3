@@ -10,11 +10,16 @@ import {UpsellBillingCycle} from './find-best-price';
 import {BillingCycleRadio} from './billing-cycle-radio';
 import {StaticPageTitle} from '../../seo/static-page-title';
 import {PricingTable} from '@common/billing/pricing-table/pricing-table';
+import {useSearchParams} from 'react-router-dom';
 
 export function PricingPage() {
   const query = useProducts();
+  const [params] = useSearchParams();
+
   const [selectedCycle, setSelectedCycle] =
     useState<UpsellBillingCycle>('monthly');
+
+  const message = (params.get('reason') == 'denied' ? 'Choose a plan below to continue' : 'Choose the right plan for you');
 
   return (
     <div className="flex flex-col h-full overflow-auto">
@@ -30,7 +35,7 @@ export function PricingPage() {
       />
       <div className="container mx-auto px-24 flex-auto">
         <h1 className="text-3xl md:text-4xl text-center mt-30 md:mt-60 mb-30 font-normal md:font-medium">
-          <Trans message="Choose the right plan for you" />
+          <Trans message={message} />
         </h1>
 
         <BillingCycleRadio

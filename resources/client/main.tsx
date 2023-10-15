@@ -34,6 +34,7 @@ import {LandingPage} from '@app/landing-page/landing-page';
 import {LandingPageContent} from '@app/landing-page/landing-page-content';
 import {useAppearanceEditorMode} from '@common/admin/appearance/commands/use-appearance-editor-mode';
 import {ignoredSentryErrors} from '@common/errors/ignored-sentry-errors';
+import {Dohaty} from '@app/dohaty/dohaty'
 
 const AdminRoutes = React.lazy(() => import('@common/admin/admin-routes'));
 const WebPlayerRoutes = React.lazy(
@@ -181,6 +182,7 @@ function Router() {
       <AppearanceListener />
       <CookieNotice />
       <ToastContainer />
+      <Dohaty />
       <Routes>
         <Route
           path="/*"

@@ -17,7 +17,7 @@ interface Response extends BackendResponse {
 
 export interface RegisterPayloadPhone {
   phone: string;
-  subscription: string;
+  subscription?: string;
   password?: string;
   password_confirmation?: string;
 }

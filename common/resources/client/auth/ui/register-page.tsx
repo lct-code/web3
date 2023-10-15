@@ -103,7 +103,6 @@ export function RegisterPage() {
         />
         <FormComboBox
           className="mb-32"
-          required
           items={subOptions.map(opt => {return {id:opt.id,label:opt.label}})}
           name="subscription"
           openMenuOnFocus

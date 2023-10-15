@@ -114,10 +114,12 @@ export const playerStoreOptions: Partial<PlayerStoreOptions> = {
       // prevent playback if user does not have permission to play music
       const hasPermission = userHasPlayPermission();
       if (!hasPermission) {
+        window.dispatchEvent(new CustomEvent('playDenied', {detail: {media:cuedMedia}}));
         toast.danger(
           message('Your current plan does not allow music playback.')
         );
         pause();
+
         return;
       }
       // log track play
