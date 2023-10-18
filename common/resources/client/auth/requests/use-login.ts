@@ -6,6 +6,7 @@ import {useNavigate} from '../../utils/hooks/use-navigate';
 import {apiClient} from '../../http/query-client';
 import {useAuth} from '../use-auth';
 import {useBootstrapData} from '../../core/bootstrap-data/bootstrap-data-context';
+import {toast} from '../../ui/toast/toast';
 
 interface Response extends BackendResponse {
   bootstrapData: string;
@@ -28,7 +29,15 @@ export function useLogin(form: UseFormReturn<LoginPayload>) {
       setBootstrapData(response.bootstrapData);
       navigate(getRedirectUri(), {replace: true});
     },
-    onError: r => onFormQueryError(r, form),
+    onError: (r: any) => {
+      if (r?.response?.data?.redirectMessage) {
+        toast.positive(r?.response?.data?.redirectMessage);
+      }
+      if (r?.response?.data?.redirectUri) {
+        navigate(r?.response?.data?.redirectUri);
+      }
+      return onFormQueryError(r, form);
+    }
   });
 }
 

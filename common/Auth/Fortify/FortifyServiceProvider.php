@@ -13,6 +13,8 @@ use Laravel\Fortify\Fortify;
 use Propaganistas\LaravelPhone\PhoneNumber;
 use Illuminate\Support\Facades\Log;
 use App\User;
+use Illuminate\Validation\ValidationException;
+use Session;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -54,11 +56,21 @@ class FortifyServiceProvider extends ServiceProvider
             )->first();
           }
           catch (\Exception $e) {
-              return null;
+              Log::debug('login-fortify-auth except '.$e->getMessage());
+              throw ValidationException::withMessages([
+                  'phone' => [$e->getMessage()],
+              ]);
           }
 
           if ($user) {
               return $user;
+          }
+          else {
+              Session::flash('redirectUri', '/register?phone='.$phone_entered);
+              Session::flash('redirectMessage', __('Please choose a Subscription option to continue.'));
+              throw ValidationException::withMessages([
+                  'phone' => [trans('auth.failed')],
+              ]);
           }
         });
 

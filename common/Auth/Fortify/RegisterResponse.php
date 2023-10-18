@@ -34,9 +34,11 @@ class RegisterResponse implements RegisterResponseContract
           $response['message'] = Session::get('message');
         }
 
-        if (Session::has('registerRedirectUri')) {
-          $response['redirectUri'] = Session::get('registerRedirectUri');
+        if (Session::has('redirectUri')) {
+          $response['redirectUri'] = Session::get('redirectUri');
         }
+
+        Log::debug('register-response '.json_encode($response));
 
         return response()->json($response);
     }

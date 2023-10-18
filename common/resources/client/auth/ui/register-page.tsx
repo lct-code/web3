@@ -115,7 +115,7 @@ export function RegisterPage() {
             </Item>
           )}
         </FormComboBox>
-        {watchFields?.subscription && (
+        {watchFields?.phone && watchFields?.subscription && (
           <Alert
             title={<Trans message="Heads up" />}
             message={

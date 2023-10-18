@@ -10,6 +10,8 @@ use Sentry\Laravel\Integration;
 use Sentry\State\Scope;
 use Throwable;
 use function Sentry\configureScope;
+use Illuminate\Validation\ValidationException;
+use Session;
 
 class BaseExceptionHandler extends Handler
 {
@@ -39,6 +41,23 @@ class BaseExceptionHandler extends Handler
         $this->reportable(function (Throwable $e) {
             Integration::captureUnhandledException($e);
         });
+    }
+
+    protected function invalidJson($request, ValidationException $exception)
+    {
+        $data = [
+            'message' => $exception->getMessage(),
+            'errors' => $exception->errors(),
+        ];
+
+        if (Session::has('redirectUri')) {
+          $data['redirectUri'] = Session::get('redirectUri');
+        }
+        if (Session::has('redirectMessage')) {
+          $data['redirectMessage'] = Session::get('redirectMessage');
+        }
+
+        return response()->json($data, $exception->status);
     }
 
     protected function convertExceptionToArray(Throwable $e): array
