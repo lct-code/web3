@@ -3,6 +3,7 @@ import {Link, To} from 'react-router-dom';
 import {AnimatePresence, m} from 'framer-motion';
 import {TaskAltIcon} from '../icons/material/TaskAlt';
 import {ErrorIcon} from '../icons/material/Error';
+import {ProgressCircle} from '../ui/progress/progress-circle';
 import {Trans} from '../i18n/trans';
 import {Button} from '../ui/buttons/button';
 import {Skeleton} from '../ui/skeleton/skeleton';
@@ -10,7 +11,7 @@ import {opacityAnimation} from '../ui/animation/opacity-animation';
 
 export interface BillingRedirectMessageConfig {
   message: MessageDescriptor;
-  status: 'success' | 'error';
+  status: 'success' | 'error' | 'pending';
   link: To;
   buttonLabel: MessageDescriptor;
 }
@@ -30,7 +31,11 @@ export function BillingRedirectMessage({config}: BillingRedirectMessageProps) {
           >
             {config.status === 'success' ? (
               <TaskAltIcon className="text-positive text-6xl" />
-            ) : (
+            ) : (config.status === 'pending' ? (
+              <div className="flex items-center justify-center flex-auto">
+                <ProgressCircle isIndeterminate aria-label="Waiting for server response..." />
+              </div>
+            ) :
               <ErrorIcon className="text-danger text-6xl" />
             )}
             <div className="text-2xl font-semibold mt-30">

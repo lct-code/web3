@@ -58,7 +58,7 @@ export function PhonesubElementsForm({
 
       if (result.status == 'subscribed') {
         if (result.message) toast(result.message);
-        navigate(returnUrl+'?status=success&subscriptionId='+(result?.subscriptionId ?? 'null'));
+        navigate(returnUrl+'?status=verified&subscriptionId='+(result?.subscriptionId ?? 'null'));
         return;
       }
 
@@ -84,6 +84,7 @@ export function PhonesubElementsForm({
         <div>
           <Alert
             title={<Trans message="Sending verification code" />}
+            type="info"
             message={
               <Trans message="Please enter verification code sent to your phone number: :phone"
               values={{phone: obfuscatePhone(user?.phone)}}

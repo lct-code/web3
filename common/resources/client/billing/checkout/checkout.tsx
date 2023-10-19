@@ -9,6 +9,8 @@ import {Fragment} from 'react';
 import {useProducts} from '../pricing-table/use-products';
 import {FullPageLoader} from '../../ui/progress/full-page-loader';
 import {useSettings} from '../../core/settings/use-settings';
+import {Button} from '../../ui/buttons/button';
+import {useNavigate} from '../../utils/hooks/use-navigate';
 
 export function Checkout() {
   const {productId, priceId} = useParams();
@@ -19,8 +21,9 @@ export function Checkout() {
   });
   const {
     base_url,
-    billing: {stripe, phonesub},
+    billing: {stripe, phonesub, paypal},
   } = useSettings();
+  const navigate = useNavigate();
 
   if (productQuery.isLoading) {
     return <FullPageLoader />;
@@ -53,7 +56,7 @@ export function Checkout() {
               type="subscription"
               returnUrl={`/checkout/${productId}/${priceId}/phonesub/done`}
             />
-            <Separator />
+            {stripe.enable || paypal.enable ? <Separator /> : null}
           </Fragment>
         ) : null}
         {stripe.enable ? (
@@ -64,10 +67,23 @@ export function Checkout() {
               type="subscription"
               returnUrl={`${base_url}/checkout/${productId}/${priceId}/stripe/done`}
             />
-            <Separator />
+            {paypal.enable ? <Separator /> : null}
           </Fragment>
         ) : null}
         <div ref={paypalElementRef} />
+        <Separator />
+        <Button
+          variant="flat"
+          color="chip"
+          size="md"
+          className="w-full"
+          type="button"
+          onClick={() => {
+            navigate('/');
+          }}
+        >
+          <Trans message="Go back" />
+        </Button>
         <div className="text-xs text-muted mt-30">
           <Trans message="You’ll be charged until you cancel your subscription. Previous charges won’t be refunded when you cancel unless it’s legally required. Your payment data is encrypted and secure. By subscribing your agree to our terms of service and privacy policy." />
         </div>

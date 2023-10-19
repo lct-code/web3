@@ -66,7 +66,7 @@ class CreateNewUser implements CreatesNewUsers
             Log::debug('regitration with subscription: '.$input['subscription'].' / '.json_encode($price));
 
             if (!empty($price)) {
-                Session::flash('registerRedirectUri', "/checkout/{$price->product_id}/{$price->id}");
+                Session::flash('redirectUri', "/checkout/{$price->product_id}/{$price->id}");
             }
         }
 
