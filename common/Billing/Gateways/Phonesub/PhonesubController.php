@@ -57,17 +57,22 @@ class PhonesubController extends BaseController
         return response()->json($data);
     }
 
-    public function storeSubscriptionDetailsLocally(): Response|JsonResponse
+    public function syncSubscriptionDetails(): Response|JsonResponse
     {
         $data = $this->validate($this->request, [
-            'phonesub_subscription_id' => 'required|string',
+            'price_id' => 'required|string',
         ]);
 
-        $this->phonesub->storeSubscriptionDetailsLocally(
-            $data['phonesub_subscription_id'],
-            Auth::user(),
-        );
+        try {
+            $data = $this->phonesub->syncSubscriptionDetails(
+                $data['price_id'],
+                Auth::user(),
+            );
+        }
+        catch (\Exception $e) {
+            return response()->json(['error' => ['message'=>$e->getMessage()]], 422);
+        }
 
-        return $this->success();
+        return response()->json($data);
     }
 }

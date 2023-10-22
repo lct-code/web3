@@ -19,9 +19,6 @@ export function CheckoutPhonesubDone() {
   const [messageConfig, setMessageConfig] =
     useState<BillingRedirectMessageConfig>();
 
-  const [syncInterval, setSyncInterval] =
-    useState<ReturnType<typeof setInterval>>();
-
   const [redirectedFrom, setRedirectedFrom] = useLocalStorage<string>('redirectedFrom');
 
   useEffect(() => {
@@ -29,23 +26,6 @@ export function CheckoutPhonesubDone() {
     const status = params.get('status');
     setMessageConfig(getRedirectMessageConfig(status, productId, priceId, redirectedFrom));
 
-    if (subscriptionId && status === 'verified') {
-      console.log('verified', syncInterval);
-      syncInterval || setSyncInterval(setInterval(() => {
-        syncSubscriptionDetails(subscriptionId).then((resp) => {
-          console.log('sync succ', resp);
-          clearInterval(syncInterval);
-          setMessageConfig(getRedirectMessageConfig('success', productId, priceId, redirectedFrom));
-        }, (err) => {
-          console.log('sync err', err);
-        });
-      }, 1000));
-
-      setTimeout(() => {
-        clearInterval(syncInterval);
-        setMessageConfig(getRedirectMessageConfig('error', productId, priceId, redirectedFrom));
-      }, 15000);
-    }
     if (subscriptionId && status === 'success') {
       storeSubscriptionDetailsLocally(subscriptionId).then(() => {
         invalidateBootstrapData();
@@ -75,13 +55,6 @@ function getRedirectMessageConfig(
         buttonLabel: message('Return to site'),
         link: link ?? '/billing',
       };
-    case 'verified':
-      return {
-        message: message('Verification complete, waiting for subscription server...'),
-        status: 'pending',
-        buttonLabel: message('Return to site'),
-        link: link ?? '/billing',
-      };
     default:
       return {
         message: message('Something went wrong. Please try again.'),
@@ -94,12 +67,6 @@ function getRedirectMessageConfig(
 
 function errorLink(productId?: string, priceId?: string): string {
   return productId && priceId ? `/checkout/${productId}/${priceId}` : '/';
-}
-
-function syncSubscriptionDetails(subscriptionId: string) {
-  return apiClient.post('billing/phonesub/sync-subscription-details', {
-    phonesub_subscription_id: subscriptionId,
-  });
 }
 
 function storeSubscriptionDetailsLocally(subscriptionId: string) {

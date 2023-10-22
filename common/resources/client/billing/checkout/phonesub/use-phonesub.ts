@@ -50,8 +50,14 @@ export function usePhonesub({type, priceId}: UsePhonesubProps) {
     return response.data;
   }
 
+  const syncSubscriptionDetails = () => {
+    return apiClient.post('billing/phonesub/sync-subscription-details', {
+      price_id: priceId,
+    });
+  }
+
   return {
-    phonesub: {subscribeStart, subscribeVerify},
+    phonesub: {subscribeStart, subscribeVerify, syncSubscriptionDetails},
     paymentElementRef,
     phonesubIsEnabled: enable,
   };

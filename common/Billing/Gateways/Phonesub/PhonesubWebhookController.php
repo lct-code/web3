@@ -5,10 +5,13 @@ use Common\Billing\GatewayException;
 use Common\Billing\Invoices\CreateInvoice;
 use Common\Billing\Notifications\PaymentFailed;
 use Common\Billing\Subscription;
+use Common\Billing\Models\Price;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
+use SimpleXMLElement;
 
 class PhonesubWebhookController extends Controller
 {
@@ -22,93 +25,69 @@ class PhonesubWebhookController extends Controller
 
     public function handleWebhook(Request $request): Response
     {
-        $payload = $request->all();
+        // Retrieve incoming request data
+        $requestData = file_get_contents('php://input');
 
-        switch ($payload['event_type']) {
-            case 'BILLING.SUBSCRIPTION.PAYMENT.FAILED':
-                return $this->handleInvoicePaymentFailed($payload);
-            case 'BILLING.SUBSCRIPTION.ACTIVATED':
-                return $this->handleSubscriptionCreated($payload);
-            case 'BILLING.SUBSCRIPTION.CANCELLED':
-            case 'BILLING.SUBSCRIPTION.EXPIRED':
-                return $this->handleSubscriptionCancelledOrExpired($payload);
-            case 'PAYMENT.SALE.COMPLETED':
-                return $this->handleSaleCompleted($payload);
-            default:
-                return response('Webhook Handled', 200);
+        $headers = [];
+        foreach ($_SERVER as $key => $value) {
+          if (substr($key, 0, 5) == 'HTTP_') {
+            $headers[$key] = $value;
+          }
         }
+
+        Log::debug('phonesub api sync request: '.json_encode([
+            'method' => $_SERVER['REQUEST_METHOD'],
+            'request' => $_REQUEST,
+            'headers' => $headers,
+        ]));
+        Log::debug('phonesub api sync - parsing xml data: '.$requestData);
+
+        $xml = new SimpleXMLElement($requestData);
+
+        $event = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:updateDesc');
+
+        switch ($event) {
+            case 'Addition':
+                return $this->handleSubscription($xml);
+            case 'Deletion':
+                return $this->handleUnsubscription($xml);
+            case 'Renewal':
+                return $this->handleRenewal($xml);
+        }
+
+        Log::debug('phonesub api sync - unknown event: '.$event);
+        return response('Webhook Handled', 200);
     }
 
-    protected function handleInvoicePaymentFailed(array $payload): Response
+    protected function handleSubscription(SimpleXmlElement $xml): Response
     {
-        $phonesubSubscriptionId = Arr::get(
-            $payload,
-            'resource.billing_agreement_id',
-        );
+        $phonesubProductId = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:productID');
+        $phonesubUserId = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:UserID/ID');
+        $phonesubSubscriptionId = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:serviceID');
 
-        $subscription = $this->subscription
-            ->where('gateway_id', $phonesubSubscriptionId)
-            ->first();
-        $subscription?->user->notify(new PaymentFailed($subscription));
+        Log::debug('phonesub api sync - handleSubscription: '.$phonesubProductId.' / '.$phonesubUserId.' / '.$phonesubSubscriptionId);
 
-        return response('Webhook handled', 200);
-    }
+        $user = User::where('phone', $phonesubUserId)->firstOrFail();
 
-    protected function handleSubscriptionCancelledOrExpired(
-        array $payload
-    ): Response {
-        $phonesubSubscriptionId = $payload['resource']['id'];
-
-        $subscription = $this->subscription
-            ->where('gateway_id', $phonesubSubscriptionId)
-            ->first();
-
-        if ($subscription && !$subscription->cancelled()) {
-            $subscription->markAsCancelled();
-        }
+        $this->phonesub->storeSubscriptionDetailsLocally($phonesubProductId, $user, $phonesubSubscriptionId);
 
         return response('Webhook Handled', 200);
     }
 
-    /**
-     * Handle a renewed stripe subscription.
-     */
-    protected function handleSaleCompleted(array $payload): Response
+    protected function handleUnsubscription(SimpleXmlElement $xml): Response
     {
-        $gatewayId = Arr::get($payload, 'resource.billing_agreement_id');
-
-        $subscription = $this->subscription
-            ->where('gateway_id', $gatewayId)
-            ->first();
-
-        if ($subscription) {
-            $phonesubSubscription = $this->gateway
-                ->subscriptions()
-                ->find($subscription);
-            $subscription
-                ->fill(['renews_at' => $phonesubSubscription['renews_at']])
-                ->save();
-            app(CreateInvoice::class)->execute([
-                'subscription_id' => $subscription->id,
-                'paid' => true,
-            ]);
-        }
+        $phonesubUserId = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:UserID/ID');
+        $phonesubSubscriptionId = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:serviceID');
+        Log::debug('phonesub api sync - handleUnsubscription: '.$phonesubUserId.' / '.$phonesubSubscriptionId);
 
         return response('Webhook Handled', 200);
     }
 
-    protected function handleSubscriptionCreated(array $payload): Response
+    protected function handleRenewal(SimpleXmlElement $xml): Response
     {
-        $phonesubSubscriptionId = Arr::get($payload, 'resource.id');
-        $phonesubUserId = Arr::get($payload, 'resource.subscriber.payer_id');
-
-        $user = User::where('phonesub_id', $phonesubUserId)->first();
-        if ($user) {
-            $this->phonesub->storeSubscriptionDetailsLocally(
-                $phonesubSubscriptionId,
-                $user,
-            );
-        }
+        $phonesubUserId = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:UserID/ID');
+        $phonesubSubscriptionId = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:serviceID');
+        Log::debug('phonesub api sync - handleRenewal: '.$phonesubUserId.' / '.$phonesubSubscriptionId);
 
         return response('Webhook Handled', 200);
     }

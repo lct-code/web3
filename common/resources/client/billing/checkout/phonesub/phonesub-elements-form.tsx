@@ -11,6 +11,7 @@ import {Alert} from '../../../alerts/alert';
 import {obfuscatePhone} from '../../../utils/string/obfuscate-phone';
 import {toast} from '../../../ui/toast/toast';
 import {useNavigate} from '../../../utils/hooks/use-navigate';
+import {ProgressCircle} from '../../../ui/progress/progress-circle';
 
 interface PhonesubElementsFormProps {
   productId?: string;
@@ -56,10 +57,8 @@ export function PhonesubElementsForm({
       const method = subStatus !== 'verify' ? 'subscribeStart' : 'subscribeVerify';
       const result = await phonesub[method](payload);
 
-      if (result.status == 'subscribed') {
-        if (result.message) toast(result.message);
-        navigate(returnUrl+'?status=verified&subscriptionId='+(result?.subscriptionId ?? 'null'));
-        return;
+      if (result.status == 'verified') {
+        setSyncTimeout();
       }
 
       if (result.status) {
@@ -77,6 +76,25 @@ export function PhonesubElementsForm({
 
     setIsSubmitting(false);
   };
+
+  const setSyncTimeout = (syncTimeoutIdx: number = 0) => {
+    return setTimeout(() => {
+      phonesub.syncSubscriptionDetails().then((resp) => {
+        console.log('sync success', resp);
+        if (resp?.data?.message) toast(resp?.data?.message);
+        navigate(returnUrl+'?status=success&subscriptionId='+(resp?.data?.subscriptionId ?? 'null'));
+
+      }, (err) => {
+        if (syncTimeoutIdx > 15) {
+          setSubStatus('syncerror');
+        }
+        else {
+          setSyncTimeout(syncTimeoutIdx + 1);
+        }
+      });
+    }, 1000);
+  }
+
 
   return (
     <Form form={form} onSubmit={handleSubmit}>
@@ -101,6 +119,23 @@ export function PhonesubElementsForm({
           />
         </div>
       )}
+      { subStatus === 'verified' && (
+        <div>
+          <div className="flex items-center justify-center flex-auto mb-8">
+            <ProgressCircle isIndeterminate aria-label="Waiting for server response..." />
+          </div>
+          <Alert
+            title={<Trans message="Verification successful" />}
+            type="info"
+            message={
+              <Trans message="Waiting for Subscription server response..."/>
+            }
+            />
+        </div>
+      )}
+      { subStatus === 'syncerror' && (
+        <div className="text-danger mt-20"><Trans message="Something went wrong. Please try again later."/></div>
+      )}
       {errorMessage && !isSubmitting && (
         <div className="text-danger mt-20">{errorMessage}</div>
       )}
@@ -112,7 +147,7 @@ export function PhonesubElementsForm({
         type="submit"
         disabled={isSubmitting || !phonesubIsReady}
       >
-        {subStatus == 'verify' ? verifyLabel : (subStatus == 'expired' ? resendLabel : submitLabel)}
+        {subStatus == 'verify' || subStatus == 'verified' ? verifyLabel : (subStatus == 'expired' || subStatus == 'syncerror' ? resendLabel : submitLabel)}
       </Button>
     </Form>
   );

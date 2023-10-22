@@ -52,34 +52,30 @@ END;
     }
 
     public function storeSubscriptionDetailsLocally(
+        string $productId,
         string $phonesubSubscriptionId,
         User $user
     ): bool {
-        Log::debug('phonesub storeSubscriptionDetailsLocally: '.$phonesubSubscriptionId.' / '.$user->id);
+        Log::debug('phonesub storeSubscriptionDetailsLocally: '.$productId.' / '.$phonesubSubscriptionId.' / '.$user->id);
+
+        $price = Price::where(
+          'product_id',
+          $productId,
+        )->firstOrFail();
+
+        $user->subscribe('phonesub', $phonesubSubscriptionId, $price);
         return true;
-
-        $response = $this->phonesub()->get(
-            "billing/subscriptions/$phonesubSubscriptionId",
-        );
-
-        if ($response->successful() && $response['status'] === 'ACTIVE') {
-            $price = Price::where(
-                'phonesub_id',
-                $response['plan_id'],
-            )->firstOrFail();
-            $user->subscribe('phonesub', $response['id'], $price);
-            return true;
-        }
-
-        return false;
     }
 
     private function createSubscription(
         Price $price,
         User $user,
+        string $phonesub_id
     ): Subscription {
 
-      $phonesub_id = $this->getUserPhone($user).'/'.date('YmdHis');
+      if (empty($phonesub_id)) {
+          $phonesub_id = $this->getUserPhone($user).'/'.date('YmdHis');
+      }
       return $user->subscribe('phonesub', $phonesub_id, $price);
     }
 
@@ -165,11 +161,10 @@ END;
             $result = 'unknown';
             switch ($resultCode) {
             case '000000':
-                $subscription = $this->createSubscription($price, $user);
+                //$subscription = $this->createSubscription($price, $user);
                 return [
-                    'status' => 'subscribed',
-                    'message' => __('You\'ve been successfully subscribed to the service.'),
-                    'subscriptionId' => $subscription->id,
+                    'status' => 'verified',
+                    'message' => __('Your verification code has been validated successfully.'),
                 ];
 
             case '330157':
@@ -186,6 +181,34 @@ END;
             default:
                 throw new GatewayException(__('Unexpected response code. Please try again later.'));
             }
+        }
+
+        return false;
+    }
+
+    public function syncSubscriptionDetails(
+        string $priceId,
+        User $user
+    ) {
+        Log::debug('phonesub syncSubscriptionDetails: '.$priceId.' / '.$user->id);
+
+        $price = Price::where(
+          'id',
+          $priceId,
+        )->firstOrFail();
+
+        $subscription = Subscription::where(
+          'price_id', $priceId
+        )->where(
+          'user_id', $user->id
+        )->orderByDesc('id')->firstOrFail();
+
+        if ($subscription && $subscription->id) {
+          return [
+            'status' => 'success',
+            'subscriptionId' => $subscription->id,
+            'message' => __('You\'ve been successfully subscribed to the service.'),
+          ];
         }
 
         return false;

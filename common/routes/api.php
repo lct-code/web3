@@ -193,7 +193,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('billing/paypal/store-subscription-details-locally', [PaypalController::class, 'storeSubscriptionDetailsLocally']);
         Route::post('billing/phonesub/subscribe-start', [PhonesubController::class, 'subscribeStart']);
         Route::post('billing/phonesub/subscribe-verify', [PhonesubController::class, 'subscribeVerify']);
-        Route::post('billing/phonesub/store-subscription-details-locally', [PhonesubController::class, 'storeSubscriptionDetailsLocally']);
+        Route::post('billing/phonesub/sync-subscription-details', [PhonesubController::class, 'syncSubscriptionDetails']);
 
         // INVOICES
         Route::get('billing/invoices', [InvoiceController::class, 'index']);
