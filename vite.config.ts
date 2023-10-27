@@ -23,6 +23,7 @@ export default defineConfig({
     hmr: {
       host: '0.0.0.0',
     },
+    proxy: {},
   },
   base: '',
   resolve: {
