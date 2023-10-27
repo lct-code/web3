@@ -12,7 +12,7 @@ import {opacityAnimation} from '../ui/animation/opacity-animation';
 export interface BillingRedirectMessageConfig {
   message: MessageDescriptor;
   status: 'success' | 'error' | 'pending';
-  link: To;
+  link: string;
   buttonLabel: MessageDescriptor;
 }
 
@@ -46,8 +46,8 @@ export function BillingRedirectMessage({config}: BillingRedirectMessageProps) {
               color="primary"
               className="w-full mt-30"
               size="md"
-              elementType={Link}
-              to={config.link}
+              elementType='a'
+              href={config.link}
             >
               <Trans {...config.buttonLabel} />
             </Button>

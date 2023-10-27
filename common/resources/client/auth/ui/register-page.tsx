@@ -118,6 +118,7 @@ export function RegisterPage() {
         {watchFields?.phone && watchFields?.subscription && (
           <Alert
             title={<Trans message="Heads up" />}
+            type="info"
             message={
               <Trans message="You are about to subscribe to the daily Dohaty service using your saved phone number: :phone for :amount SR"
               values={{phone: watchFields?.phone, amount: subSelected?.price}}

@@ -50,7 +50,7 @@ export function Checkout() {
             <PhonesubElementsForm
               productId={productId}
               priceId={priceId}
-              submitLabel={<Trans message="Upgrade" />}
+              submitLabel={<Trans message="Send code" />}
               verifyLabel={<Trans message="Verify code" />}
               resendLabel={<Trans message="Resend code" />}
               type="subscription"

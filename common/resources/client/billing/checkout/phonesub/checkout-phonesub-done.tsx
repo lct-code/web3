@@ -27,9 +27,7 @@ export function CheckoutPhonesubDone() {
     setMessageConfig(getRedirectMessageConfig(status, productId, priceId, redirectedFrom));
 
     if (subscriptionId && status === 'success') {
-      storeSubscriptionDetailsLocally(subscriptionId).then(() => {
-        invalidateBootstrapData();
-      });
+      //invalidateBootstrapData();
     }
   }, [priceId, productId, params, invalidateBootstrapData]);
 
@@ -53,7 +51,7 @@ function getRedirectMessageConfig(
         message: message('Subscription successful!'),
         status: 'success',
         buttonLabel: message('Return to site'),
-        link: link ?? '/billing',
+        link: link ?? '/',
       };
     default:
       return {
@@ -67,11 +65,5 @@ function getRedirectMessageConfig(
 
 function errorLink(productId?: string, priceId?: string): string {
   return productId && priceId ? `/checkout/${productId}/${priceId}` : '/';
-}
-
-function storeSubscriptionDetailsLocally(subscriptionId: string) {
-  return apiClient.post('billing/phonesub/store-subscription-details-locally', {
-    phonesub_subscription_id: subscriptionId,
-  });
 }
 

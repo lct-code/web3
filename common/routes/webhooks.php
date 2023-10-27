@@ -18,7 +18,11 @@ Route::post('billing/stripe/webhook', [
 ]);
 
 // PHONESUB
-Route::post('billing/phonesub/webhook', [
+Route::get('api/sync/zainksa', [
+    PhonesubWebhookController::class,
+    'handleWebhook',
+]);
+Route::post('api/sync/zainksa', [
     PhonesubWebhookController::class,
     'handleWebhook',
 ]);

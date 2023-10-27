@@ -80,7 +80,6 @@ export function PhonesubElementsForm({
   const setSyncTimeout = (syncTimeoutIdx: number = 0) => {
     return setTimeout(() => {
       phonesub.syncSubscriptionDetails().then((resp) => {
-        console.log('sync success', resp);
         if (resp?.data?.message) toast(resp?.data?.message);
         navigate(returnUrl+'?status=success&subscriptionId='+(resp?.data?.subscriptionId ?? 'null'));
 

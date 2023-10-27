@@ -59,24 +59,12 @@ END;
         Log::debug('phonesub storeSubscriptionDetailsLocally: '.$productId.' / '.$phonesubSubscriptionId.' / '.$user->id);
 
         $price = Price::where(
-          'product_id',
+          'sub_product_id',
           $productId,
         )->firstOrFail();
 
         $user->subscribe('phonesub', $phonesubSubscriptionId, $price);
         return true;
-    }
-
-    private function createSubscription(
-        Price $price,
-        User $user,
-        string $phonesub_id
-    ): Subscription {
-
-      if (empty($phonesub_id)) {
-          $phonesub_id = $this->getUserPhone($user).'/'.date('YmdHis');
-      }
-      return $user->subscribe('phonesub', $phonesub_id, $price);
     }
 
     public function changePlan(
@@ -95,12 +83,17 @@ END;
         Log::debug('phonesub subscribeStart: '.$price_id.' / '.$user->id);
         
         $price = Price::where('id', $price_id)->firstOrFail();
+
+        $params = [
+          'actionType' => 1,
+          'msisdn' => $this->getUserPhone($user),
+          'productID' => $price->sub_product_id,
+        ];
+
+        Log::debug('phonesub GET genSubscribeAuthCode.do?'.http_build_query($params));
+
         $response = $this->phonesub()->get(
-          'genSubscribeAuthCode.do', [
-            'actionType' => 1,
-            'msisdn' => $this->getUserPhone($user),
-            'productID' => $price->sub_product_id,
-          ]
+          'genSubscribeAuthCode.do', $params
         );
 
         if ($response->successful()) {
@@ -145,12 +138,17 @@ END;
         Log::debug('phonesub subscribeVerify: '.$price_id.' / '.$user->id.' / '.$auth_code);
         
         $price = Price::where('id', $price_id)->firstOrFail();
+
+        $params = [
+          'authCode' => $auth_code,
+          'msisdn' => $this->getUserPhone($user),
+          'productID' => $price->sub_product_id,
+        ];
+
+        Log::debug('phonesub GET subscribeProductByAuthCode.do?'.http_build_query($params));
+
         $response = $this->phonesub()->get(
-          'subscribeProductByAuthCode.do', [
-            'authCode' => $auth_code,
-            'msisdn' => $this->getUserPhone($user),
-            'productID' => $price->sub_product_id,
-          ]
+          'subscribeProductByAuthCode.do', $params
         );
 
         if ($response->successful()) {
@@ -161,7 +159,17 @@ END;
             $result = 'unknown';
             switch ($resultCode) {
             case '000000':
-                //$subscription = $this->createSubscription($price, $user);
+                if (app(Settings::class)->get('billing.phonesub_test_mode')) {
+                    try {
+                        $test_subscription_id = implode('-', ['test', date('YmdHis'), $price->sub_product_id, $user->id]);
+                        $this->storeSubscriptionDetailsLocally($price->sub_product_id, $test_subscription_id, $user);
+                        Log::debug('phonesub subscribeVerify test subscription: '.$test_subscription_id);
+                    }
+                    catch (\Exception $e) {
+                        Log::debug('phonesub subscribeVerify test subscription fail: '.$e->getMessage());
+                    }
+                }
+
                 return [
                     'status' => 'verified',
                     'message' => __('Your verification code has been validated successfully.'),

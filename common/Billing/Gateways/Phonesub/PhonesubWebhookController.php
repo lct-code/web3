@@ -42,82 +42,125 @@ class PhonesubWebhookController extends Controller
         ]));
         Log::debug('phonesub api sync - parsing xml data: '.$requestData);
 
-        $xml = new SimpleXMLElement($requestData);
+        if (empty($requestData)) {
+          return $this->respondXml(400, 'Missing sync data');
+        }
 
-        $event = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:updateDesc');
+        /*
+        try {
+          $xml = new SimpleXMLElement($requestData);
+          $xml->registerXPathNamespace('ns1', 'https://www.w3.org/XML/2008/xsdl-exx/ns1');
+
+          $event = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:updateDesc');
+        }
+        catch (\Exception $e) {
+          Log::debug('phonesub api sync - parse error: '.$e->getMessage());
+          return $this->respondXml(500, 'Parse error');
+        }
+         */
+
+        if (!($event = $this->extractXmlItem($requestData, 'ns1:updateDesc'))) {
+          return $this->respondXml(100, 'Missing event');
+        }
 
         switch ($event) {
             case 'Addition':
-                return $this->handleSubscription($xml);
+                return $this->handleSubscription($requestData);
             case 'Deletion':
-                return $this->handleUnsubscription($xml);
+                return $this->handleUnsubscription($requestData);
             case 'Renewal':
-                return $this->handleRenewal($xml);
+                return $this->handleRenewal($requestData);
         }
 
         Log::debug('phonesub api sync - unknown event: '.$event);
-        return response('Webhook Handled', 200);
+        return $this->respondXml(100, 'Unknown event');
     }
 
-    protected function handleSubscription(SimpleXmlElement $xml): Response
-    {
-        $phonesubProductId = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:productID');
-        $phonesubUserId = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:UserID/ID');
-        $phonesubSubscriptionId = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:serviceID');
+    protected function respondXml($code, $desc = 'OK') {
+      // Create the SOAP response
+      $responseXml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:loc="http://www..."></soapenv:Envelope>');
 
-        Log::debug('phonesub api sync - handleSubscription: '.$phonesubProductId.' / '.$phonesubUserId.' / '.$phonesubSubscriptionId);
+      $body = $responseXml->addChild('soapenv:Body');
+      $syncOrderRelationResponse = $body->addChild('loc:syncOrderRelationResponse');
+      $syncOrderRelationResponse->addChild('loc:result', $code);
+      $syncOrderRelationResponse->addChild('loc:resultDescription', $desc);
 
-        $user = User::where('phone', $phonesubUserId)->firstOrFail();
-
-        $this->phonesub->storeSubscriptionDetailsLocally($phonesubProductId, $user, $phonesubSubscriptionId);
-
-        return response('Webhook Handled', 200);
+      return response($responseXml->asXml(), 200, [
+        'Content-Type' => 'application/xml'
+      ]);
     }
 
-    protected function handleUnsubscription(SimpleXmlElement $xml): Response
-    {
-        $phonesubUserId = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:UserID/ID');
-        $phonesubSubscriptionId = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:serviceID');
-        Log::debug('phonesub api sync - handleUnsubscription: '.$phonesubUserId.' / '.$phonesubSubscriptionId);
+    protected function extractXmlItem($current, $items) {
+        $current = preg_replace('/\s+/', '', $current);
+        foreach ((array)$items as $item) {
+            if (!preg_match('|<'.$item.'>(.*)</'.$item.'>|', $current, $matches)) {
+                Log::debug('extractXmlItem false: "'.substr($current, 0, 50).'" / '.$item);
+                return false;
+            }
 
-        return response('Webhook Handled', 200);
-    }
-
-    protected function handleRenewal(SimpleXmlElement $xml): Response
-    {
-        $phonesubUserId = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:UserID/ID');
-        $phonesubSubscriptionId = (string) $xml->xpath('/soapenv:Envelope/soapenv:Body/ns1:syncOrderRelation/ns1:serviceID');
-        Log::debug('phonesub api sync - handleRenewal: '.$phonesubUserId.' / '.$phonesubSubscriptionId);
-
-        return response('Webhook Handled', 200);
-    }
-
-    protected function webhookIsValid(): bool
-    {
-        $payload = [
-            'auth_algo' => request()->header('phonesub-AUTH-ALGO'),
-            'cert_url' => request()->header('phonesub-CERT-URL'),
-            'transmission_id' => request()->header('phonesub-TRANSMISSION-ID'),
-            'transmission_sig' => request()->header('phonesub-TRANSMISSION-SIG'),
-            'transmission_time' => request()->header(
-                'phonesub-TRANSMISSION-TIME',
-            ),
-            'webhook_id' => config('services.phonesub.webhook_id'),
-            'webhook_event' => request()->all(),
-        ];
-
-        $response = $this->phonesub()->post(
-            'notifications/verify-webhook-signature',
-            $payload,
-        );
-
-        if (!$response->successful()) {
-            throw new GatewayException(
-                "Could not validate phonesub webhook: {$response->body()}",
-            );
+            Log::debug('extractXmlItem match: '.substr($current, 0, 50).' / '.$item.' / '.json_encode($matches));
+            $current = $matches[1];
         }
 
-        return $response['verification_status'] === 'SUCCESS';
+        return $current;
+    }
+
+    protected function handleSubscription(string $xmlString): Response
+    {
+        $phonesubProductId = $this->extractXmlItem($xmlString, ['ns1:productID']);
+        $phonesubUserId = $this->extractXmlItem($xmlString, ['ns1:userID','ID']);
+        $phonesubSubscriptionId = $this->extractXmlItem($xmlString, ['ns1:serviceID']);
+
+        Log::debug('phonesub api sync - handleSubscription: '.$phonesubProductId.' / '.$phonesubUserId.' / '.$phonesubSubscriptionId);
+        if (!$phonesubProductId || !$phonesubUserId || !$phonesubSubscriptionId) {
+            return $this->respondXml(400, 'Missing SUB data');
+        }
+
+        try {
+            $user = User::where('phone', '+'.$phonesubUserId)->firstOrFail();
+        }
+        catch (\Exception $e) {
+            Log::debug('phonesub api sync - handleSubscription - user NOT FOUND for phone: '.$phonesubUserId);
+            return $this->respondXml(400, 'Missing User data');
+        }
+
+        Log::debug('phonesub api sync - handleSubscription - user: '.json_encode($user));
+
+        try {
+            $this->phonesub->storeSubscriptionDetailsLocally($phonesubProductId, $phonesubSubscriptionId, $user);
+        }
+        catch (\Exception $e) {
+            Log::debug('phonesub api sync - handleSubscription - storeSubscriptionDetailsLocally error: '.$e->getMessage());
+            return $this->respondXml(400, 'Could not store subscription');
+        }
+
+        return $this->respondXml(0, 'OK');
+    }
+
+    protected function handleUnsubscription(string $xmlString): Response
+    {
+        $phonesubUserId = $this->extractXmlItem($xmlString, ['ns1:userID','ID']);
+        $phonesubSubscriptionId = $this->extractXmlItem($xmlString, ['ns1:serviceID']);
+        Log::debug('phonesub api sync - handleUnsubscription (TODO): '.$phonesubUserId.' / '.$phonesubSubscriptionId);
+
+        if (!$phonesubUserId || !$phonesubSubscriptionId) {
+            return $this->respondXml(400, 'Missing SUB data');
+        }
+
+        return $this->respondXml(0, 'OK');
+    }
+
+    protected function handleRenewal(string $xmlString): Response
+    {
+        $phonesubUserId = $this->extractXmlItem($xmlString, ['ns1:userID','ID']);
+        $phonesubSubscriptionId = $this->extractXmlItem($xmlString, ['ns1:serviceID']);
+        Log::debug('phonesub api sync - handleRenewal (TODO): '.$phonesubUserId.' / '.$phonesubSubscriptionId);
+
+        if (!$phonesubUserId || !$phonesubSubscriptionId) {
+            return $this->respondXml(400, 'Missing SUB data');
+        }
+
+        return $this->respondXml(0, 'OK');
     }
 }
 
