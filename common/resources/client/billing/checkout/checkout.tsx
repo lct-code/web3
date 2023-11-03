@@ -79,7 +79,7 @@ export function Checkout() {
           className="w-full"
           type="button"
           onClick={() => {
-            navigate('/');
+            navigate('/pricing');
           }}
         >
           <Trans message="Go back" />

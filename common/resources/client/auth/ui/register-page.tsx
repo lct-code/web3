@@ -59,10 +59,12 @@ export function RegisterPage() {
     price: number,
   }
   const subOptions: SubOption[] = [
+    /*
     {id: "", label: 'No Subscription',   price: 0},
     {id: "1000045459", label: "Daily",   price: 1.5},
     {id: "1000045461", label: "Weekly",  price: 5},
     {id: "1000045179", label: "Monthly", price: 10},
+    */
   ]
   const subSelected = subOptions.filter(opts => opts.id === watchFields?.subscription).shift()
 
@@ -101,20 +103,22 @@ export function RegisterPage() {
           label={<Trans message="Phone" />}
           required
         />
-        <FormComboBox
-          className="mb-32"
-          items={subOptions.map(opt => {return {id:opt.id,label:opt.label}})}
-          name="subscription"
-          openMenuOnFocus
-          useOptionLabelAsInputValue={true}
-          label={<Trans message="Subscription" />}
-        >
-          {item => (
-            <Item value={item.id} key={item.id}>
-              {item.label}
-            </Item>
-          )}
-        </FormComboBox>
+        {subOptions.length > 0 && (
+            <FormComboBox
+              className="mb-32"
+              items={subOptions.map(opt => {return {id:opt.id,label:opt.label}})}
+              name="subscription"
+              openMenuOnFocus
+              useOptionLabelAsInputValue={true}
+              label={<Trans message="Subscription" />}
+            >
+              {item => (
+                <Item value={item.id} key={item.id}>
+                  {item.label}
+                </Item>
+              )}
+            </FormComboBox>
+        )}
         {watchFields?.phone && watchFields?.subscription && (
           <Alert
             title={<Trans message="Heads up" />}
