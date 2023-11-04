@@ -226,7 +226,7 @@ END;
         Subscription $subscription,
         bool $atPeriodEnd = true
     ): bool {
-        Log::debug('phonesub changePlan: '.$subscription->toJson().' / '.($atPeriodEnd?'atPeriodEnd':'notPeriodEnd'));
+        Log::debug('phonesub cancelSubscription: '.$subscription->toJson().' / '.($atPeriodEnd?'atPeriodEnd':'notPeriodEnd'));
         return true;
     }
 
@@ -234,7 +234,7 @@ END;
         Subscription $subscription,
         array $gatewayParams = []
     ): bool {
-        Log::debug('phonesub changePlan: '.$subscription->toJson().' / '.json_encode($gatewayParams));
+        Log::debug('phonesub resumeSubscription: '.$subscription->toJson().' / '.json_encode($gatewayParams));
         return true;
     }
 

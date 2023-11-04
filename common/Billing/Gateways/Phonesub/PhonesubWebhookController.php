@@ -141,11 +141,20 @@ class PhonesubWebhookController extends Controller
     {
         $phonesubUserId = $this->extractXmlItem($xmlString, ['ns1:userID','ID']);
         $phonesubSubscriptionId = $this->extractXmlItem($xmlString, ['ns1:serviceID']);
-        Log::debug('phonesub api sync - handleUnsubscription (TODO): '.$phonesubUserId.' / '.$phonesubSubscriptionId);
+        Log::debug('phonesub api sync - handleUnsubscription: '.$phonesubUserId.' / '.$phonesubSubscriptionId);
 
         if (!$phonesubUserId || !$phonesubSubscriptionId) {
             return $this->respondXml(400, 'Missing SUB data');
         }
+
+        $subscription = Subscription::where(
+            'gateway_id',
+            $phonesubSubscriptionId,
+        )->first();
+
+        Log::debug('phonesub api sync - handleUnsubscription - $subscription: '.json_encode($subscription));
+
+        $subscription?->cancelAndDelete();
 
         return $this->respondXml(0, 'OK');
     }
