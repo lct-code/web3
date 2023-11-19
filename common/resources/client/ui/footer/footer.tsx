@@ -32,6 +32,7 @@ export function Footer({className, padding}: Props) {
         <div>
           <ThemeSwitcher />
           <LocaleSwitcher />
+          {(false ? <DirectionSwitcher /> : null)}
         </div>
       </div>
     </footer>
@@ -80,6 +81,27 @@ function ThemeSwitcher() {
         <Trans message="Dark mode" />
       ) : (
         <Trans message="Light mode" />
+      )}
+    </Button>
+  );
+}
+
+function DirectionSwitcher() {
+  return (
+    <Button
+      variant="text"
+      onClick={() => {
+        if (document.documentElement.dir == 'ltr') {
+          document.documentElement.setAttribute('dir', 'rtl');
+        } else {
+          document.documentElement.setAttribute('dir', 'ltr');
+        }
+      }}
+    >
+      {document.documentElement.dir == 'ltr' ? (
+        <Trans message="RTL" />
+      ) : (
+        <Trans message="LTR" />
       )}
     </Button>
   );

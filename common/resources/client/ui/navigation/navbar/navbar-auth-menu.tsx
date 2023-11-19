@@ -1,4 +1,4 @@
-import {ReactElement, useContext} from 'react';
+import {ReactElement, useContext, useState} from 'react';
 import {ListboxItemProps} from '@common/ui/forms/listbox/item';
 import {SiteConfigContext} from '@common/core/settings/site-config-context';
 import {useLogout} from '@common/auth/requests/logout';
@@ -37,6 +37,7 @@ export function NavbarAuthMenu({children, items}: Props) {
   const {selectedTheme, selectTheme} = useThemeSelector();
   if (!selectedTheme || !user) return null;
   const hasUnreadNotif = !!user.unread_notifications_count;
+  const [direction, setDirection] = useState(document.documentElement.dir ?? 'ltr');
 
   const notifMenuItem = (
     <MenuItem
@@ -121,6 +122,28 @@ export function NavbarAuthMenu({children, items}: Props) {
             }}
           >
             <Trans message="Light mode" />
+          </MenuItem>
+        )}
+        {direction == 'ltr' && (
+          <MenuItem
+            value="rtl"
+            onSelected={() => {
+              setDirection('rtl');
+              document.documentElement.setAttribute('dir', 'rtl');
+            }}
+          >
+            <Trans message="RTL" />
+          </MenuItem>
+        )}
+        {direction == 'rtl' && (
+          <MenuItem
+            value="ltr"
+            onSelected={() => {
+              setDirection('ltr');
+              document.documentElement.setAttribute('dir', 'ltr');
+            }}
+          >
+            <Trans message="LTR" />
           </MenuItem>
         )}
         <MenuItem

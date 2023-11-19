@@ -1,6 +1,6 @@
 @php use Sentry\Laravel\Integration; @endphp
     <!doctype html>
-<html lang="{{$bootstrapData->get('language')}}">
+<html lang="{{$bootstrapData->get('language')}}" dir="ltr">
 <head>
     <base href="{{ $htmlBaseUri }}">
 
