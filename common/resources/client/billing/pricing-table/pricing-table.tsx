@@ -77,7 +77,7 @@ function PlanList({plans, selectedPeriod}: PlanListProps) {
             {...opacityAnimation}
             className={clsx(
               'px-28 rounded-lg w-full md:max-w-350 md:min-w-240 border shadow-lg bg-paper',
-              plan.recommended ? 'py-56' : 'py-28',
+              plan.recommended ? 'md:py-56 max-md:order-first' : 'py-28',
               isFirst && 'ml-auto',
               isLast && 'mr-auto'
             )}
