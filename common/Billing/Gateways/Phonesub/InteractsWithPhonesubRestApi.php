@@ -10,15 +10,31 @@ use Illuminate\Support\Facades\Log;
 
 trait InteractsWithPhonesubRestApi
 {
-    public function phonesub(): PendingRequest
+    protected $timestamp;
+
+    public function phonesub($target = 'sub'): PendingRequest
     {
-        // testing? app(Settings::class)->get('billing.phonesub_test_mode')
-        $baseUrl = 'http://'.config('services.phonesub.address').'/portalservice/v1/interfaces/';
+        switch ($target) {
+        case 'sub':
+          $baseUrl = config('services.phonesub.baseurl_sub');
+          break;
+
+        case 'unsub':
+          $baseUrl = config('services.phonesub.baseurl_unsub');
+          break;
+
+        default:
+          throw new GatewayException(__('Unexpexted SUB server target.'));
+        }
+
+        if (empty($baseUrl)) {
+          throw new GatewayException(__('Missing baseUrl.'));
+        }
 
         $nonce = bin2hex(random_bytes(16));
         //$nonce = "MjAyMzA2MDcwODA2Mzk1MTQA";
 
-        $timestamp = time();
+        $timestamp = $this->timestamp ?? time(); 
         //$timestamp = 1686566956;
 
         $password_digest = base64_encode(sha1($nonce.$timestamp.config('services.phonesub.password'), true));
@@ -59,5 +75,23 @@ trait InteractsWithPhonesubRestApi
         Log::debug('InteractsWithPhonesubRestApi headers: '.json_encode($headers));
 
         return Http::withHeaders($headers)->baseUrl($baseUrl);
+    }
+
+    /**
+     * Helper function to extract string value of an xml node.
+     */
+    protected function extractXmlItem($current, $items) {
+        $current = preg_replace('/\s+/', '', $current);
+        foreach ((array)$items as $item) {
+            if (!preg_match('|<'.$item.'>(.*)</'.$item.'>|', $current, $matches)) {
+                Log::debug('extractXmlItem false: "'.substr($current, 0, 50).'" / '.$item);
+                return false;
+            }
+
+            Log::debug('extractXmlItem match: '.substr($current, 0, 50).' / '.$item.' / '.json_encode($matches));
+            $current = $matches[1];
+        }
+
+        return $current;
     }
 }

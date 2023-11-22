@@ -90,21 +90,6 @@ class PhonesubWebhookController extends Controller
       ]);
     }
 
-    protected function extractXmlItem($current, $items) {
-        $current = preg_replace('/\s+/', '', $current);
-        foreach ((array)$items as $item) {
-            if (!preg_match('|<'.$item.'>(.*)</'.$item.'>|', $current, $matches)) {
-                Log::debug('extractXmlItem false: "'.substr($current, 0, 50).'" / '.$item);
-                return false;
-            }
-
-            Log::debug('extractXmlItem match: '.substr($current, 0, 50).' / '.$item.' / '.json_encode($matches));
-            $current = $matches[1];
-        }
-
-        return $current;
-    }
-
     protected function handleSubscription(string $xmlString): Response
     {
         $phonesubProductId = $this->extractXmlItem($xmlString, ['ns1:productID']);

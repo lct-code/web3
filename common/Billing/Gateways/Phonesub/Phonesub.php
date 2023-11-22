@@ -29,9 +29,25 @@ class Phonesub implements CommonSubscriptionGatewayActions
     <effectiveTime>5</effectiveTime>
 </response>
 END;
+            Http::fake([config('services.phonesub.baseurl_sub').'*' => Http::response($resp_zero, 200)]);
 
-            Http::fake(['*' => Http::response($resp_zero, 200)]);
+            $resp_unsub = <<<'END'
+<?xml version="1.0" encoding="utf-8" ?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <soapenv:Body>
+        <ns1:unSubscribeProductResponse xmlns:ns1="http://www.csapi.org/schema/parlayx/subscribe/manage/v1_0/local">
+            <ns1:unSubscribeProductRsp>
+                <result>00000000</result>
+                <resultDescription>UnSubscribe Success. Detailed description:  userID : [ 966xxxxxxxxx ] was unsubscribed !</resultDescription>
+            </ns1:unSubscribeProductRsp>
+        </ns1:unSubscribeProductResponse>
+    </soapenv:Body>
+</soapenv:Envelope>
+END;
+            Http::fake([config('services.phonesub.baseurl_unsub').'*' => Http::response($resp_unsub, 200)]);
         }
+
+        $this->timestamp = time();
     }
 
     public function isEnabled(): bool
@@ -227,6 +243,89 @@ END;
         bool $atPeriodEnd = true
     ): bool {
         Log::debug('phonesub cancelSubscription: '.$subscription->toJson().' / '.($atPeriodEnd?'atPeriodEnd':'notPeriodEnd'));
+
+        $params = [
+          'msisdn' => $this->getUserPhone($subscription->user),
+          'productID' => $subscription->price->sub_product_id,
+
+          'Username' => config('services.phonesub.sp_id'),
+          'Password' => config('services.phonesub.password'),
+
+          'timestamp' => $this->timestamp,
+        ];
+
+        $body = <<<BODY
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:loc="http://www.csapi.org/schema/parlayx/subscribe/manage/v1_0/local">
+    <soapenv:Header>
+        <tns:RequestSOAPHeader xmlns:tns="http://www.huawei.com.cn/schema/common/v2_1">
+            <tns:spId>{$params['Username']}</tns:spId>
+            <tns:spPassword>{$params['Password']}</tns:spPassword>
+            <tns:timeStamp>{$params['timestamp']}</tns:timeStamp>
+        </tns:RequestSOAPHeader>
+    </soapenv:Header>
+    <soapenv:Body>
+        <loc:unSubscribeProductRequest>
+            <loc:unSubscribeProductReq>
+                <userID>
+                    <ID>{$params['msisdn']}</ID>
+                    <type>0</type>
+                </userID>
+                <subInfo>
+                    <productID>{$params['productID']}</productID>
+                    <operCode>zh</operCode>
+                    <isAutoExtend>0</isAutoExtend>
+                    <channelID>1</channelID>
+                    <extensionInfo>
+                        <namedParameters>
+                            <key>keyword</key>
+                            <value>unsub</value>
+                        </namedParameters>
+                    </extensionInfo>
+                </subInfo>
+            </loc:unSubscribeProductReq>
+        </loc:unSubscribeProductRequest>
+    </soapenv:Body>
+</soapenv:Envelope>
+BODY;
+
+        Log::debug('phonesub POST SubscribeManage: '.http_build_query($params));
+
+        $response = $this->phonesub('unsub')
+          ->withBody($body, 'application/xml')
+          ->post('SubscribeManage');
+
+        if ($response->successful()) {
+            $xml = $this->parseXml($response);
+
+            $resultCode = (string) $this->extractXmlItem($response, ['result']);
+
+            switch ($resultCode) {
+            case '00000000':
+              return true;
+                return [
+                    'status' => 'success',
+                    'message' => __('Your subscription has been cancelled successfully.'),
+                ];
+
+            case '22007219':
+                return true;
+                return [
+                    'status' => 'unsubscribed',
+                    'message' => __('You\'ve already unsubscribed from the service.'),
+                ];
+
+            default:
+                Log::error("phoneSub gateway - unexpected response code [$resultCode]");
+                throw new GatewayException(__('Unexpected response code. Please try again later.'));
+            }
+        }
+        else {
+          Log::error("phoneSub gateway - unexpected response (".$response->status()."): ".$response->body());
+          throw new GatewayException(__('Unexpexted SUB server response.'));
+        }
+
+        return false;
+
         return true;
     }
 
@@ -235,7 +334,8 @@ END;
         array $gatewayParams = []
     ): bool {
         Log::debug('phonesub resumeSubscription: '.$subscription->toJson().' / '.json_encode($gatewayParams));
-        return true;
+        throw new GatewayException(__('Could not renew subscription.'));
+        return false;
     }
 
     public function getUserPhone(User $user): string {
