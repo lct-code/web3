@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc --skipLibCheck && vite build",
+    "build": "tsc --skipLibCheck && npx cross-env NODE_OPTIONS=--max-old-space-size=8192 vite build",
     "preview": "vite preview",
     "iconIndex": "node ./scripts/create-icon-index.js",
     "extract": "node ./resources/scripts/extract-translations.js"
