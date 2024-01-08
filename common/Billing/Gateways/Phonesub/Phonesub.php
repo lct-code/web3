@@ -47,7 +47,7 @@ END;
             Http::fake([config('services.phonesub.baseurl_unsub').'*' => Http::response($resp_unsub, 200)]);
         }
 
-        $this->timestamp = time();
+        $this->timestamp = date('YmdHis');
     }
 
     public function isEnabled(): bool
@@ -177,7 +177,7 @@ END;
             case '000000':
                 if (app(Settings::class)->get('billing.phonesub_test_mode')) {
                     try {
-                        $test_subscription_id = implode('-', ['test', date('YmdHis'), $price->sub_product_id, $user->id]);
+                        $test_subscription_id = implode('-', ['phonesub', 'test', $this->getUserPhone($user), $price->sub_product_id, date('YmdHis')]);
                         $this->storeSubscriptionDetailsLocally($price->sub_product_id, $test_subscription_id, $user);
                         Log::debug('phonesub subscribeVerify test subscription: '.$test_subscription_id);
                     }
@@ -249,9 +249,10 @@ END;
           'productID' => $subscription->price->sub_product_id,
 
           'Username' => config('services.phonesub.sp_id'),
-          'Password' => config('services.phonesub.password'),
+          'Password' => md5(config('services.phonesub.sp_id').config('services.phonesub.password').$this->timestamp),
 
           'timestamp' => $this->timestamp,
+          //'timestamp' => '20230904143853',
         ];
 
         $body = <<<BODY

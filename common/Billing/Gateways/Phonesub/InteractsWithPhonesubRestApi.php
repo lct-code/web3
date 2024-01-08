@@ -34,7 +34,7 @@ trait InteractsWithPhonesubRestApi
         $nonce = bin2hex(random_bytes(16));
         //$nonce = "MjAyMzA2MDcwODA2Mzk1MTQA";
 
-        $timestamp = $this->timestamp ?? time(); 
+        $timestamp = $this->timestamp ?? date('YmdHis'); 
         //$timestamp = 1686566956;
 
         $password_digest = base64_encode(sha1($nonce.$timestamp.config('services.phonesub.password'), true));

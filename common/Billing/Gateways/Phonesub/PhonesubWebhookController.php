@@ -94,7 +94,10 @@ class PhonesubWebhookController extends Controller
     {
         $phonesubProductId = $this->extractXmlItem($xmlString, ['ns1:productID']);
         $phonesubUserId = $this->extractXmlItem($xmlString, ['ns1:userID','ID']);
-        $phonesubSubscriptionId = $this->extractXmlItem($xmlString, ['ns1:serviceID']);
+        // $phonesubSubscriptionId = $this->extractXmlItem($xmlString, ['ns1:serviceID']);
+
+        // generating unique subscription ID because we're not getting one from Zain
+        $phonesubSubscriptionId = implode('-', ['phonesub', $phonesubUserId, $phonesubProductId, date('YmdHis')]);
 
         Log::debug('phonesub api sync - handleSubscription: '.$phonesubProductId.' / '.$phonesubUserId.' / '.$phonesubSubscriptionId);
         if (!$phonesubProductId || !$phonesubUserId || !$phonesubSubscriptionId) {
@@ -124,18 +127,22 @@ class PhonesubWebhookController extends Controller
 
     protected function handleUnsubscription(string $xmlString): Response
     {
+        $phonesubProductId = $this->extractXmlItem($xmlString, ['ns1:productID']);
         $phonesubUserId = $this->extractXmlItem($xmlString, ['ns1:userID','ID']);
-        $phonesubSubscriptionId = $this->extractXmlItem($xmlString, ['ns1:serviceID']);
-        Log::debug('phonesub api sync - handleUnsubscription: '.$phonesubUserId.' / '.$phonesubSubscriptionId);
+        //$phonesubSubscriptionId = $this->extractXmlItem($xmlString, ['ns1:serviceID']);
 
-        if (!$phonesubUserId || !$phonesubSubscriptionId) {
+        $phonesubSubscriptionIdStub = implode('-', ['phonesub', $phonesubUserId, $phonesubProductId]);
+        Log::debug('phonesub api sync - handleUnsubscription: '.$phonesubUserId.' / '.$phonesubSubscriptionIdStub);
+
+        if (!$phonesubProductId || !$phonesubUserId || !$phonesubSubscriptionIdStub) {
             return $this->respondXml(400, 'Missing SUB data');
         }
 
         $subscription = Subscription::where(
             'gateway_id',
-            $phonesubSubscriptionId,
-        )->first();
+            'LIKE',
+            $phonesubSubscriptionIdStub.'%'
+        )->orderBy('created_at', 'desc')->first();
 
         Log::debug('phonesub api sync - handleUnsubscription - $subscription: '.json_encode($subscription));
 
@@ -146,11 +153,14 @@ class PhonesubWebhookController extends Controller
 
     protected function handleRenewal(string $xmlString): Response
     {
+        $phonesubProductId = $this->extractXmlItem($xmlString, ['ns1:productID']);
         $phonesubUserId = $this->extractXmlItem($xmlString, ['ns1:userID','ID']);
-        $phonesubSubscriptionId = $this->extractXmlItem($xmlString, ['ns1:serviceID']);
-        Log::debug('phonesub api sync - handleRenewal (TODO): '.$phonesubUserId.' / '.$phonesubSubscriptionId);
+        //$phonesubSubscriptionId = $this->extractXmlItem($xmlString, ['ns1:serviceID']);
 
-        if (!$phonesubUserId || !$phonesubSubscriptionId) {
+        $phonesubSubscriptionIdStub = implode('-', ['phonesub', $phonesubUserId, $phonesubProductId]);
+        Log::debug('phonesub api sync - handleRenewal (TODO): '.$phonesubUserId.' / '.$phonesubSubscriptionIdStub);
+
+        if (!$phonesubProductId || !$phonesubUserId || !$phonesubSubscriptionIdStub) {
             return $this->respondXml(400, 'Missing SUB data');
         }
 
