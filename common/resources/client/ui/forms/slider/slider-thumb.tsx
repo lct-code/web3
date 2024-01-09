@@ -80,7 +80,8 @@ export function SliderThumb({
   };
 
   const className = clsx(
-    'outline-none rounded-full top-1/2 -translate-y-1/2 -translate-x-1/2 absolute inset-0 transition-button duration-200',
+    'outline-none rounded-full top-1/2 -translate-y-1/2 absolute inset-0 transition-button duration-200',
+    document.dir == 'rtl' ? 'translate-x-1/2' : '-translate-x-1/2',
     thumbSize,
     !isDisabled && 'shadow-md',
     thumbColor({fillColor, isDisabled, isDragging: isDragging}),
@@ -90,13 +91,14 @@ export function SliderThumb({
       : 'invisible'
   );
 
+  const style: {left?:string, right?:string} = {};
+  style[document.dir == 'rtl' ? 'right': 'left'] = `${Math.max(getThumbPercent(index) * 100, 0)}%`;
+
   return (
     <div
       role="presentation"
       className={className}
-      style={{
-        left: `${Math.max(getThumbPercent(index) * 100, 0)}%`,
-      }}
+      style={style}
       onPointerDown={e => {
         if (e.button !== 0 || e.altKey || e.ctrlKey || e.metaKey) {
           return;

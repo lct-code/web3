@@ -271,6 +271,9 @@ module.exports = {
           '.icon-xl': {
             'font-size': '2.6875rem',
           },
+          '[dir="rtl"] .reverse-on-rtl': {
+            'transform': 'scaleX(-1)',
+          },
 
           // UTILS
           '.no-tap-highlight': {

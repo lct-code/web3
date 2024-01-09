@@ -38,6 +38,7 @@ export function NavbarAuthMenu({children, items}: Props) {
   if (!selectedTheme || !user) return null;
   const hasUnreadNotif = !!user.unread_notifications_count;
   const [direction, setDirection] = useState(document.documentElement.dir ?? 'ltr');
+  const toggleDirection = false;
 
   const notifMenuItem = (
     <MenuItem
@@ -124,7 +125,7 @@ export function NavbarAuthMenu({children, items}: Props) {
             <Trans message="Light mode" />
           </MenuItem>
         )}
-        {direction == 'ltr' && (
+        {toggleDirection && direction == 'ltr' && (
           <MenuItem
             value="rtl"
             onSelected={() => {
@@ -135,7 +136,7 @@ export function NavbarAuthMenu({children, items}: Props) {
             <Trans message="RTL" />
           </MenuItem>
         )}
-        {direction == 'rtl' && (
+        {toggleDirection && direction == 'rtl' && (
           <MenuItem
             value="ltr"
             onSelected={() => {
