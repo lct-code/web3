@@ -11,6 +11,7 @@ use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
 use Laravel\Fortify\Fortify;
 use Propaganistas\LaravelPhone\PhoneNumber;
+use Propaganistas\LaravelPhone\Exceptions\NumberParseException;
 use Illuminate\Support\Facades\Log;
 use App\User;
 use Illuminate\Validation\ValidationException;
@@ -56,10 +57,20 @@ class FortifyServiceProvider extends ServiceProvider
             )->first();
           }
           catch (\Exception $e) {
-              Log::debug('login-fortify-auth except '.$e->getMessage());
-              throw ValidationException::withMessages([
-                  'phone' => [$e->getMessage()],
-              ]);
+            Log::debug('login-fortify-auth except ('.get_class($e).') '.$e->getMessage());
+
+            if ($e instanceof NumberParseException) {
+              $message = trans('validation.phone_country');
+            }
+            else {
+              $message = $e->getMessage();
+            }
+
+            Log::debug('login-fortify-auth except msg '.$message);
+
+            throw ValidationException::withMessages([
+              'phone' => [$message],
+            ]);
           }
 
           if ($user) {
