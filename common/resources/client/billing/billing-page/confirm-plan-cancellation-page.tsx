@@ -70,12 +70,14 @@ export function ConfirmPlanCancellationPage() {
           <div className="text-xl font-bold">{product.name}</div>
           <FormattedPrice price={price} className="text-lg" />
           <div className="text-base mt-12 border-b pb-24 mb-48">
-            <Trans
-              message="Your plan will be canceled, but is still available until the end of your billing period on :date"
-              values={{date: renewDate}}
-            />
-            <div className="mt-20">
-              <Trans message="If you change your mind, you can renew your subscription." />
+            <div className="hidden">
+              <Trans
+                message="Your plan will be canceled, but is still available until the end of your billing period on :date"
+                values={{date: renewDate}}
+              />
+              <div className="mt-20">
+                <Trans message="If you change your mind, you can renew your subscription." />
+              </div>
             </div>
           </div>
           <div>

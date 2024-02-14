@@ -192,7 +192,7 @@ END;
                 ];
 
             case '330157':
-                throw new GatewayException(__('Invalid verification code. Please try again. You have :attempts attempt(s) left.', ['attempts'=>'?']));
+                throw new GatewayException(__('Invalid verification code. Please try again.'));
 
             case '330158':
                 return [
