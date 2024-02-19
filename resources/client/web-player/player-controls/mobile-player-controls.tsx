@@ -31,7 +31,7 @@ import {BufferingIndicator} from '@app/web-player/player-controls/buffering-indi
 
 export function MobilePlayerControls() {
   return (
-    <div className="fixed bottom-0 left-0 right-0 w-[calc(100%-20px)] mx-auto bg-background/95">
+    <div className="fixed bottom-0 left-0 right-0 w-[calc(100%-20px)] mx-auto bg-alt">
       <PlayerControls />
       <MobileNavbar />
     </div>
@@ -65,7 +65,7 @@ function QueuedTrack() {
 
   return (
     <div className="flex items-center gap-10 min-w-0 flex-auto">
-      <TrackImage className="rounded w-36 h-36 object-cover" track={track} />
+      <TrackImage className="rounded w-36 h-36 object-cover overflow-hidden" track={track} />
       <div className="flex-auto whitespace-nowrap overflow-hidden">
         <div className="text-sm font-medium overflow-hidden overflow-ellipsis">
           {track.name}

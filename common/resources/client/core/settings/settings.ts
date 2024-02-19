@@ -9,6 +9,10 @@ export interface Settings {
     logo_dark: string;
     logo_light_mobile: string;
     logo_dark_mobile: string;
+    player_header_light: string;
+    player_header_dark: string;
+    player_header_light_mobile: string;
+    player_header_dark_mobile: string;
     site_name: string;
     site_description: string;
     favicon: string;

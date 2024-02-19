@@ -4,13 +4,14 @@ import React, {Fragment, useMemo} from 'react';
 import {Button} from '@common/ui/buttons/button';
 import {Link} from 'react-router-dom';
 import {Trans} from '@common/i18n/trans';
+import {useTrans} from '@common/i18n/use-trans';
 import {useNavigate} from '@common/utils/hooks/use-navigate';
 import {usePrimaryArtistForCurrentUser} from '@app/web-player/backstage/use-primary-artist-for-current-user';
 import {MenuItem} from '@common/ui/navigation/menu/menu-trigger';
 import {MicIcon} from '@common/icons/material/Mic';
+import {SubscriptionsIcon} from '@common/icons/material/Subscriptions';
 import {getArtistLink} from '@app/web-player/artists/artist-link';
 import {Navbar} from '@common/ui/navigation/navbar/navbar';
-import {SearchAutocomplete} from '@app/web-player/search/search-autocomplete';
 
 export function PlayerNavbar() {
   const navigate = useNavigate();
@@ -58,7 +59,6 @@ export function PlayerNavbar() {
       authMenuItems={menuItems}
       className="dashboard-grid-header"
     >
-      <SearchAutocomplete />
       <ActionButtons />
     </Navbar>
   );
@@ -67,6 +67,7 @@ export function PlayerNavbar() {
 function ActionButtons() {
   const {player, billing} = useSettings();
   const {isLoggedIn, hasPermission, isSubscribed} = useAuth();
+  const {trans} = useTrans();
 
   const showUploadButton =
     player?.show_upload_btn && isLoggedIn && hasPermission('music.create');
@@ -82,8 +83,9 @@ function ActionButtons() {
           color="primary"
           elementType={Link}
           to="/pricing"
+          title={trans({message: 'Try Pro'})}
         >
-          <Trans message="Try Pro" />
+          <SubscriptionsIcon />
         </Button>
       )}
       {showUploadButton && (

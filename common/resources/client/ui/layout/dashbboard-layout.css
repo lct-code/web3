@@ -1,7 +1,7 @@
 .dashboard-grid {
     display: grid;
     grid-template-areas: "navbar navbar navbar"
-"sidenav-left header header"
+"sidenav-left content header"
 "sidenav-left content sidenav-right"
 "footer footer footer";
     grid-template-rows:  auto auto 1fr;

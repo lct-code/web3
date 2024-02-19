@@ -73,7 +73,7 @@ export function Navbar({
     <div
       className={clsx(
         'flex items-center gap-10 py-8',
-        isMobile ? 'pl-14 pr-8' : 'px-20',
+        isMobile ? 'pl-14 pr-8' : 'px-8',
         color === 'primary' &&
           `bg-primary ${textColor || 'text-on-primary'} border-b-primary`,
         color === 'bg' && `bg ${textColor || 'text-main'} border-b`,

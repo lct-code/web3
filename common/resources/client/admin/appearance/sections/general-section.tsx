@@ -41,6 +41,34 @@ export function GeneralSection() {
         }
         type="logo_dark_mobile"
       />
+      <BrandingImageSelector
+        label={<Trans message="Light player header" />}
+        description={<Trans message="Will be used on dark backgrounds." />}
+        type="player_header_light"
+        showRemoveButton={true}
+      />
+      <BrandingImageSelector
+        label={<Trans message="Dark player header" />}
+        description={
+          <Trans message="Will be used on light backgrounds. Will default to light logo if left empty." />
+        }
+        type="player_header_dark"
+        showRemoveButton={true}
+      />
+      <BrandingImageSelector
+        label={<Trans message="Mobile light player header" />}
+        description={<Trans message="Will be used on dark backgrounds." />}
+        type="player_header_light_mobile"
+        showRemoveButton={true}
+      />
+      <BrandingImageSelector
+        label={<Trans message="Mobile dark player header" />}
+        description={
+          <Trans message="Will be used on light backgrounds. Will default to light logo if left empty." />
+        }
+        type="player_header_dark_mobile"
+        showRemoveButton={true}
+      />
       <SiteNameTextField />
       <SiteDescriptionTextArea />
     </Fragment>
@@ -50,9 +78,10 @@ export function GeneralSection() {
 interface ImageSelectorProps {
   label: ReactNode;
   description: ReactNode;
+  showRemoveButton?: boolean;
   type: keyof Settings['branding'];
 }
-function BrandingImageSelector({label, description, type}: ImageSelectorProps) {
+function BrandingImageSelector({label, description, type, showRemoveButton}: ImageSelectorProps) {
   const defaultValue = useAppearanceStore(
     s => s.defaults?.settings.branding[type]
   );
@@ -62,6 +91,7 @@ function BrandingImageSelector({label, description, type}: ImageSelectorProps) {
       className="border-b pb-30 mb-30"
       label={label}
       description={description}
+      showRemoveButton={showRemoveButton}
       diskPrefix="branding_media"
       defaultValue={defaultValue}
       onChange={() => {
