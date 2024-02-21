@@ -39,7 +39,7 @@ class CreateNewUser implements CreatesNewUsers
             }
             catch (\Exception $e) {
                 throw ValidationException::withMessages([
-                    'phone' => ['Invalid phone number format. Please make sure to enter a valid phone number in the KSA code format.'],
+                    'phone' => [trans('Invalid phone number format. Please make sure to enter a valid phone number in the KSA code format.')],
                 ]);
             }
         }
