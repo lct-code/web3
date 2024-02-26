@@ -12,13 +12,15 @@ export function BillingPage() {
     <CancelledPlanPanel />
   ) : (
     <ActivePlanPanel />
-  );
+    );
+
+  let showInvoiceHistoryPanel = false;
 
   return (
     <div>
       {planPanel}
       <PaymentMethodPanel />
-      <InvoiceHistoryPanel />
+      {showInvoiceHistoryPanel && (<InvoiceHistoryPanel />)}
     </div>
   );
 }

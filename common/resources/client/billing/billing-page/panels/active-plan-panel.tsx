@@ -14,6 +14,8 @@ export function ActivePlanPanel() {
     <FormattedDate preset="long" date={subscription.renews_at} />
   );
 
+  const showChangePlanButton = false;
+
   return (
     <BillingPlanPanel title={<Trans message="Current plan" />}>
       <div className="flex gap-20 justify-between mt-24">
@@ -30,6 +32,7 @@ export function ActivePlanPanel() {
           </div>
         </div>
         <div className="w-[233px]">
+          {showChangePlanButton && (
           <Button
             variant="flat"
             color="primary"
@@ -39,7 +42,7 @@ export function ActivePlanPanel() {
             to="/billing/change-plan"
           >
             <Trans message="Change plan" />
-          </Button>
+          </Button>)}
           <Button
             variant="outline"
             color="danger"
