@@ -14,8 +14,8 @@ interface Params {
 type UserId = number | string | 'me';
 const endpoint = (id: UserId) => `users/${id}`;
 
-export function useUser(id: UserId, params?: Params) {
-  return useQuery([endpoint(id)], () => fetchUser(id, params));
+export function useUser(id: UserId, params?: Params, cacheKey?: string) {
+  return useQuery([endpoint(id)+'/'+(cacheKey ?? '')], () => fetchUser(id, params));
 }
 
 function fetchUser(id: UserId, params?: Params): Promise<FetchUseUserResponse> {

@@ -3,7 +3,7 @@ import {invalidateUseUserQuery, useUser} from '../../auth/ui/use-user';
 export function useBillingUser() {
   const query = useUser('me', {
     with: ['subscriptions.product', 'subscriptions.price'],
-  });
+  }, 'billing');
 
   const subscription = query.data?.user.subscriptions?.[0];
 

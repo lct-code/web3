@@ -13,7 +13,7 @@ import {Fragment} from 'react';
 
 export function AccountSettingsPage() {
   const {data, isLoading} = useUser('me', {
-    with: ['roles', 'social_profiles', 'tokens'],
+    with: ['roles', 'social_profiles', 'tokens', 'subscriptions'],
   });
   return (
     <div className="bg-alt flex flex-col h-full">
@@ -42,7 +42,7 @@ export function AccountSettingsPage() {
               <ChangePasswordPanel />
               <LocalizationPanel user={data.user} />
               <AccessTokenPanel user={data.user} />
-              <DangerZonePanel />
+              <DangerZonePanel user={data.user} />
             </Fragment>
           )}
         </div>
