@@ -79,6 +79,14 @@ class UserController extends BaseController
 
         // guard against current user or admin user deletion
         foreach ($users as $user) {
+            if ($user->subscribed()) {
+                return $this->error(
+                    __('Could not delete user with an active subscription: :email', [
+                        'email' => $user->email,
+                    ]),
+                );
+            }
+
             if (!$shouldDeleteCurrentUser && $user->id === Auth::id()) {
                 return $this->error(
                     __('Could not delete currently logged in user: :email', [
