@@ -6,6 +6,7 @@ import {toast} from '../../../ui/toast/toast';
 import {message} from '../../../i18n/message';
 import {User} from '../../../auth/user';
 import {showHttpErrorToast} from '../../../utils/http/show-http-error-toast';
+import {useBootstrapData} from '@common/core/bootstrap-data/bootstrap-data-context';
 
 interface Response extends BackendResponse {
   user: User;
@@ -18,8 +19,10 @@ interface Payload {
 
 export function useCancelSubscription() {
   const {trans} = useTrans();
+  const {invalidateBootstrapData} = useBootstrapData();
   return useMutation((props: Payload) => cancelSubscription(props), {
     onSuccess: (response, payload) => {
+      invalidateBootstrapData();
       toast(
         payload.delete
           ? trans(message('Subscription deleted.'))
