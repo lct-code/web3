@@ -5,6 +5,7 @@ return [
         [
             'default' => true,
             'name' => 'users',
+            'internal' => true,
             'permissions' => [
                 'users.view',
                 'localizations.view',
@@ -17,6 +18,7 @@ return [
         [
             'guests' => true,
             'name' => 'guests',
+            'internal' => true,
             'permissions' => [
                 'users.view',
                 'custom_pages.view',

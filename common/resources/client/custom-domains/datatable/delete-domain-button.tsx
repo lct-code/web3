@@ -25,7 +25,7 @@ export function DeleteDomainButton({domain}: DeleteDomainButtonProps) {
         variant="outline"
         color="danger"
         size="xs"
-        disabled={deleteDomain.isLoading}
+        disabled={deleteDomain.isPending}
       >
         <Trans message="Remove" />
       </Button>

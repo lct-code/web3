@@ -2,11 +2,12 @@
 
 namespace Common\Workspaces\Controllers;
 
-use App\User;
+use App\Models\User;
 use Arr;
 use Auth;
 use Common\Core\BaseController;
 use Common\Settings\Settings;
+use Common\Validation\Validators\EmailsAreValid;
 use Common\Workspaces\Actions\DeleteInviteNotification;
 use Common\Workspaces\Notifications\WorkspaceInvitation;
 use Common\Workspaces\Workspace;
@@ -78,7 +79,12 @@ class WorkspaceInvitesController extends BaseController
     {
         $this->authorize('store', [WorkspaceMember::class, $workspace]);
 
+        $emailsRules = ['required', 'array'];
+        if (settings('registration.disable')) {
+            $emailsRules[] = new EmailsAreValid();
+        }
         $validatedData = $this->request->validate([
+            'emails' => $emailsRules,
             'emails.*' => 'required|email',
             'roleId' => 'required|int',
         ]);
@@ -114,7 +120,7 @@ class WorkspaceInvitesController extends BaseController
                 ) {
                     // if registration is disabled, only allow inviting already registered users
                     if (
-                        $this->settings->get('registration.disable') &&
+                        settings('registration.disable') &&
                         !isset($existingUsers[$email])
                     ) {
                         return null;

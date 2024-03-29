@@ -1,14 +1,14 @@
 import {CssTheme} from '../css-theme';
-import {setThemeColor} from './set-theme-color';
-import {rootEl} from '@common/core/root-el';
+import {setThemeValue} from './set-theme-value';
+import {themeEl} from '@common/core/root-el';
 
 export function applyThemeToDom(theme: CssTheme) {
-  Object.entries(theme.colors).forEach(([key, value]) => {
-    setThemeColor(key, value);
+  Object.entries(theme.values).forEach(([key, value]) => {
+    setThemeValue(key, value);
   });
   if (theme.is_dark) {
-    rootEl.classList.add('dark');
+    themeEl.classList.add('dark');
   } else {
-    rootEl.classList.remove('dark');
+    themeEl.classList.remove('dark');
   }
 }

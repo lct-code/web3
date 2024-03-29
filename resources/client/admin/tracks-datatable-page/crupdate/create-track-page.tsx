@@ -30,7 +30,7 @@ export function CreateTrackPage({wrapInContainer}: Props) {
         createTrack.mutate(values);
       }}
       title={<Trans message="Add new track" />}
-      isLoading={createTrack.isLoading}
+      isLoading={createTrack.isPending}
       disableSaveWhenNotDirty
       wrapInContainer={wrapInContainer}
     >

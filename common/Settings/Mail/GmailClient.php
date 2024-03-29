@@ -2,7 +2,6 @@
 
 namespace Common\Settings\Mail;
 
-use Common\Settings\Settings;
 use File;
 use Google\Service\Gmail\Message;
 use Google\Service\Gmail\WatchRequest;
@@ -78,9 +77,7 @@ class GmailClient
     public function watch(): WatchResponse
     {
         $payload = new WatchRequest();
-        $payload->topicName = app(Settings::class)->get(
-            'gmail.incoming.topicName',
-        );
+        $payload->topicName = settings('incoming_email.gmail.topicName');
         $payload->labelIds = ['UNREAD'];
         $payload->labelFilterAction = 'include';
         return $this->gmail->users->watch('me', $payload);

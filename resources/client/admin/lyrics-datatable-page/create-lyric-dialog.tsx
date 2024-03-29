@@ -20,6 +20,7 @@ export function CreateLyricDialog({trackId}: Props) {
   const form = useForm<CreateLyricPayload>({
     defaultValues: {
       track_id: trackId,
+      is_synced: false,
     },
   });
   const createLyric = useCreateLyric(form);
@@ -46,7 +47,7 @@ export function CreateLyricDialog({trackId}: Props) {
         </Button>
         <Button
           form={formId}
-          disabled={createLyric.isLoading}
+          disabled={createLyric.isPending}
           variant="flat"
           color="primary"
           type="submit"

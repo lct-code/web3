@@ -71,20 +71,32 @@ function VirtualizedBody({renderRowAs, placeholderRowCount, query}: BodyProps) {
   const scrollableRef = useRef<Element>(null!);
   const scrollOffset = useRef(0);
 
-  useEffect(() => {
+  // virtualizer will not work with "getScrollElement: () => scrollableRef.current"
+  // if scrollableRef.current is set in useEffect and is null on first render
+  const getScrollElement = () => {
+    if (scrollableRef.current) {
+      return scrollableRef.current;
+    }
     if (bodyRef.current) {
       scrollableRef.current = getScrollParent(bodyRef.current);
+    }
+    return scrollableRef.current;
+  };
+
+  useEffect(() => {
+    if (bodyRef.current) {
       scrollOffset.current =
         bodyRef.current.getBoundingClientRect().top +
-        scrollableRef.current.scrollTop;
+        getScrollElement().scrollTop;
     }
   }, [bodyRef]);
 
   const virtualizer = useVirtualizer({
     overscan: 10,
     count: data.length,
-    getScrollElement: () => scrollableRef.current,
+    getScrollElement,
     estimateSize: () => 48,
+    // getScrollElement: () => scrollableRef.current,
     observeElementOffset: (instance, cb) => {
       return observeElementOffset(instance, offset => {
         cb(offset - scrollOffset.current);
@@ -103,7 +115,7 @@ function VirtualizedBody({renderRowAs, placeholderRowCount, query}: BodyProps) {
     <div
       ref={bodyRef}
       role="presentation"
-      className="w-full relative"
+      className="relative w-full"
       style={{
         height: virtualHeight,
       }}
@@ -116,7 +128,7 @@ function VirtualizedBody({renderRowAs, placeholderRowCount, query}: BodyProps) {
             index={virtualItem.index}
             key={item.id}
             renderAs={renderRowAs}
-            className="absolute top-0 left-0 w-full"
+            className="absolute left-0 top-0 w-full"
             style={{
               height: `${virtualItem.size}px`,
               transform: `translateY(${virtualItem.start}px)`,
@@ -125,7 +137,7 @@ function VirtualizedBody({renderRowAs, placeholderRowCount, query}: BodyProps) {
         );
       })}
       <Sentinel
-        dataCount={virtualizer.range.endIndex}
+        dataCount={virtualizer.range?.endIndex ?? 0}
         placeholderRowCount={placeholderRowCount}
         query={query}
         style={{
@@ -167,7 +179,7 @@ function Sentinel({
               renderAs={renderRowAs}
             />
           );
-        }
+        },
       )}
     </InfiniteScrollSentinel>
   );

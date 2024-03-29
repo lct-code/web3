@@ -16,6 +16,8 @@ export interface FullscreenSlice {
   enterFullscreen: () => void;
   exitFullscreen: () => void;
   toggleFullscreen: () => void;
+  initFullscreen: () => void;
+  destroyFullscreen: () => void;
 }
 
 type BaseSliceCreator = StateCreator<
@@ -31,12 +33,8 @@ type StoreLice = BaseSliceCreator extends (...a: infer U) => infer R
 
 const iPhoneProviderBlacklist = ['youtube'];
 
-export const createFullscreenSlice: StoreLice = (
-  set,
-  get,
-  store,
-  listeners
-) => {
+export const createFullscreenSlice: StoreLice = (set, get) => {
+  let subscription: () => void | undefined;
   const orientation = new ScreenOrientation();
   let adapter: FullscreenAdapter | undefined;
 
@@ -60,28 +58,6 @@ export const createFullscreenSlice: StoreLice = (
     return adapter?.canFullScreen() ?? false;
   };
 
-  listeners.add({
-    providerReady: ({el}) => {
-      // when changing adapters, remove previous adapter events and exit fullscreen
-      adapter?.unbindEvents();
-      if (get().isFullscreen) {
-        adapter?.exit();
-      }
-      // create new adapter, and if fullscreen is supported, bind events
-      adapter = IS_IPHONE
-        ? createIphoneFullscreenAdapter(
-            el as HTMLVideoElement,
-            onFullscreenChange
-          )
-        : createNativeFullscreenAdapter(el, onFullscreenChange);
-      const canFullscreen = isSupported();
-      set({canFullscreen});
-      if (canFullscreen) {
-        adapter.bindEvents();
-      }
-    },
-  });
-
   return {
     isFullscreen: false,
     canFullscreen: false,
@@ -104,6 +80,33 @@ export const createFullscreenSlice: StoreLice = (
       } else {
         get().enterFullscreen();
       }
+    },
+    initFullscreen: () => {
+      subscription = get().subscribe({
+        providerReady: ({el}) => {
+          // when changing adapters, remove previous adapter events and exit fullscreen
+          adapter?.unbindEvents();
+          if (get().isFullscreen) {
+            adapter?.exit();
+          }
+          // create new adapter, and if fullscreen is supported, bind events
+          adapter = IS_IPHONE
+            ? createIphoneFullscreenAdapter(
+                el as HTMLVideoElement,
+                onFullscreenChange
+              )
+            : createNativeFullscreenAdapter(el, onFullscreenChange);
+          const canFullscreen = isSupported();
+          set({canFullscreen});
+          if (canFullscreen) {
+            adapter.bindEvents();
+          }
+        },
+      });
+    },
+    destroyFullscreen: () => {
+      get().exitFullscreen();
+      subscription?.();
     },
   };
 };

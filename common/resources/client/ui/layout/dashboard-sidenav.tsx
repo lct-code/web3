@@ -3,15 +3,21 @@ import {m} from 'framer-motion';
 import {cloneElement, ReactElement, useContext} from 'react';
 import {DashboardLayoutContext} from './dashboard-layout-context';
 
+export interface DashboardSidenavChildrenProps {
+  className?: string;
+  isCompactMode?: boolean;
+}
+
 export interface SidenavProps {
   className?: string;
-  children: ReactElement<{className: string; isCompactMode?: boolean}>;
+  children: ReactElement<DashboardSidenavChildrenProps>;
   position?: 'left' | 'right';
   size?: 'sm' | 'md' | 'lg' | string;
   mode?: 'overlay';
   // absolute will place sidenav between navbar/footer, fixed will overlay it over nav/footer.
   overlayPosition?: 'absolute' | 'fixed';
   display?: 'flex' | 'block';
+  overflow?: string;
   forceClosed?: boolean;
 }
 export function DashboardSidenav({
@@ -22,6 +28,7 @@ export function DashboardSidenav({
   mode,
   overlayPosition = 'fixed',
   display = 'flex',
+  overflow = 'overflow-hidden',
   forceClosed = false,
 }: SidenavProps) {
   const {
@@ -69,18 +76,19 @@ export function DashboardSidenav({
         position === 'left'
           ? 'dashboard-grid-sidenav-left'
           : 'dashboard-grid-sidenav-right',
-        'overflow-hidden will-change-[width]',
+        'will-change-[width]',
+        overflow,
         sizeClassName,
-        isOverlayMode && `${overlayPosition} top-0 bottom-0 z-20 shadow-2xl`,
+        isOverlayMode && `${overlayPosition} bottom-0 top-0 z-20 shadow-2xl`,
         isOverlayMode && position === 'left' && 'left-0',
-        isOverlayMode && position === 'right' && 'right-0'
+        isOverlayMode && position === 'right' && 'right-0',
       )}
     >
-      {cloneElement(children, {
+      {cloneElement<DashboardSidenavChildrenProps>(children, {
         className: clsx(
           children.props.className,
           'w-full h-full',
-          status === 'compact' && 'compact-scrollbar'
+          status === 'compact' && 'compact-scrollbar',
         ),
         isCompactMode: status === 'compact',
       })}

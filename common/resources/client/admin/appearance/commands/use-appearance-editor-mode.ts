@@ -1,7 +1,11 @@
+import {isSsr} from '@common/utils/dom/is-ssr';
+
 export function useAppearanceEditorMode() {
   return {
-    isAppearanceEditorActive: (
-      (window.frameElement as HTMLIFrameElement) || undefined
-    )?.src.includes('appearanceEditor=true'),
+    isAppearanceEditorActive:
+      !isSsr() &&
+      ((window.frameElement as HTMLIFrameElement) || undefined)?.src.includes(
+        'appearanceEditor=true'
+      ),
   };
 }

@@ -2,7 +2,7 @@
 
 namespace Common\Localizations\Listeners;
 
-use App\User;
+use App\Models\User;
 use Common\Settings\Events\SettingsSaved;
 
 class UpdateAllUsersLanguageWhenDefaultLocaleChanges

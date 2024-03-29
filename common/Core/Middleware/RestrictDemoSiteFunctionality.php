@@ -122,6 +122,7 @@ class RestrictDemoSiteFunctionality
             'storage_digitalocean_key',
             'storage_digitalocean_secret',
             'stripe_webhook_secret',
+            'openai_api_key',
         ];
 
         $clientKeys = [

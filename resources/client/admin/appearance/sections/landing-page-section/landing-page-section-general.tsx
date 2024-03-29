@@ -21,7 +21,7 @@ export function LandingPageSectionGeneral() {
   return (
     <Fragment>
       <HeaderSection />
-      <div className="my-24 py-24 border-y">
+      <div className="my-24 border-y py-24">
         <AppearanceButton
           to="action-buttons"
           elementType={Link}
@@ -44,7 +44,7 @@ export function LandingPageSectionGeneral() {
 
 function HeaderSection() {
   const defaultImage = useAppearanceStore(
-    s => s.defaults?.settings.homepage.appearance?.headerImage
+    s => s.defaults?.settings.homepage.appearance?.headerImage,
   );
 
   return (
@@ -65,7 +65,7 @@ function HeaderSection() {
         name="settings.homepage.appearance.headerSubtitle"
         onFocus={() => {
           appearanceState().preview.setHighlight(
-            '[data-testid="headerSubtitle"]'
+            '[data-testid="headerSubtitle"]',
           );
         }}
       />
@@ -73,7 +73,6 @@ function HeaderSection() {
         name="settings.homepage.appearance.headerImage"
         className="mb-30"
         label={<Trans message="Header image" />}
-        highlightSelector={'[data-testid="headerImage"]'}
         defaultValue={defaultImage}
         diskPrefix="homepage"
       />
@@ -85,7 +84,7 @@ function HeaderSection() {
         maxValue={1}
         formatOptions={{style: 'percent'}}
       />
-      <div className="text-muted text-xs mb-20">
+      <div className="mb-20 text-xs text-muted">
         <Trans message="In order for overlay colors to appear, header image opacity will need to be less then 100%" />
       </div>
       <ColorPickerTrigger
@@ -104,7 +103,7 @@ function FooterSection() {
   const defaultImage = useAppearanceStore(
     s =>
       (s.defaults?.settings.homepage.appearance as LandingPageContent)
-        ?.footerImage
+        ?.footerImage,
   );
   return (
     <Fragment>
@@ -125,7 +124,7 @@ function FooterSection() {
         name="settings.homepage.appearance.footerSubtitle"
         onFocus={() => {
           appearanceState().preview.setHighlight(
-            '[data-testid="footerSubtitle"]'
+            '[data-testid="footerSubtitle"]',
           );
         }}
       />
@@ -133,7 +132,6 @@ function FooterSection() {
         name="settings.homepage.appearance.footerImage"
         className="mb-30"
         label={<Trans message="Footer background image" />}
-        highlightSelector={'[data-testid="footerImage"]'}
         defaultValue={defaultImage}
         diskPrefix="homepage"
       />
@@ -143,14 +141,14 @@ function FooterSection() {
 
 function PricingSection() {
   return (
-    <div className="mt-24 pt-24 border-t">
+    <div className="mt-24 border-t pt-24">
       <FormTextField
         label={<Trans message="Pricing title" />}
         className="mb-20"
         name="settings.homepage.appearance.pricingTitle"
         onFocus={() => {
           appearanceState().preview.setHighlight(
-            '[data-testid="pricingTitle"]'
+            '[data-testid="pricingTitle"]',
           );
         }}
       />
@@ -160,7 +158,7 @@ function PricingSection() {
         name="settings.homepage.appearance.pricingSubtitle"
         onFocus={() => {
           appearanceState().preview.setHighlight(
-            '[data-testid="pricingSubtitle"]'
+            '[data-testid="pricingSubtitle"]',
           );
         }}
       />
@@ -189,11 +187,10 @@ function ColorPickerTrigger({label, formKey}: ColorPickerTriggerProps) {
 
   return (
     <DialogTrigger
-      currentValue={formValue}
+      value={formValue}
       type="popover"
-      onClose={value => {
-        setColor(value);
-      }}
+      onValueChange={newValue => setColor(newValue)}
+      onClose={value => setColor(value)}
     >
       <AppearanceButton
         className="capitalize"
@@ -207,12 +204,7 @@ function ColorPickerTrigger({label, formKey}: ColorPickerTriggerProps) {
       >
         {label}
       </AppearanceButton>
-      <ColorPickerDialog
-        defaultValue={formValue}
-        onChange={newValue => {
-          setColor(newValue);
-        }}
-      />
+      <ColorPickerDialog />
     </DialogTrigger>
   );
 }

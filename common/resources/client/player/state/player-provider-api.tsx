@@ -9,6 +9,7 @@ export interface PlayerProviderApi {
   setPlaybackQuality?: (value: string) => void;
   setTextTrackVisibility?: (isVisible: boolean) => void;
   setCurrentTextTrack?: (trackId: number) => void;
+  setCurrentAudioTrack?: (trackId: number) => void;
   getCurrentTime: () => number;
   getSrc: () => string | undefined;
   internalProviderApi?: any;

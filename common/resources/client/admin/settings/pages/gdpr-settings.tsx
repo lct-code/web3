@@ -48,8 +48,8 @@ function CookieNoticeSection() {
       </FormSwitch>
       {noticeEnabled && (
         <Fragment>
-          <div className="border-b pb-6 mb-20">
-            <div className="text-sm font-medium border-b pb-10 mb-20">
+          <div className="mb-20 border-b pb-6">
+            <div className="mb-20 border-b pb-10 text-sm font-medium">
               <Trans message="Information button" />
             </div>
             <MenuItemForm
@@ -100,7 +100,6 @@ function RegistrationPoliciesSection() {
             chevronPosition="left"
             endAppend={
               <IconButton
-                radius="rounded"
                 variant="text"
                 color="danger"
                 size="sm"

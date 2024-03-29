@@ -80,22 +80,23 @@ function FontButton({font, state: {value, onChange}}: FontButtonProps) {
   return (
     <ButtonBase
       key={font.family}
+      display="block"
       onClick={() => {
         onChange(font);
       }}
     >
       <span
         className={clsx(
-          'flex items-center justify-center text-4xl md:text-5xl border rounded aspect-square hover:bg-hover transition-bg-color',
-          isActive && 'ring-2 ring-primary ring-offset-2'
+          'flex aspect-square items-center justify-center rounded-panel border text-4xl transition-bg-color hover:bg-hover md:text-5xl',
+          isActive && 'ring-2 ring-primary ring-offset-2',
         )}
       >
         <span style={{fontFamily: font.family}}>Aa</span>
       </span>
       <span
         className={clsx(
-          'block mt-6 text-sm whitespace-nowrap overflow-hidden overflow-ellipsis',
-          isActive && 'text-primary'
+          'mt-6 block overflow-hidden overflow-ellipsis whitespace-nowrap text-sm',
+          isActive && 'text-primary',
         )}
       >
         {font.label ? <Trans {...font.label} /> : displayName}
@@ -116,7 +117,7 @@ function FontListSkeleton({className}: FontListSkeletonProps) {
           <div className="aspect-square">
             <Skeleton display="block" variant="rect" />
           </div>
-          <Skeleton className="text-sm mt-6" />
+          <Skeleton className="mt-6 text-sm" />
         </div>
       ))}
     </m.div>

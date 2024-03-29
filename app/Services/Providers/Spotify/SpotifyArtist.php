@@ -1,6 +1,6 @@
 <?php namespace App\Services\Providers\Spotify;
 
-use App\Artist;
+use App\Models\Artist;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -22,7 +22,7 @@ class SpotifyArtist
         }
 
         // if couldn't find artist, bail
-        if (!isset($spotifyArtist)) {
+        if (!isset($spotifyArtist['name'])) {
             return null;
         }
 

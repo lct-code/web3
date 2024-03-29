@@ -9,7 +9,6 @@ export function HistoryButtons({editor}: MenubarButtonProps) {
     <span>
       <IconButton
         size="md"
-        radius="rounded"
         disabled={!editor.can().undo()}
         onClick={() => {
           editor.commands.focus();
@@ -20,7 +19,6 @@ export function HistoryButtons({editor}: MenubarButtonProps) {
       </IconButton>
       <IconButton
         size="md"
-        radius="rounded"
         disabled={!editor.can().redo()}
         onClick={() => {
           editor.commands.focus();

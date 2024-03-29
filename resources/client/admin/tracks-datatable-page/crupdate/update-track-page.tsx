@@ -16,13 +16,19 @@ interface Props {
   wrapInContainer?: boolean;
 }
 export function UpdateTrackPage({wrapInContainer}: Props) {
-  const query = useTrack({forEditing: true});
+  const query = useTrack({loader: 'editTrackPage'});
   if (query.data) {
     return (
       <PageContent track={query.data.track} wrapInContainer={wrapInContainer} />
     );
   }
-  return <PageStatus query={query} loaderClassName="absolute inset-0 m-auto" />;
+  return (
+    <PageStatus
+      query={query}
+      loaderClassName="absolute inset-0 m-auto"
+      loaderIsScreen={false}
+    />
+  );
 }
 
 interface PageContentProps {
@@ -54,7 +60,7 @@ function PageContent({track, wrapInContainer}: PageContentProps) {
         updateTrack.mutate(values);
       }}
       title={<Trans message="Edit “:name“ track" values={{name: track.name}} />}
-      isLoading={updateTrack.isLoading}
+      isLoading={updateTrack.isPending}
       disableSaveWhenNotDirty
       wrapInContainer={wrapInContainer}
     >

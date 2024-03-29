@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use App\BackstageRequest;
-use App\Policies\BackstageRequestPolicy;
 use App\Policies\MusicUploadPolicy;
 use App\Policies\TrackCommentPolicy;
 use Common\Comments\Comment;

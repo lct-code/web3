@@ -1,4 +1,3 @@
-import useCookie from 'react-use-cookie';
 import React, {useMemo} from 'react';
 import {applyThemeToDom} from '../ui/themes/utils/apply-theme-to-dom';
 import {
@@ -9,6 +8,7 @@ import {
 import {CssTheme} from '../ui/themes/css-theme';
 import {useSettings} from './settings/use-settings';
 import {useBootstrapData} from './bootstrap-data/bootstrap-data-context';
+import {useCookie} from '@common/utils/hooks/use-cookie';
 
 const STORAGE_KEY = 'be-active-theme';
 
@@ -16,20 +16,20 @@ interface ThemeProviderProps {
   children: any;
 }
 export function ThemeProvider({children}: ThemeProviderProps) {
-  const {
-    themes: {user_change, default_id},
-  } = useSettings();
+  const {themes} = useSettings();
+  const canChangeTheme = themes?.user_change;
   const {data} = useBootstrapData();
   const allThemes = useMemo(() => data.themes.all || [], [data.themes.all]);
   const initialThemeId = data.themes.selectedThemeId || undefined;
+
   const [selectedThemeId, setSelectedThemeId] = useCookie(
     STORAGE_KEY,
-    `${initialThemeId}`
+    `${initialThemeId}`,
   );
 
-  let selectedTheme = user_change
+  let selectedTheme = canChangeTheme
     ? allThemes.find(t => t.id == selectedThemeId)
-    : allThemes.find(t => t.id == default_id);
+    : allThemes.find(t => t.id == themes?.default_id);
   if (!selectedTheme) {
     selectedTheme = allThemes[0];
   }
@@ -39,7 +39,7 @@ export function ThemeProvider({children}: ThemeProviderProps) {
       allThemes,
       selectedTheme: selectedTheme!,
       selectTheme: (id: ThemeId) => {
-        if (!user_change) return;
+        if (!canChangeTheme) return;
         const theme = findTheme(allThemes, id);
         if (theme) {
           setSelectedThemeId(`${theme.id}`);
@@ -47,7 +47,7 @@ export function ThemeProvider({children}: ThemeProviderProps) {
         }
       },
     };
-  }, [allThemes, selectedTheme, setSelectedThemeId, user_change]);
+  }, [allThemes, selectedTheme, setSelectedThemeId, canChangeTheme]);
 
   return (
     <ThemeSelectorContext.Provider value={contextValue}>

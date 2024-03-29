@@ -2,8 +2,8 @@
 
 namespace App\Services\Tracks\Queries;
 
-use App\Album;
-use App\Services\Albums\ShowAlbum;
+use App\Models\Album;
+use App\Services\Albums\LoadAlbum;
 use Illuminate\Database\Eloquent\Builder;
 
 class AlbumTrackQuery extends BaseTrackQuery
@@ -14,10 +14,8 @@ class AlbumTrackQuery extends BaseTrackQuery
     public function get(int $albumId): Builder
     {
         // fetch album tracks from spotify, if not fetched already
-        app(ShowAlbum::class)
-            ->execute(app(Album::class)->find($albumId), [], true);
+        (new LoadAlbum())->execute(Album::find($albumId), 'trackQuery');
 
-        return $this->baseQuery()
-            ->where('tracks.album_id', $albumId);
+        return $this->baseQuery()->where('tracks.album_id', $albumId);
     }
 }

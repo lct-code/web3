@@ -1,6 +1,6 @@
 import {Trans} from '../../i18n/trans';
-import {CheckIcon} from '../../icons/material/Check';
 import {Product} from '../product';
+import {CheckIcon} from '@common/icons/material/Check';
 
 interface FeatureListProps {
   product: Product;
@@ -10,13 +10,13 @@ export function ProductFeatureList({product}: FeatureListProps) {
   if (!product.feature_list.length) return null;
 
   return (
-    <div className="border-t pt-24 mt-32">
-      <div className="text-sm mb-10 font-semibold">
+    <div className="mt-32 border-t pt-24">
+      <div className="mb-10 text-sm font-semibold">
         <Trans message="What's included" />
       </div>
       {product.feature_list.map(feature => (
-        <div key={feature} className="flex items-center gap-10 text-sm py-6">
-          <CheckIcon className="text-positive" size="sm" />
+        <div key={feature} className="flex items-center gap-10 py-6 text-sm">
+          <CheckIcon className="text-primary" size="sm" />
           <Trans message={feature} />
         </div>
       ))}

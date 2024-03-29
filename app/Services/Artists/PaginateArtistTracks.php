@@ -1,6 +1,6 @@
 <?php namespace App\Services\Artists;
 
-use App\Artist;
+use App\Models\Artist;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class PaginateArtistTracks

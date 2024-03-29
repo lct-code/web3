@@ -25,6 +25,7 @@ import {ArtistLink, getArtistLink} from '@app/web-player/artists/artist-link';
 import {PlayableMediaGridSkeleton} from '@app/web-player/playable-item/player-media-grid-skeleton';
 import {useTrans} from '@common/i18n/use-trans';
 import {message} from '@common/i18n/message';
+import {useLightThemeVariables} from '@common/ui/themes/use-light-theme-variables';
 
 interface ContentProps {
   content: LandingPageContent;
@@ -38,20 +39,19 @@ export function LandingPage() {
   return (
     <Fragment>
       <DefaultMetaTags />
-      <div className="h-full overflow-y-auto scroll-smooth">
-        <HeroHeader content={appearance} />
-        <PrimaryFeatures content={appearance} />
-        <SecondaryFeatures content={appearance} />
-        {showTrending && <TrendingArtistsSection />}
-        <BottomCta content={appearance} />
-        {showPricing && <PricingSection content={appearance} />}
-        <Footer className="landing-container" />
-      </div>
+      <HeroHeader content={appearance} />
+      <PrimaryFeatures content={appearance} />
+      <SecondaryFeatures content={appearance} />
+      {showTrending && <TrendingArtistsSection />}
+      <BottomCta content={appearance} />
+      {showPricing && <PricingSection content={appearance} />}
+      <Footer className="landing-container" />
     </Fragment>
   );
 }
 
 function HeroHeader({content}: ContentProps) {
+  const lightThemeVars = useLightThemeVariables();
   const {trans} = useTrans();
   const navigate = useNavigate();
   const {
@@ -118,6 +118,7 @@ function HeroHeader({content}: ContentProps) {
             </div>
           )}
           <form
+            style={lightThemeVars}
             className="w-full mt-60 md:mt-80"
             onSubmit={e => {
               e.preventDefault();
@@ -130,7 +131,6 @@ function HeroHeader({content}: ContentProps) {
               background="bg-white"
               inputRadius="rounded-full"
               size="lg"
-              inputClassName="bg-white"
               placeholder={trans(message(content.actions.inputText))}
               startAdornment={<SearchIcon />}
               adornmentPosition="left-10"

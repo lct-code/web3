@@ -20,8 +20,8 @@ export function ArtistTracksPanel({artist, initialTracks}: Props) {
     initialPage: initialTracks,
   });
 
-  if (query.isInitialLoading) {
-    return <FullPageLoader className="min-h-100" />;
+  if (query.isLoading) {
+    return <FullPageLoader className="min-h-100" screen={false} />;
   }
 
   if (!query.items.length) {

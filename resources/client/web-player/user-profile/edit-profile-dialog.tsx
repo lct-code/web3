@@ -134,7 +134,7 @@ export function EditProfileDialog({user}: Props) {
           type="submit"
           variant="flat"
           color="primary"
-          disabled={updateProfile.isLoading}
+          disabled={updateProfile.isPending}
         >
           <Trans message="Save" />
         </Button>

@@ -48,7 +48,7 @@ export class TusUpload implements UploadStrategy {
         'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'),
       },
       onError: err => {
-        if ('originalResponse' in err) {
+        if ('originalResponse' in err && err.originalResponse) {
           try {
             const message = JSON.parse(err.originalResponse.getBody())?.message;
             onError?.(message, file);

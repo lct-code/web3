@@ -3,7 +3,6 @@ import {ListboxItemProps} from '@common/ui/forms/listbox/item';
 import {SiteConfigContext} from '@common/core/settings/site-config-context';
 import {useLogout} from '@common/auth/requests/logout';
 import {useCustomMenu} from '@common/menus/use-custom-menu';
-import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 import {useSettings} from '@common/core/settings/use-settings';
 import {useAuth} from '@common/auth/use-auth';
 import {useNavigate} from '@common/utils/hooks/use-navigate';
@@ -30,7 +29,6 @@ export function NavbarAuthMenu({children, items}: Props) {
   const {auth} = useContext(SiteConfigContext);
   const logout = useLogout();
   const menu = useCustomMenu('auth-dropdown');
-  const isMobile = useIsMobileMediaQuery();
   const {notifications, themes} = useSettings();
   const {user, isSubscribed} = useAuth();
   const navigate = useNavigate();
@@ -40,6 +38,7 @@ export function NavbarAuthMenu({children, items}: Props) {
 
   const notifMenuItem = (
     <MenuItem
+      className="md:hidden"
       value="notifications"
       startIcon={<NotificationsIcon />}
       onSelected={() => {
@@ -99,7 +98,7 @@ export function NavbarAuthMenu({children, items}: Props) {
           </MenuItem>
         )}
         {items?.map(item => item)}
-        {isMobile && notifications?.integrated ? notifMenuItem : undefined}
+        {notifications?.integrated ? notifMenuItem : undefined}
         {isSubscribed && billingMenuItem}
         {themes?.user_change && !selectedTheme.is_dark && (
           <MenuItem

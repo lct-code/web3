@@ -15,10 +15,11 @@ interface Payload {
 }
 
 export function useUpdateComment() {
-  return useMutation((props: Payload) => updateComment(props), {
+  return useMutation({
+    mutationFn: (props: Payload) => updateComment(props),
     onSuccess: () => {
       toast(message('Comment updated'));
-      queryClient.invalidateQueries(['comment']);
+      queryClient.invalidateQueries({queryKey: ['comment']});
     },
     onError: err => showHttpErrorToast(err),
   });

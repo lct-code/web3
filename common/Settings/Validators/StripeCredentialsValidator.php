@@ -11,9 +11,9 @@ class StripeCredentialsValidator implements SettingsValidator
 {
     const KEYS = ['stripe_key', 'stripe_secret'];
 
-    public function fails($settings)
+    public function fails($values)
     {
-        $this->setConfigDynamically($settings);
+        $this->setConfigDynamically($values);
 
         // create gateway after setting config dynamically
         // so gateway uses new configuration

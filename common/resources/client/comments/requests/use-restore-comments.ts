@@ -14,12 +14,13 @@ interface Payload {
 }
 
 export function useRestoreComments() {
-  return useMutation((payload: Payload) => restoreComment(payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => restoreComment(payload),
     onSuccess: (response, payload) => {
       toast(
         message('Restored [one 1 comment|other :count comments]', {
           values: {count: payload.commentIds.length},
-        })
+        }),
       );
     },
     onError: err => showHttpErrorToast(err),

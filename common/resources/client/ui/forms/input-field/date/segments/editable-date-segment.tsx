@@ -9,14 +9,14 @@ import React, {
 import {NumberParser} from '@internationalized/number';
 import {mergeProps} from '@react-aria/utils';
 import {today, ZonedDateTime} from '@internationalized/date';
-import {useSelectedLocale} from '../../../../../i18n/selected-locale';
-import {useDateFormatter} from '../../../../../i18n/use-date-formatter';
+import {useSelectedLocale} from '@common/i18n/selected-locale';
+import {useDateFormatter} from '@common/i18n/use-date-formatter';
 import {DatePickerState} from '../date-picker/use-date-picker-state';
 import {adjustSegment} from './utils/adjust-segment';
 import {setSegment} from './utils/set-segment';
 import {PAGE_STEP} from './utils/page-step';
 import {DateRangePickerState} from '../date-range-picker/use-date-range-picker-state';
-import {useIsMobileMediaQuery} from '../../../../../utils/hooks/is-mobile-media-query';
+import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 
 export interface EditableSegment {
   type: 'day' | 'dayPeriod' | 'hour' | 'minute' | 'month' | 'second' | 'year';
@@ -50,18 +50,18 @@ export function EditableDateSegment({
   const formatter = useDateFormatter({timeZone: timezone});
   const parser = useMemo(
     () => new NumberParser(localeCode, {maximumFractionDigits: 0}),
-    [localeCode]
+    [localeCode],
   );
 
   const setSegmentValue = (newValue: number) => {
     onChange(
-      setSegment(value, segment.type, newValue, formatter.resolvedOptions())
+      setSegment(value, segment.type, newValue, formatter.resolvedOptions()),
     );
   };
 
   const adjustSegmentValue = (amount: number) => {
     onChange(
-      adjustSegment(value, segment.type, amount, formatter.resolvedOptions())
+      adjustSegment(value, segment.type, amount, formatter.resolvedOptions()),
     );
   };
 
@@ -94,12 +94,12 @@ export function EditableDateSegment({
       case 'ArrowLeft':
         e.preventDefault();
         e.stopPropagation();
-        focusManager.focusPrevious();
+        focusManager?.focusPrevious();
         break;
       case 'ArrowRight':
         e.preventDefault();
         e.stopPropagation();
-        focusManager.focusNext();
+        focusManager?.focusNext();
         break;
       case 'Enter':
         (e.target as HTMLElement).closest('form')?.requestSubmit();
@@ -180,7 +180,7 @@ export function EditableDateSegment({
         } else {
           break;
         }
-        focusManager.focusNext();
+        focusManager?.focusNext();
         break;
       case 'day':
       case 'hour':
@@ -232,7 +232,7 @@ export function EditableDateSegment({
         ) {
           enteredKeys.current = '';
           if (shouldSetValue) {
-            focusManager.focusNext();
+            focusManager?.focusNext();
           }
         } else {
           enteredKeys.current = newValue;
@@ -267,7 +267,7 @@ export function EditableDateSegment({
           e.stopPropagation();
         },
       } as HTMLAttributes<HTMLDivElement>)}
-      className="p-2 outline-none caret-transparent cursor-default rounded focus:bg-primary focus:text-on-primary select-none whitespace-nowrap box-content tabular-nums text-center"
+      className="box-content cursor-default select-none whitespace-nowrap rounded p-2 text-center tabular-nums caret-transparent outline-none focus:bg-primary focus:text-on-primary"
     >
       {segment.text.padStart(segment.minLength, '0')}
     </div>

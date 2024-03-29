@@ -2,12 +2,12 @@
 
 namespace App\Services\Albums;
 
-use App\Album;
-use App\Genre;
+use App\Models\Album;
+use App\Models\Genre;
+use App\Models\Tag;
+use App\Models\Track;
 use App\Notifications\ArtistUploadedMedia;
 use App\Services\Tracks\CrupdateTrack;
-use App\Tag;
-use App\Track;
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Notification;
 
 class CrupdateAlbum
 {
-    public function __construct(protected CrupdateTrack $createTrack)
+    public function __construct(protected CrupdateTrack $crupdateTrack)
     {
     }
 
@@ -131,7 +131,7 @@ class CrupdateAlbum
             $trackModel = Arr::get($trackData, 'id')
                 ? $savedTracks->find($trackData['id'])
                 : null;
-            $this->createTrack->execute(
+            $this->crupdateTrack->execute(
                 // reorder tracks based on the array order
                 array_merge(Arr::except($trackData, 'album'), [
                     'number' => $index + 1,

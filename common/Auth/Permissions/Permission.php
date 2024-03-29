@@ -17,6 +17,13 @@ class Permission extends Model
 
     protected $hidden = ['pivot', 'permissionable_type'];
 
+    const MODEL_TYPE = 'permission';
+
+    public static function getModelTypeAttribute(): string
+    {
+        return self::MODEL_TYPE;
+    }
+
     /**
      * @param string|array $value
      * @return Collection

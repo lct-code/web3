@@ -1,4 +1,8 @@
-import {useQuery, UseQueryOptions} from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useQuery,
+  UseQueryOptions,
+} from '@tanstack/react-query';
 import {PaginatedBackendResponse} from '../../http/backend-response/pagination-response';
 import {apiClient} from '../../http/query-client';
 
@@ -8,14 +12,14 @@ export interface GetDatatableDataParams {
   filters?: string | null;
   query?: string;
   with?: string;
-  perPage?: number;
-  page?: number;
+  perPage?: number | string | null;
+  page?: number | string;
   [key: string]: string | number | boolean | undefined | null;
 }
 
 export const DatatableDataQueryKey = (
   endpoint: string,
-  params?: GetDatatableDataParams | Record<string, string | number | boolean>
+  params?: GetDatatableDataParams | Record<string, string | number | boolean>,
 ) => {
   // split endpoint by slash, so we can clear cache from the root later,
   // for example, 'link-group' will clear 'link-group/1/links' endpoint
@@ -37,21 +41,29 @@ export function useDatatableData<T = object>(
       any[]
     >,
     'queryKey' | 'queryFn'
-  >
+  >,
+  onLoad?: (data: PaginatedBackendResponse<T>) => void,
 ) {
-  return useQuery(
-    DatatableDataQueryKey(endpoint, params),
-    () => paginate<T>(endpoint, params),
-    {
-      ...options,
-      keepPreviousData: true,
-    }
-  );
+  return useQuery({
+    queryKey: DatatableDataQueryKey(endpoint, params),
+    queryFn: ({signal}) => paginate<T>(endpoint, params, onLoad, signal),
+    placeholderData: keepPreviousData,
+    ...options,
+  });
 }
 
-function paginate<T>(
+async function paginate<T>(
   endpoint: string,
-  params: GetDatatableDataParams
+  params: GetDatatableDataParams,
+  onLoad?: (data: PaginatedBackendResponse<T>) => void,
+  signal?: AbortSignal,
 ): Promise<PaginatedBackendResponse<T>> {
-  return apiClient.get(endpoint, {params}).then(response => response.data);
+  if (params.query) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+  }
+  const response = await apiClient
+    .get(endpoint, {params, signal: params.query ? signal : undefined})
+    .then(response => response.data);
+  onLoad?.(response);
+  return response;
 }

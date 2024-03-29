@@ -2,7 +2,7 @@ declare module '@react-stately/utils' {
   function useControlledState<T>(
     value?: T,
     defaultValue?: T,
-    onChange?: (val: T, ...args: any[]) => void
+    onChange?: (val: T, ...args: any[]) => void,
   ): [T, (val: T | ((prevState: T) => T), ...args: any[]) => void];
 }
 
@@ -88,4 +88,10 @@ interface HTMLVideoElement {
    * @see {@link https://developer.apple.com/documentation/webkitjs/htmlvideoelement/1631224-webkitsetpresentationmode}
    */
   webkitSetPresentationMode?(mode: WebKitPresentationMode): Promise<void>;
+}
+
+declare namespace React {
+  interface HTMLAttributes<T> {
+    inert?: '';
+  }
 }

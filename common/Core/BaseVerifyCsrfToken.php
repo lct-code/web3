@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 
 class BaseVerifyCsrfToken extends VerifyCsrfToken
 {
-
     /**
      * The URIs that should be excluded from CSRF verification.
      *
@@ -25,7 +24,8 @@ class BaseVerifyCsrfToken extends VerifyCsrfToken
      */
     protected function inExceptArray($request)
     {
-        if (config('common.site.demo')) {
+        return true;
+        if (config('common.site.demo') || config('common.site.disable_csrf')) {
             return true;
         }
 

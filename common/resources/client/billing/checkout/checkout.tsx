@@ -22,7 +22,7 @@ export function Checkout() {
   } = useSettings();
 
   if (productQuery.isLoading) {
-    return <FullPageLoader />;
+    return <FullPageLoader screen />;
   }
 
   const product = productQuery.data?.products.find(
@@ -38,13 +38,14 @@ export function Checkout() {
   return (
     <CheckoutLayout>
       <Fragment>
-        <h1 className="text-4xl mb-40">
+        <h1 className="mb-40 text-4xl">
           <Trans message="Checkout" />
         </h1>
         {stripe.enable ? (
           <Fragment>
             <StripeElementsForm
               productId={productId}
+              priceId={priceId}
               submitLabel={<Trans message="Upgrade" />}
               type="subscription"
               returnUrl={`${base_url}/checkout/${productId}/${priceId}/stripe/done`}
@@ -53,7 +54,7 @@ export function Checkout() {
           </Fragment>
         ) : null}
         <div ref={paypalElementRef} />
-        <div className="text-xs text-muted mt-30">
+        <div className="mt-30 text-xs text-muted">
           <Trans message="You’ll be charged until you cancel your subscription. Previous charges won’t be refunded when you cancel unless it’s legally required. Your payment data is encrypted and secure. By subscribing your agree to our terms of service and privacy policy." />
         </div>
       </Fragment>
@@ -64,8 +65,8 @@ export function Checkout() {
 
 function Separator() {
   return (
-    <div className="relative text-center my-20 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-1 before:w-full before:bg-divider">
-      <span className="bg relative z-10 px-10 text-sm text-muted">
+    <div className="relative my-20 text-center before:absolute before:left-0 before:top-1/2 before:h-1 before:w-full before:-translate-y-1/2 before:bg-divider">
+      <span className="relative z-10 bg px-10 text-sm text-muted">
         <Trans message="or" />
       </span>
     </div>

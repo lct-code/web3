@@ -7,42 +7,47 @@ import {PaginationResponse} from '@common/http/backend-response/pagination-respo
 import {Album} from '@app/web-player/albums/album';
 import {assignAlbumToTracks} from '@app/web-player/albums/assign-album-to-tracks';
 import {Track} from '@app/web-player/tracks/track';
+import {getBootstrapData} from '@common/core/bootstrap-data/use-backend-bootstrap-data';
 
-export const albumLayoutKey = 'artistPage.albumLayout';
+export const albumLayoutKey = 'artistPage-albumLayout';
 
 export interface UseArtistResponse extends BackendResponse {
   artist: Artist;
   albums?: PaginationResponse<Album>;
   tracks?: PaginationResponse<Track>;
+  loader?: UseArtistParams['loader'];
+  selectedAlbumLayout?: string;
 }
 
 export interface UseArtistParams {
-  autoUpdate?: boolean;
-  forEditing?: boolean;
-  with?: string | string[];
-  withCount?: string | string[];
-  loadAlbumTracks?: boolean;
-  albumsPerPage?: number;
-  paginate?: 'simple';
+  loader: 'artistPage' | 'editArtistPage' | 'artist';
 }
 
 export function useArtist(params: UseArtistParams) {
   const {artistId} = useParams();
-  return useQuery(['artists', artistId, params], () =>
-    fetchArtist(artistId!, params)
-  );
+  return useQuery({
+    queryKey: ['artists', artistId, params],
+    queryFn: () => fetchArtist(artistId!, params),
+    initialData: () => {
+      const data = getBootstrapData().loaders?.[params.loader];
+      if (data?.artist?.id == artistId && data?.loader === params.loader) {
+        return data;
+      }
+      return undefined;
+    },
+  });
 }
 
 function fetchArtist(
   artistId: number | string,
-  params: object
+  params: object,
 ): Promise<UseArtistResponse> {
   return apiClient
     .get<UseArtistResponse>(`artists/${artistId}`, {params})
     .then(response => {
       if (response.data.albums) {
         response.data.albums.data = response.data.albums.data.map(album =>
-          assignAlbumToTracks(album)
+          assignAlbumToTracks(album),
         );
       }
       return response.data;

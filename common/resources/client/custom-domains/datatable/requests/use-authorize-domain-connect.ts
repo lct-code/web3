@@ -14,14 +14,12 @@ export interface AuthorizeDomainConnectPayload {
 
 // check if is this host is not connected already and if user has permissions to connect domains
 export function useAuthorizeDomainConnect(
-  form: UseFormReturn<AuthorizeDomainConnectPayload>
+  form: UseFormReturn<AuthorizeDomainConnectPayload>,
 ) {
-  return useMutation(
-    (props: AuthorizeDomainConnectPayload) => authorize(props),
-    {
-      onError: err => onFormQueryError(err, form),
-    }
-  );
+  return useMutation({
+    mutationFn: (props: AuthorizeDomainConnectPayload) => authorize(props),
+    onError: err => onFormQueryError(err, form),
+  });
 }
 
 function authorize(payload: AuthorizeDomainConnectPayload): Promise<Response> {

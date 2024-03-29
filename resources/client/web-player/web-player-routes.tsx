@@ -20,6 +20,8 @@ import {LibraryPlaylistsPage} from '@app/web-player/library/library-playlists-pa
 import {TrackEmbed} from '@app/web-player/tracks/track-embed';
 import {AlbumEmbed} from '@app/web-player/albums/album-embed';
 import {HomepageChannelPage} from '@app/web-player/channels/homepage-channel-page';
+import {NotFoundPage} from '@common/ui/not-found-page/not-found-page';
+import {LyricsPage} from '@app/web-player/tracks/lyrics/lyrics-page';
 
 const RouteConfig: RouteObject[] = [
   {
@@ -39,16 +41,8 @@ const RouteConfig: RouteObject[] = [
         element: <HomepageChannelPage />,
       },
       {
-        path: ':slugOrId',
-        element: <ChannelPage />,
-      },
-      {
-        path: 'channel/:slugOrId',
-        element: <ChannelPage />,
-      },
-      {
-        path: 'channel/:slugOrId/:filter',
-        element: <ChannelPage />,
+        path: 'lyrics',
+        element: <LyricsPage />,
       },
       // artists
       {
@@ -116,7 +110,7 @@ const RouteConfig: RouteObject[] = [
       },
       // library
       {
-        path: 'library',
+        path: '/library',
         element: (
           <AuthRoute>
             <LibraryPage />
@@ -124,7 +118,7 @@ const RouteConfig: RouteObject[] = [
         ),
       },
       {
-        path: 'library/songs',
+        path: '/library/songs',
         element: (
           <AuthRoute>
             <LibraryTracksPage />
@@ -132,7 +126,7 @@ const RouteConfig: RouteObject[] = [
         ),
       },
       {
-        path: 'library/playlists',
+        path: '/library/playlists',
         element: (
           <AuthRoute>
             <LibraryPlaylistsPage />
@@ -140,7 +134,7 @@ const RouteConfig: RouteObject[] = [
         ),
       },
       {
-        path: 'library/albums',
+        path: '/library/albums',
         element: (
           <AuthRoute>
             <LibraryAlbumsPage />
@@ -148,7 +142,7 @@ const RouteConfig: RouteObject[] = [
         ),
       },
       {
-        path: 'library/artists',
+        path: '/library/artists',
         element: (
           <AuthRoute>
             <LibraryArtistsPage />
@@ -156,12 +150,33 @@ const RouteConfig: RouteObject[] = [
         ),
       },
       {
-        path: 'library/history',
+        path: '/library/history',
         element: (
           <AuthRoute>
             <LibraryHistoryPage />
           </AuthRoute>
         ),
+      },
+      // Channels
+      {
+        path: ':slugOrId',
+        element: <ChannelPage />,
+      },
+      {
+        path: 'channel/:slugOrId',
+        element: <ChannelPage />,
+      },
+      {
+        path: ':slugOrId/:restriction',
+        element: <ChannelPage />,
+      },
+      {
+        path: 'channel/:slugOrId/:restriction',
+        element: <ChannelPage />,
+      },
+      {
+        path: '*',
+        element: <NotFoundPage />,
       },
     ],
   },

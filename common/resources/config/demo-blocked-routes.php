@@ -4,6 +4,7 @@ return [
     // admin
     ['method' => 'POST', 'name' => 'settings'],
     ['method' => 'POST', 'name' => 'admin/appearance'],
+    ['method' => 'PUT', 'name' => 'admin/appearance/seo-tags/{name}'],
     ['method' => 'POST', 'name' => 'cache/clear'],
     ['method' => 'POST', 'name' => 'artisan/call'],
     ['method' => 'POST', 'name' => 'admin/search/import'],
@@ -59,10 +60,20 @@ return [
     ],
 
     // users
-    ['method' => 'POST', 'name' => 'users/{id}/password/change'],
+    ['method' => 'PUT', 'name' => 'auth/user/password'],
     ['method' => 'PUT', 'origin' => 'admin', 'name' => 'users/{user}'],
     ['method' => 'POST', 'origin' => 'admin', 'name' => 'users'],
     ['method' => 'DELETE', 'name' => 'users/{ids}'],
+    ['method' => 'POST', 'name' => 'user-sessions/logout-other'],
+    ['method' => 'POST', 'name' => 'admin/users/impersonate/{user}'],
+    [
+        'method' => 'POST',
+        'name' => 'auth/user/confirmed-two-factor-authentication',
+    ],
+
+    // bans
+    ['method' => 'POST', 'name' => 'users/{user}/ban'],
+    ['method' => 'DELETE', 'name' => 'users/{user}/unban'],
 
     // tags
     ['method' => 'POST', 'origin' => 'admin', 'name' => 'tags'],
@@ -97,6 +108,9 @@ return [
         'name' => 'file-entries/{entryIds}',
         'origin' => 'admin',
     ],
+
+    // comments
+    ['method' => 'DELETE', 'name' => 'comment/{comment}'],
 
     // admin
     [

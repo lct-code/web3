@@ -1,10 +1,10 @@
 import {
   IAppearanceConfig,
   MenuSectionConfig,
-} from '../types/appearance-editor-config';
-import {message} from '../../../i18n/message';
-import {chunkArray} from '../../../utils/array/chunk-array';
-import {AppearanceEditorBreadcrumbItem} from '../types/appearance-editor-section';
+} from '@common/admin/appearance/types/appearance-editor-config';
+import {message} from '@common/i18n/message';
+import {chunkArray} from '@common/utils/array/chunk-array';
+import {AppearanceEditorBreadcrumbItem} from '@common/admin/appearance/types/appearance-editor-section';
 
 export const DefaultAppearanceConfig: IAppearanceConfig = {
   preview: {
@@ -38,6 +38,18 @@ export const DefaultAppearanceConfig: IAppearanceConfig = {
           breadcrumb.push({
             label: formValue.appearance.themes.all[+themeIndex]?.name,
             location: `themes/${themeIndex}`,
+          });
+        }
+        if (parts.at(-1) === 'font') {
+          breadcrumb.push({
+            label: message('Font'),
+            location: `themes/${themeIndex}/font`,
+          });
+        }
+        if (parts.at(-1) === 'radius') {
+          breadcrumb.push({
+            label: message('Rounding'),
+            location: `themes/${themeIndex}/radius`,
           });
         }
         return breadcrumb;
@@ -81,6 +93,7 @@ export const DefaultAppearanceConfig: IAppearanceConfig = {
       },
       config: {
         availableRoutes: [
+          '/',
           '/login',
           '/register',
           '/contact',
@@ -102,7 +115,7 @@ export const DefaultAppearanceConfig: IAppearanceConfig = {
           '/admin/settings/branding',
           '/admin/settings/cache',
           '/admin/settings/providers',
-          '/api-routes',
+          '/api-docs',
         ],
         positions: [
           'admin-navbar',

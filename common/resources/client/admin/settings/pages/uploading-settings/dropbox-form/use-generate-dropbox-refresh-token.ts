@@ -14,7 +14,8 @@ interface Payload {
 }
 
 export function useGenerateDropboxRefreshToken() {
-  return useMutation((props: Payload) => generateToken(props), {
+  return useMutation({
+    mutationFn: (props: Payload) => generateToken(props),
     onError: err => showHttpErrorToast(err),
   });
 }

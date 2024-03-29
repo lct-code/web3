@@ -1,5 +1,4 @@
 import React from 'react';
-import {Channel} from '@app/web-player/channels/channel';
 import {Link, useParams} from 'react-router-dom';
 import {KeyboardArrowRightIcon} from '@common/icons/material/KeyboardArrowRight';
 import clsx from 'clsx';
@@ -9,6 +8,7 @@ import {Trans} from '@common/i18n/trans';
 import {AntennaIcon} from '@app/web-player/channels/antenna-icon';
 import {useShouldShowRadioButton} from '@app/web-player/tracks/context-dialog/use-should-show-radio-button';
 import {getRadioLink} from '@app/web-player/radio/get-radio-link';
+import {Channel} from '@common/channels/channel';
 
 interface ChannelHeadingProps {
   channel: Channel;
@@ -25,19 +25,19 @@ export function ChannelHeading({
     return null;
   }
   if (!isNested) {
-    if (shouldShowRadio && channel.genre) {
+    if (shouldShowRadio && channel.restriction?.model_type === 'genre') {
       return (
         <div
-          className={clsx('flex gap-24 items-center justify-between', margin)}
+          className={clsx('flex items-center justify-between gap-24', margin)}
         >
-          <h1 className="text-3xl flex-auto">
+          <h1 className="flex-auto text-3xl">
             <Trans message={channel.name} />
           </h1>
           <Tooltip label={<Trans message="Genre radio" />}>
             <IconButton
               className="flex-shrink-0"
               elementType={Link}
-              to={getRadioLink(channel.genre)}
+              to={getRadioLink(channel.restriction)}
             >
               <AntennaIcon />
             </IconButton>
@@ -53,7 +53,7 @@ export function ChannelHeading({
   }
 
   return (
-    <div className={clsx('text-xl flex items-center gap-4', margin)}>
+    <div className={clsx('flex items-center gap-4 text-xl', margin)}>
       <NestedChannelLink channel={channel} />
       <KeyboardArrowRightIcon className="mt-4" />
     </div>
@@ -64,14 +64,14 @@ interface ChannelLinkProps {
   channel: Channel;
 }
 function NestedChannelLink({channel}: ChannelLinkProps) {
-  const {filter: genreName} = useParams();
+  const {restriction: genreName} = useParams();
   return (
     <Link
-      className="hover:underline outline-none focus-visible:underline"
+      className="outline-none hover:underline focus-visible:underline"
       to={
-        channel.config.connectToGenreViaUrl && genreName
-          ? `/channel/${channel.slug}/${genreName}`
-          : `/channel/${channel.slug}`
+        channel.config.restriction === 'genre' && genreName
+          ? `/${channel.slug}/${genreName}`
+          : `/${channel.slug}`
       }
     >
       <Trans message={channel.name} />

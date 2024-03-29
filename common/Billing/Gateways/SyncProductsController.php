@@ -11,12 +11,11 @@ use Illuminate\Http\Response;
 
 class SyncProductsController extends BaseController
 {
-    /**
-     * Sync local plans with 3rd party gateways
-     */
     public function syncProducts(): Response|JsonResponse
     {
-        $products = Product::where('free', false)->get();
+        $products = Product::where('free', false)
+            ->whereHas('prices')
+            ->get();
 
         foreach ($products as $product) {
             try {

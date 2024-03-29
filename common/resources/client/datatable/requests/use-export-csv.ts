@@ -11,17 +11,15 @@ interface Response extends BackendResponse {
 export type ExportCsvPayload = Record<string, string | number | undefined>;
 
 export function useExportCsv(endpoint: string) {
-  return useMutation(
-    (payload: ExportCsvPayload | undefined) => exportCsv(endpoint, payload),
-    {
-      onError: err => showHttpErrorToast(err),
-    }
-  );
+  return useMutation({
+    mutationFn: (payload?: ExportCsvPayload) => exportCsv(endpoint, payload),
+    onError: err => showHttpErrorToast(err),
+  });
 }
 
 function exportCsv(
   endpoint: string,
-  payload: ExportCsvPayload | undefined
+  payload: ExportCsvPayload | undefined,
 ): Promise<Response> {
   return apiClient.post(endpoint, payload).then(r => r.data);
 }

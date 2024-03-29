@@ -1,11 +1,11 @@
 <?php
 
-use App\Album;
-use App\Artist;
-use App\Channel;
-use App\Genre;
-use App\Playlist;
-use App\Track;
+use App\Models\Album;
+use App\Models\Artist;
+use App\Models\Channel;
+use App\Models\Genre;
+use App\Models\Playlist;
+use App\Models\Track;
 use Illuminate\Database\Migrations\Migration;
 
 class MoveChannelSettingsIntoConfigColumn extends Migration

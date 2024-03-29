@@ -1,6 +1,6 @@
 <?php namespace Common\Core\Policies;
 
-use App\User;
+use App\Models\User;
 use Common\Pages\CustomPage;
 
 class PagePolicy extends BasePolicy

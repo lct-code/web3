@@ -2,10 +2,10 @@
 
 namespace Common\Notifications;
 
-use App\User;
+use App\Models\User;
 use Common\Core\BaseController;
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\File;
 
 class NotificationSubscriptionsController extends BaseController
 {
@@ -17,6 +17,27 @@ class NotificationSubscriptionsController extends BaseController
     public function index(User $user): JsonResponse
     {
         $response = $this->getConfig();
+
+        // filter out notifications user does not have permission for
+        $response['subscriptions'] = collect($response['subscriptions'])
+            ->map(function ($group) use ($user) {
+                $group['subscriptions'] = collect($group['subscriptions'])
+                    ->filter(function ($subscription) use ($user) {
+                        if (!isset($subscription['permissions'])) {
+                            return true;
+                        }
+                        return collect($subscription['permissions'])->every(
+                            fn($permission) => $user->hasPermission($permission),
+                        );
+                    })
+                    ->values()
+                    ->toArray();
+                return $group;
+            })
+            ->filter(fn($group) => count($group['subscriptions']))
+            ->values()
+            ->toArray();
+
         $subs = $user->notificationSubscriptions;
         $response['user_selections'] = $subs;
 
@@ -25,13 +46,35 @@ class NotificationSubscriptionsController extends BaseController
 
     public function update(User $user): JsonResponse
     {
-        $this->validate(request(), [
+        $data = $this->validate(request(), [
             'selections' => 'present|array',
             'selections.*.notif_id' => 'required|string',
             'selections.*.channels' => 'required|array',
         ]);
 
-        foreach (request()->get('selections') as $selection) {
+        $allConfig = collect($this->getConfig()['subscriptions'])->flatMap(
+            fn($group) => $group['subscriptions'],
+        );
+
+        foreach ($data['selections'] as $selection) {
+            // check if user has permissions to subscribe to this notification
+            $config = $allConfig->firstWhere(
+                'notif_id',
+                $selection['notif_id'],
+            );
+            if (isset($config['permissions'])) {
+                $hasAllPermissions = collect($config['permissions'])->every(
+                    fn($permission) => $user->hasPermission($permission),
+                );
+                if (!$hasAllPermissions) {
+                    return $this->error(
+                        'You do not have permission to subscribe to one of these notifications.',
+                        [],
+                        403,
+                    );
+                }
+            }
+
             $subscription = $user
                 ->notificationSubscriptions()
                 ->firstOrNew(['notif_id' => $selection['notif_id']]);
@@ -48,7 +91,7 @@ class NotificationSubscriptionsController extends BaseController
 
     private function getConfig()
     {
-        return app(Filesystem::class)->getRequire(
+        return File::getRequire(
             resource_path('defaults/notification-settings.php'),
         );
     }

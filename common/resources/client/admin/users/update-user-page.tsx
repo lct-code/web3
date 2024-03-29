@@ -1,7 +1,7 @@
 import {useForm} from 'react-hook-form';
 import {useParams} from 'react-router-dom';
 import React, {useEffect} from 'react';
-import {invalidateUseUserQuery, useUser} from '../../auth/ui/use-user';
+import {useUser} from '../../auth/ui/use-user';
 import {UpdateUserPayload, useUpdateUser} from './requests/update-user';
 import {Button} from '../../ui/buttons/button';
 import {useResendVerificationEmail} from '../../auth/requests/use-resend-verification-email';
@@ -15,6 +15,8 @@ import {useSettings} from '../../core/settings/use-settings';
 import {FormTextField} from '@common/ui/forms/input-field/text-field/text-field';
 import {FileUploadProvider} from '@common/uploads/uploader/file-upload-provider';
 import {FormImageSelector} from '@common/ui/images/image-selector';
+import {queryClient} from '@common/http/query-client';
+import {ReportIcon} from '@common/icons/material/Report';
 
 export function UpdateUserPage() {
   const form = useForm<UpdateUserPayload>();
@@ -23,8 +25,9 @@ export function UpdateUserPage() {
   const updateUser = useUpdateUser(form);
   const resendConfirmationEmail = useResendVerificationEmail();
   const {data, isLoading} = useUser(userId!, {
-    with: ['subscriptions', 'roles', 'permissions'],
+    with: ['subscriptions', 'roles', 'permissions', 'bans'],
   });
+  const banReason = data?.user.bans?.[0]?.comment;
 
   useEffect(() => {
     if (data?.user && !form.getValues().id) {
@@ -52,7 +55,7 @@ export function UpdateUserPage() {
       color="primary"
       disabled={
         !require_email_confirmation ||
-        resendConfirmationEmail.isLoading ||
+        resendConfirmationEmail.isPending ||
         data?.user?.email_verified_at != null
       }
       onClick={() => {
@@ -72,12 +75,25 @@ export function UpdateUserPage() {
       title={
         <Trans values={{email: data?.user.email}} message="Edit “:email“" />
       }
-      isLoading={updateUser.isLoading}
+      subTitle={
+        banReason && (
+          <div className="flex items-center gap-4 text-sm text-danger">
+            <ReportIcon />
+            <div>
+              <Trans
+                message="Suspended: :reason"
+                values={{reason: banReason}}
+              />
+            </div>
+          </div>
+        )
+      }
+      isLoading={updateUser.isPending}
       avatarManager={
         <AvatarSection
           user={data!.user}
           onChange={() => {
-            invalidateUseUserQuery(userId!);
+            queryClient.invalidateQueries({queryKey: ['users']});
           }}
         />
       }

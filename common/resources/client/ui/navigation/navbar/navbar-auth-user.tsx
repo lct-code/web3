@@ -1,6 +1,5 @@
 import {useAuth} from '@common/auth/use-auth';
 import {useThemeSelector} from '@common/ui/themes/theme-selector-context';
-import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 import {Badge} from '@common/ui/badge/badge';
 import {IconButton} from '@common/ui/buttons/icon-button';
 import {PersonIcon} from '@common/icons/material/Person';
@@ -14,30 +13,34 @@ export interface NavbarAuthUserProps {
   items?: ReactElement<ListboxItemProps>[];
 }
 export function NavbarAuthUser({items = []}: NavbarAuthUserProps) {
-  const isMobile = useIsMobileMediaQuery();
   const {user} = useAuth();
   const {selectedTheme} = useThemeSelector();
   if (!selectedTheme || !user) return null;
   const hasUnreadNotif = !!user.unread_notifications_count;
 
   const mobileButton = (
-    <Badge
-      badgeLabel={user?.unread_notifications_count}
-      badgeIsVisible={hasUnreadNotif}
+    <IconButton
+      size="md"
+      className="md:hidden"
+      role="presentation"
+      aria-label="toggle authentication menu"
+      badge={
+        hasUnreadNotif ? (
+          <Badge>{user.unread_notifications_count}</Badge>
+        ) : undefined
+      }
     >
-      <IconButton size="md">
-        <PersonIcon />
-      </IconButton>
-    </Badge>
+      <PersonIcon />
+    </IconButton>
   );
   const desktopButton = (
-    <ButtonBase className="flex items-center">
+    <ButtonBase className="flex items-center max-md:hidden" role="presentation">
       <img
-        className="w-32 h-32 object-cover flex-shrink-0 rounded mr-12"
+        className="mr-12 h-32 w-32 flex-shrink-0 rounded object-cover"
         src={user.avatar}
         alt=""
       />
-      <span className="block text-sm mr-2 max-w-124 overflow-x-hidden overflow-ellipsis">
+      <span className="mr-2 block max-w-124 overflow-x-hidden overflow-ellipsis text-sm">
         {user.display_name}
       </span>
       <ArrowDropDownIcon className="block icon-sm" />
@@ -46,7 +49,10 @@ export function NavbarAuthUser({items = []}: NavbarAuthUserProps) {
 
   return (
     <NavbarAuthMenu items={items}>
-      {isMobile ? mobileButton : desktopButton}
+      <span role="button">
+        {mobileButton}
+        {desktopButton}
+      </span>
     </NavbarAuthMenu>
   );
 }

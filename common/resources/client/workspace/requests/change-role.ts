@@ -23,18 +23,19 @@ function ChangeRole({workspaceId, member, ...other}: Props): Promise<Response> {
   return apiClient
     .post(
       `workspace/${workspaceId}/${modelType}/${memberId}/change-role`,
-      other
+      other,
     )
     .then(r => r.data);
 }
 
 export function useChangeRole() {
-  return useMutation((props: Props) => ChangeRole(props), {
+  return useMutation({
+    mutationFn: (props: Props) => ChangeRole(props),
     onSuccess: (response, props) => {
       toast(message('Role changed'));
-      queryClient.invalidateQueries(
-        WorkspaceQueryKeys.workspaceWithMembers(props.workspaceId)
-      );
+      queryClient.invalidateQueries({
+        queryKey: WorkspaceQueryKeys.workspaceWithMembers(props.workspaceId),
+      });
     },
     onError: err => showHttpErrorToast(err),
   });

@@ -20,10 +20,13 @@ export interface UpdateGenrePayload extends CreateGenrePayload {
 
 export function useUpdateGenre(form: UseFormReturn<UpdateGenrePayload>) {
   const {trans} = useTrans();
-  return useMutation((props: UpdateGenrePayload) => updateGenre(props), {
+  return useMutation({
+    mutationFn: (props: UpdateGenrePayload) => updateGenre(props),
     onSuccess: () => {
       toast(trans(message('Genre updated')));
-      queryClient.invalidateQueries(DatatableDataQueryKey('genres'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('genres'),
+      });
     },
     onError: err => onFormQueryError(err, form),
   });

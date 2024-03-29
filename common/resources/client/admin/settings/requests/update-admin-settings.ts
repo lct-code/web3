@@ -19,26 +19,41 @@ export interface AdminSettingsWithFiles {
 }
 
 export function useUpdateAdminSettings(
-  form: UseFormReturn<AdminSettingsWithFiles>
+  form: UseFormReturn<AdminSettingsWithFiles>,
 ) {
   const {data: original} = useAdminSettings();
 
-  return useMutation(
-    (props: AdminSettingsWithFiles) => {
-      // need to convert these to json, otherwise only single key from object would be sent due to diffing
+  return useMutation({
+    mutationFn: (props: AdminSettingsWithFiles) => {
+      //need to convert these to json, otherwise only single key from object would be sent due to diffing
       if (props.client?.cookie_notice?.button) {
         props.client.cookie_notice.button = JSON.stringify(
-          props.client.cookie_notice.button
+          props.client.cookie_notice.button,
         ) as any;
       }
       if (props.client?.registration?.policies) {
         props.client.registration.policies = JSON.stringify(
-          props.client.registration.policies
+          props.client.registration.policies,
         ) as any;
       }
       if ((props.client as any)?.artistPage?.tabs) {
         (props.client as any).artistPage.tabs = JSON.stringify(
-          (props.client as any).artistPage.tabs
+          (props.client as any).artistPage.tabs,
+        ) as any;
+      }
+      if ((props.client as any)?.title_page?.sections) {
+        (props.client as any).title_page.sections = JSON.stringify(
+          (props.client as any).title_page.sections,
+        ) as any;
+      }
+      if ((props.client as any)?.incoming_email) {
+        (props.client as any).incoming_email = JSON.stringify(
+          (props.client as any).incoming_email,
+        ) as any;
+      }
+      if ((props.client as any)?.publish?.default_credentials) {
+        (props.client as any).publish.default_credentials = JSON.stringify(
+          (props.client as any).publish.default_credentials,
         ) as any;
       }
 
@@ -50,16 +65,14 @@ export function useUpdateAdminSettings(
         files: props.files,
       } as AdminSettings);
     },
-    {
-      onSuccess: () => {
-        toast(message('Settings updated'), {
-          position: 'bottom-right',
-        });
-        queryClient.invalidateQueries(['fetchAdminSettings']);
-      },
-      onError: r => onFormQueryError(r, form),
-    }
-  );
+    onSuccess: () => {
+      toast(message('Settings updated'), {
+        position: 'bottom-right',
+      });
+      queryClient.invalidateQueries({queryKey: ['fetchAdminSettings']});
+    },
+    onError: r => onFormQueryError(r, form),
+  });
 }
 
 function updateAdminSettings({

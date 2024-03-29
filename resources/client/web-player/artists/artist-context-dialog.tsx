@@ -8,7 +8,7 @@ import React, {useCallback} from 'react';
 import {ToggleInLibraryMenuButton} from '@app/web-player/context-dialog/toggle-in-library-menu-button';
 import {CopyLinkMenuButton} from '@app/web-player/context-dialog/copy-link-menu-button';
 import {useDialogContext} from '@common/ui/overlays/dialog/dialog-context';
-import {openGlobalDialog} from '@app/web-player/state/global-dialog-store';
+import {openDialog} from '@common/ui/overlays/store/dialog-store';
 import {ConfirmationDialog} from '@common/ui/overlays/dialog/confirmation-dialog';
 import {Artist} from '@app/web-player/artists/artist';
 import {useArtistPermissions} from '@app/web-player/artists/use-artist-permissions';
@@ -35,7 +35,7 @@ export function ArtistContextDialog({artist}: ArtistContextDialogProps) {
       title={<ArtistLink artist={artist} />}
       loadTracks={loadTracks}
     >
-      <ToggleInLibraryMenuButton items={[artist]} />
+      <ToggleInLibraryMenuButton items={[artist]} modelType="artist" />
       {showRadioButton && (
         <ContextMenuButton type="link" to={getRadioLink(artist)}>
           <Trans message="Go to artist radio" />
@@ -77,10 +77,10 @@ function DeleteButton({artist}: ArtistContextDialogProps) {
 
   return (
     <ContextMenuButton
-      disabled={deleteArtist.isLoading}
+      disabled={deleteArtist.isPending}
       onClick={() => {
         closeMenu();
-        openGlobalDialog(ConfirmationDialog, {
+        openDialog(ConfirmationDialog, {
           isDanger: true,
           title: <Trans message="Delete artist" />,
           body: (

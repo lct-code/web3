@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Tag;
+use App\Models\Tag;
 use Common\Core\BaseController;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 

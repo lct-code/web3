@@ -43,7 +43,7 @@ export function CheckoutStripeDone() {
           });
         }
         setMessageConfig(
-          getRedirectMessageConfig(paymentIntent?.status, productId, priceId)
+          getRedirectMessageConfig(paymentIntent?.status, productId, priceId),
         );
       });
     });
@@ -72,7 +72,7 @@ export function CheckoutStripeDone() {
 function getRedirectMessageConfig(
   status?: PaymentIntent.Status,
   productId?: string,
-  priceId?: string
+  priceId?: string,
 ): BillingRedirectMessageConfig {
   switch (status) {
     case 'succeeded':
@@ -85,7 +85,7 @@ function getRedirectMessageConfig(
     case 'processing':
       return {
         message: message(
-          "Payment processing. We'll update you when payment is received."
+          "Payment processing. We'll update you when payment is received.",
         ),
         status: 'success',
         buttonLabel: message('Return to site'),
@@ -109,7 +109,7 @@ function getRedirectMessageConfig(
 }
 
 function errorLink(productId?: string, priceId?: string): string {
-  return productId && priceId ? `/buy/${productId}/${priceId}` : '/';
+  return productId && priceId ? `/checkout/${productId}/${priceId}` : '/';
 }
 
 function storeSubscriptionDetailsLocally(paymentIntentId: string) {

@@ -16,7 +16,8 @@ function deleteAccessToken({id}: Props): Promise<Response> {
 }
 
 export function useDeleteAccessToken() {
-  return useMutation((props: Props) => deleteAccessToken(props), {
+  return useMutation({
+    mutationFn: (props: Props) => deleteAccessToken(props),
     onSuccess: () => {
       toast(message('Token deleted'));
     },

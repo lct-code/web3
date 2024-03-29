@@ -3,7 +3,6 @@
 namespace Common\Settings\Mail;
 
 use Common\Auth\Oauth;
-use Common\Settings\Settings;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Support\Facades\File;
 use Laravel\Socialite\Facades\Socialite;
@@ -26,11 +25,11 @@ class HandleConnectGmailOauthCallback
             ]),
         );
 
-        if (app(Settings::class)->get('mail.handler') === 'gmailApi') {
-            app(GmailClient::class)->watch();
+        if (settings('incoming_email.gmail.enabled')) {
+            (new GmailClient())->watch();
         }
 
-        return app(Oauth::class)->getPopupResponse('SUCCESS', [
+        return (new Oauth())->getPopupResponse('SUCCESS', [
             'profile' => $profile,
         ]);
     }

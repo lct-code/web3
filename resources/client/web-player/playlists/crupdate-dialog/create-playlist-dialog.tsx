@@ -47,7 +47,7 @@ export function CreatePlaylistDialog() {
           type="submit"
           variant="flat"
           color="primary"
-          disabled={createPlaylist.isLoading}
+          disabled={createPlaylist.isPending}
         >
           <Trans message="Create" />
         </Button>

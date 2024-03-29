@@ -6,10 +6,16 @@ import {MenubarButtonProps} from './menubar-button-props';
 import {useActiveUpload} from '../../uploads/uploader/use-active-upload';
 import {UploadInputType} from '../../uploads/types/upload-input-config';
 import {Disk} from '../../uploads/types/backend-metadata';
+import {Tooltip} from '@common/ui/tooltip/tooltip';
+import {Trans} from '@common/i18n/trans';
 
 const TwoMB = 2097152;
 
-export function ImageButton({editor, size}: MenubarButtonProps) {
+interface Props extends MenubarButtonProps {
+  diskPrefix?: string;
+}
+
+export function ImageButton({editor, size, diskPrefix = 'page_media'}: Props) {
   const {selectAndUploadFile} = useActiveUpload();
 
   const handleUpload = () => {
@@ -20,7 +26,7 @@ export function ImageButton({editor, size}: MenubarButtonProps) {
         maxFileSize: TwoMB,
       },
       metadata: {
-        diskPrefix: 'page_media',
+        diskPrefix: diskPrefix,
         disk: Disk.public,
       },
       onSuccess: entry => {
@@ -33,13 +39,14 @@ export function ImageButton({editor, size}: MenubarButtonProps) {
   };
 
   return (
-    <IconButton
-      size={size}
-      radius="rounded"
-      onClick={handleUpload}
-      className={clsx('flex-shrink-0')}
-    >
-      <ImageIcon />
-    </IconButton>
+    <Tooltip label={<Trans message="Insert image" />}>
+      <IconButton
+        size={size}
+        onClick={handleUpload}
+        className={clsx('flex-shrink-0')}
+      >
+        <ImageIcon />
+      </IconButton>
+    </Tooltip>
   );
 }

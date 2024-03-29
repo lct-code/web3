@@ -1,6 +1,6 @@
 <?php namespace App\Services\Artists;
 
-use App\Artist;
+use App\Models\Artist;
 use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -18,16 +18,16 @@ class PaginateArtistAlbums
     {
         $prefix = DB::getTablePrefix();
         $withTracks = castToBoolean(Arr::get($params, 'loadAlbumTracks', true));
-        $perPage = (int) ($params['albumsPerPage'] ?? $params['perPage'] ?? 5);
+        $perPage =
+            (int) ($params['albumsPerPage'] ?? ($params['perPage'] ?? 5));
 
         $builder = $artist
             ->albums()
             ->with($withTracks ? ['artists', 'tracks.artists'] : ['artists'])
-            ->leftjoin('tracks', 'tracks.album_id', '=', 'albums.id')
-            ->groupBy('albums.id')
+            ->withCount('tracks')
             // albums can have identical release dates, order by id to avoid duplicates in pagination
             ->orderByRaw(
-                "COUNT({$prefix}tracks.id) > 5 desc, {$prefix}albums.release_date desc, albums.id desc",
+                "tracks_count desc, {$prefix}albums.release_date desc, {$prefix}albums.id desc",
             );
 
         if (Arr::get($params, 'paginate') === 'simple') {

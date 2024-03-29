@@ -1,6 +1,6 @@
 <?php namespace Common\Billing\Gateways\Paypal;
 
-use App\User;
+use App\Models\User;
 use Common\Billing\GatewayException;
 use Common\Billing\Invoices\CreateInvoice;
 use Common\Billing\Notifications\PaymentFailed;
@@ -16,7 +16,7 @@ class PaypalWebhookController extends Controller
 
     public function __construct(
         protected Subscription $subscription,
-        protected Paypal $paypal
+        protected Paypal $paypal,
     ) {
     }
 
@@ -62,7 +62,7 @@ class PaypalWebhookController extends Controller
     }
 
     protected function handleSubscriptionCancelledOrExpired(
-        array $payload
+        array $payload,
     ): Response {
         $paypalSubscriptionId = $payload['resource']['id'];
 
@@ -77,9 +77,6 @@ class PaypalWebhookController extends Controller
         return response('Webhook Handled', 200);
     }
 
-    /**
-     * Handle a renewed stripe subscription.
-     */
     protected function handleSaleCompleted(array $payload): Response
     {
         $gatewayId = Arr::get($payload, 'resource.billing_agreement_id');
@@ -89,8 +86,8 @@ class PaypalWebhookController extends Controller
             ->first();
 
         if ($subscription) {
-            $paypalSubscription = $this->gateway
-                ->subscriptions()
+            $paypalSubscription = $this->paypal
+                ->subscriptions
                 ->find($subscription);
             $subscription
                 ->fill(['renews_at' => $paypalSubscription['renews_at']])

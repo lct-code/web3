@@ -1,23 +1,27 @@
 import {useForm} from 'react-hook-form';
 import {useId} from 'react';
-import {Form} from '../../../ui/forms/form';
+import {Form} from '@common/ui/forms/form';
 import {AccountSettingsPanel} from './account-settings-panel';
 import {useUpdateAccountDetails} from './basic-info-panel/update-account-details';
-import {Button} from '../../../ui/buttons/button';
+import {Button} from '@common/ui/buttons/button';
 import {User} from '../../user';
-import {useValueLists} from '../../../http/value-lists';
+import {useValueLists} from '@common/http/value-lists';
 import {Option} from '../../../ui/forms/combobox/combobox';
-import {FormSelect, OptionGroup} from '../../../ui/forms/select/select';
-import {useChangeLocale} from '../../../i18n/change-locale';
-import {Trans} from '../../../i18n/trans';
-import {FormComboBox} from '../../../ui/forms/combobox/form-combobox';
+import {FormSelect} from '../../../ui/forms/select/select';
+import {useChangeLocale} from '@common/i18n/change-locale';
+import {Trans} from '@common/i18n/trans';
 import {getLocalTimeZone} from '@internationalized/date';
+import {AccountSettingsId} from '@common/auth/ui/account-settings/account-settings-sidenav';
+import {message} from '@common/i18n/message';
+import {useTrans} from '@common/i18n/use-trans';
+import {TimezoneSelect} from '@common/auth/ui/account-settings/timezone-select';
 
 interface Props {
   user: User;
 }
 export function LocalizationPanel({user}: Props) {
   const formId = useId();
+  const {trans} = useTrans();
   const form = useForm<Partial<User>>({
     defaultValues: {
       language: user.language || '',
@@ -35,6 +39,7 @@ export function LocalizationPanel({user}: Props) {
 
   return (
     <AccountSettingsPanel
+      id={AccountSettingsId.LocationAndLanguage}
       title={<Trans message="Date, time and language" />}
       actions={
         <Button
@@ -42,7 +47,7 @@ export function LocalizationPanel({user}: Props) {
           variant="flat"
           color="primary"
           form={formId}
-          disabled={updateDetails.isLoading || !form.formState.isValid}
+          disabled={updateDetails.isPending || !form.formState.isValid}
         >
           <Trans message="Save" />
         </Button>
@@ -62,48 +67,31 @@ export function LocalizationPanel({user}: Props) {
           name="language"
           label={<Trans message="Language" />}
         >
-          {localizations.map(localization => {
-            return (
-              <Option key={localization.language} value={localization.language}>
-                {localization.name}
-              </Option>
-            );
-          })}
+          {localizations.map(localization => (
+            <Option key={localization.language} value={localization.language}>
+              {localization.name}
+            </Option>
+          ))}
         </FormSelect>
-        <FormComboBox
+        <FormSelect
           className="mb-24"
           selectionMode="single"
           name="country"
           label={<Trans message="Country" />}
-          useOptionLabelAsInputValue
+          showSearchField
+          searchPlaceholder={trans(message('Search countries'))}
         >
-          {countries.map(country => {
-            return (
-              <Option key={country.code} value={country.code}>
-                {country.name}
-              </Option>
-            );
-          })}
-        </FormComboBox>
-        <FormComboBox
-          selectionMode="single"
-          name="timezone"
+          {countries.map(country => (
+            <Option key={country.code} value={country.code}>
+              {country.name}
+            </Option>
+          ))}
+        </FormSelect>
+        <TimezoneSelect
           label={<Trans message="Timezone" />}
-        >
-          {Object.entries(timezones).map(([sectionName, sectionItems]) => {
-            return (
-              <OptionGroup label={sectionName} key={sectionName}>
-                {sectionItems.map(timezone => {
-                  return (
-                    <Option key={timezone.value} value={timezone.value}>
-                      {timezone.text}
-                    </Option>
-                  );
-                })}
-              </OptionGroup>
-            );
-          })}
-        </FormComboBox>
+          name="timezone"
+          timezones={timezones}
+        />
       </Form>
     </AccountSettingsPanel>
   );

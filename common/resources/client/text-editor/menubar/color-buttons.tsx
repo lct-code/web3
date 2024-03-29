@@ -16,7 +16,6 @@ export function ColorButtons({editor, size}: MenubarButtonProps) {
       <span className={clsx('flex-shrink-0 whitespace-nowrap')}>
         <IconButton
           size={size}
-          radius="rounded"
           color={textActive ? 'primary' : null}
           onClick={() => {
             setDialog('text');
@@ -26,7 +25,6 @@ export function ColorButtons({editor, size}: MenubarButtonProps) {
         </IconButton>
         <IconButton
           size={size}
-          radius="rounded"
           color={backgroundActive ? 'primary' : null}
           onClick={() => {
             setDialog('bg');
@@ -36,7 +34,7 @@ export function ColorButtons({editor, size}: MenubarButtonProps) {
         </IconButton>
       </span>
       <DialogTrigger
-        currentValue={dialog === 'text' ? '#000000' : '#FFFFFF'}
+        defaultValue={dialog === 'text' ? '#000000' : '#FFFFFF'}
         type="modal"
         isOpen={!!dialog}
         onClose={newValue => {
@@ -50,9 +48,7 @@ export function ColorButtons({editor, size}: MenubarButtonProps) {
           setDialog(false);
         }}
       >
-        <ColorPickerDialog
-          defaultValue={dialog === 'text' ? '#000000' : '#FFFFFF'}
-        />
+        <ColorPickerDialog />
       </DialogTrigger>
     </Fragment>
   );

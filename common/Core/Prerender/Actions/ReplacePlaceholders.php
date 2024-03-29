@@ -9,40 +9,19 @@ use Illuminate\Support\Str;
 
 class ReplacePlaceholders
 {
-    /**
-     * @var AppUrlGenerator
-     */
-    private $urls;
+    private array $allData;
 
-    /**
-     * @var array
-     */
-    private $allData;
-
-    /**
-     * @param AppUrlGenerator $urls
-     */
-    public function __construct(AppUrlGenerator $urls)
+    public function __construct(protected AppUrlGenerator $urls)
     {
-        $this->urls = $urls;
     }
 
-    /**
-     * @param array|string $config
-     * @param array $data
-     * @return array|string
-     */
-    public function execute($config, $data)
+    public function execute(array|string $config, array $data): array|string
     {
         $this->allData = $data;
         return $this->replace($config);
     }
 
-    /**
-     * @param array|string $config
-     * @return array|string
-     */
-    private function replace($config)
+    private function replace(array|string $config): array|string
     {
         if (is_array($config)) {
             if (array_key_exists('_ifNotNull', $config)) {
@@ -55,7 +34,7 @@ class ReplacePlaceholders
             if (Arr::get($config, '_type') === 'loop') {
                 return $this->replaceLoop($config);
             } else {
-                return array_map(function($item) {
+                return array_map(function ($item) {
                     return $this->replace($item);
                 }, $config);
             }
@@ -64,11 +43,7 @@ class ReplacePlaceholders
         }
     }
 
-    /**
-     * @param $config
-     * @return array
-     */
-    private function replaceLoop($config)
+    private function replaceLoop(array $config): array
     {
         $dataSelector = strtolower($config['dataSelector']);
         $loopData = Arr::get($this->allData, $dataSelector);
@@ -85,7 +60,7 @@ class ReplacePlaceholders
         // ['key' => 'pivot.department', 'value' => 'cast' will get
         // only cast from movie credits array instead of full credits
         if ($filter = Arr::get($config, 'filter')) {
-            $loopData = $loopData->filter(function($loopItem) use($filter) {
+            $loopData = $loopData->filter(function ($loopItem) use ($filter) {
                 return Arr::get($loopItem, $filter['key']) === $filter['value'];
             });
         }
@@ -100,76 +75,90 @@ class ReplacePlaceholders
             $loopData->slice(0, 1);
         }
 
-        $generated = collect($loopData)->map(function($loopItem) use($config) {
+        $generated = collect($loopData)->map(function ($loopItem) use (
+            $config,
+        ) {
             // make sure template can access data via dot notation (TAG.NAME)
             // so instead of passing just tag, pass ['tag' => $tag]
-            $name = strtolower(class_basename($loopItem));
-            return $this->replaceString($config['template'], [$name => $loopItem]);
+            $model = is_array($loopItem)
+                ? modelTypeToNamespace($loopItem['model_type'])
+                : $loopItem;
+            $name = strtolower(class_basename($model));
+            return $this->replaceString($config['template'], [
+                $name => $loopItem,
+            ]);
         });
 
-        return $returnFirstOnly ? $generated->first() : $generated->values()->toArray();
+        return $returnFirstOnly
+            ? $generated->first()
+            : $generated->values()->toArray();
     }
 
-    /**
-     * @param string|string[] $template
-     * @param array $originalData
-     * @return string|string[]
-     */
-    private function replaceString($template, $originalData)
+    private function replaceString(mixed $template, array $originalData): mixed
     {
         $data = [];
         foreach ($originalData as $key => $value) {
             $data[Str::lower($key)] = $value;
         }
 
-        return preg_replace_callback('/{{([\w\.\-\?\:]+?)}}/', function($matches) use($data) {
-            if ( ! isset($matches[1])) return $matches[0];
+        return preg_replace_callback(
+            '/{{([\w\.\-\?\:]+?)}}/',
+            function ($matches) use ($data) {
+                if (!isset($matches[1])) {
+                    return $matches[0];
+                }
 
-            $placeholder = $matches[1];
+                $placeholder = $matches[1];
 
-            // replace site name
-            if ($placeholder === 'site_name') {
-                return config('app.name');
-            }
+                // replace site name
+                if ($placeholder === 'site_name') {
+                    return config('app.name');
+                }
 
-            // replace base url
-            if ($placeholder === 'url.base') {
-                return url('');
-            }
+                // replace base url
+                if ($placeholder === 'url.base') {
+                    return url('');
+                }
 
-            // replace by url generator url
-            if (Str::startsWith($placeholder, 'url.')) {
-                // "url.movie" => "movie"
-                $resource = str_replace('url.', '', $placeholder);
-                // "new_releases" => "newReleases"
-                $method = Str::camel($resource);
-                return $this->urls->$method(Arr::get($data, $resource) ?: $data);
-            }
+                // replace by url generator url
+                if (Str::startsWith($placeholder, 'url.')) {
+                    // "url.movie" => "movie"
+                    $resource = str_replace('url.', '', $placeholder);
+                    // "new_releases" => "newReleases"
+                    $method = Str::camel($resource);
+                    return $this->urls->$method(
+                        Arr::get($data, $resource) ?: $data, $data,
+                    );
+                }
 
-            // replace placeholder with actual value.
-            // supports dot notation: 'artist.bio.text' as well as ?:
-            $replacement = $this->findUsingDotNotation($data, $placeholder);
+                // replace placeholder with actual value.
+                // supports dot notation: 'artist.bio.text' as well as ?:
+                $replacement = $this->findUsingDotNotation($data, $placeholder);
 
-            // prefix relative image urls with base site url
-            if ($replacement && Str::startsWith($replacement, 'storage/')) {
-                $replacement = config('app.url') . "/$replacement"; url();
-            }
+                // prefix relative image urls with base site url
+                if ($replacement && Str::startsWith($replacement, 'storage/')) {
+                    $replacement = config('app.url') . "/$replacement";
+                    url();
+                }
 
-            // return null if we could not replace placeholder
-            if ( ! $replacement) {
-                return null;
-            }
+                // return null if we could not replace placeholder
+                if (!$replacement) {
+                    return null;
+                }
 
-            return Str::limit(strip_tags($this->replaceString($replacement, $data), '<br>'), 400);
-        }, $template);
+                return Str::limit(
+                    strip_tags(
+                        $this->replaceString($replacement, $data),
+                        '<br>',
+                    ),
+                    400,
+                );
+            },
+            $template,
+        );
     }
 
-    /**
-     * @param array $data
-     * @param string $item
-     * @return mixed|void
-     */
-    private function findUsingDotNotation($data, $item)
+    private function findUsingDotNotation(array $data, string $item)
     {
         foreach (explode('?:', $item) as $itemVariant) {
             if ($value = Arr::get($data, $itemVariant)) {

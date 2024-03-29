@@ -19,19 +19,18 @@ export interface ApproveBackstageRequestPayload {
 
 export function useApproveBackstageRequest() {
   const navigate = useNavigate();
-  return useMutation(
-    (payload: ApproveBackstageRequestPayload) => approveRequest(payload),
-    {
-      onSuccess: () => {
-        toast(message('Request approved'));
-        navigate('/admin/backstage-requests');
-        queryClient.invalidateQueries(
-          DatatableDataQueryKey('backstage-request')
-        );
-      },
-      onError: err => showHttpErrorToast(err),
-    }
-  );
+  return useMutation({
+    mutationFn: (payload: ApproveBackstageRequestPayload) =>
+      approveRequest(payload),
+    onSuccess: () => {
+      toast(message('Request approved'));
+      navigate('/admin/backstage-requests');
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('backstage-request'),
+      });
+    },
+    onError: err => showHttpErrorToast(err),
+  });
 }
 
 function approveRequest({

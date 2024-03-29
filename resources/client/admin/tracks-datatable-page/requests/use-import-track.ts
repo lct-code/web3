@@ -19,10 +19,13 @@ export interface ImportTrackPayload {
 
 export function useImportTrack() {
   const {trans} = useTrans();
-  return useMutation((props: ImportTrackPayload) => importTrack(props), {
+  return useMutation({
+    mutationFn: (props: ImportTrackPayload) => importTrack(props),
     onSuccess: () => {
       toast(trans(message('Track imported')));
-      queryClient.invalidateQueries(DatatableDataQueryKey('tracks'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('tracks'),
+      });
     },
     onError: err => showHttpErrorToast(err),
   });

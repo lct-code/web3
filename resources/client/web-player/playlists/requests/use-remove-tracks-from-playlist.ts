@@ -17,19 +17,20 @@ interface Payload {
 }
 
 export function useRemoveTracksFromPlaylist() {
-  return useMutation((payload: Payload) => removeTracks(payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => removeTracks(payload),
     onSuccess: (response, {tracks}) => {
       toast(
         message('Removed [one 1 track|other :count tracks] from playlist', {
           values: {count: tracks.length},
-        })
+        }),
       );
-      queryClient.invalidateQueries(['playlists', response.playlist.id]);
-      queryClient.invalidateQueries([
-        'tracks',
-        'playlist',
-        response.playlist.id,
-      ]);
+      queryClient.invalidateQueries({
+        queryKey: ['playlists', response.playlist.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['tracks', 'playlist', response.playlist.id],
+      });
     },
     onError: r => showHttpErrorToast(r),
   });

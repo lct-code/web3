@@ -12,17 +12,18 @@ interface Response extends BackendResponse {
 
 export function useCreateStripeSubscription(productId: string | number) {
   const {trans} = useTrans();
-  return useMutation(() => createStripeSubscription(productId), {
+  return useMutation({
+    mutationFn: () => createStripeSubscription(productId),
     onSuccess: () => {
       toast(trans(message('Mutation performed')));
-      queryClient.invalidateQueries(['Query Key']);
+      queryClient.invalidateQueries({queryKey: ['Query Key']});
     },
     onError: err => showHttpErrorToast(err),
   });
 }
 
 function createStripeSubscription(
-  productId: string | number
+  productId: string | number,
 ): Promise<Response> {
   return apiClient
     .post('billing/subscriptions/stripe/create', {product_id: productId})

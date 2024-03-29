@@ -4,7 +4,7 @@ import {FullPageLoader} from '@common/ui/progress/full-page-loader';
 import {IllustratedMessage} from '@common/ui/images/illustrated-message';
 import {AudiotrackIcon} from '@common/icons/material/Audiotrack';
 import {Trans} from '@common/i18n/trans';
-import React, {Fragment, useState} from 'react';
+import React, {useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
 import {Album} from '@app/web-player/albums/album';
 import {AlbumIcon} from '@common/icons/material/Album';
@@ -25,10 +25,11 @@ export function TagMediaPage() {
   const tagName = params.tagName!;
   const tabName = params['*']?.split('/').pop() || tagTabNames.tracks;
   const [selectedTab, setSelectedTab] = useState(
-    tagTabNames[tabName as keyof typeof tagTabNames] || 0
+    tagTabNames[tabName as keyof typeof tagTabNames] || 0,
   );
+
   return (
-    <Fragment>
+    <div>
       <h1 className="text-3xl mb-40">
         {tabName === 'albums' ? (
           <Trans
@@ -60,7 +61,7 @@ export function TagMediaPage() {
           </TabPanel>
         </TabPanels>
       </Tabs>
-    </Fragment>
+    </div>
   );
 }
 
@@ -73,8 +74,8 @@ function AlbumsPanel({tagName}: TracksPanelProps) {
     endpoint: `tags/${tagName}/albums`,
   });
 
-  if (query.isInitialLoading) {
-    return <FullPageLoader className="min-h-100" />;
+  if (query.isLoading) {
+    return <FullPageLoader className="min-h-100" screen={false} />;
   }
 
   if (!query.items.length) {
@@ -100,8 +101,8 @@ function TracksPanel({tagName}: TracksPanelProps) {
     endpoint: `tags/${tagName}/tracks`,
   });
 
-  if (query.isInitialLoading) {
-    return <FullPageLoader className="min-h-100" />;
+  if (query.isLoading) {
+    return <FullPageLoader className="min-h-100" screen={false} />;
   }
 
   if (!query.items.length) {

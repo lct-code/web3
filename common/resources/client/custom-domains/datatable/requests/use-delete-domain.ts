@@ -7,6 +7,7 @@ import {message} from '@common/i18n/message';
 import {toast} from '@common/ui/toast/toast';
 import {DatatableDataQueryKey} from '@common/datatable/requests/paginated-resources';
 import {CustomDomain} from '@common/custom-domains/custom-domain';
+import {removeProtocol} from '@common/utils/urls/remove-protocol';
 
 interface Response extends BackendResponse {}
 
@@ -16,14 +17,19 @@ interface Payload {
 
 export function useDeleteDomain() {
   const {trans} = useTrans();
-  return useMutation((props: Payload) => deleteDomain(props), {
+  return useMutation({
+    mutationFn: (props: Payload) => deleteDomain(props),
     onSuccess: (response, props) => {
       toast.positive(
         trans(
-          message('“:domain” removed', {values: {domain: props.domain.host}})
-        )
+          message('“:domain” removed', {
+            values: {domain: removeProtocol(props.domain.host)},
+          }),
+        ),
       );
-      queryClient.invalidateQueries(DatatableDataQueryKey('custom-domain'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('custom-domain'),
+      });
     },
     onError: err => showHttpErrorToast(err),
   });

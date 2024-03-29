@@ -2,13 +2,13 @@
 
 namespace App\Listeners;
 
-use App\Actions\Track\DeleteTracks;
-use App\ProfileLink;
+use App\Models\ProfileLink;
+use App\Models\TrackPlay;
+use App\Models\User;
+use App\Models\UserProfile;
 use App\Services\Albums\DeleteAlbums;
 use App\Services\Playlists\DeletePlaylists;
-use App\TrackPlay;
-use App\User;
-use App\UserProfile;
+use App\Services\Tracks\DeleteTracks;
 use Common\Auth\Events\UsersDeleted;
 use Common\Comments\Comment;
 use DB;
@@ -73,7 +73,7 @@ class DeleteModelsRelatedToUser
         // profiles
         UserProfile::whereIn('user_id', $userIds)->delete();
         ProfileLink::whereIn('linkeable_id', $userIds)
-            ->where('linkeable_type', User::class)
+            ->where('linkeable_type', User::MODEL_TYPE)
             ->delete();
     }
 }

@@ -31,7 +31,7 @@ export function DesktopPlayerControls() {
   if (!mediaIsCued) return null;
 
   return (
-    <div className="h-96 px-16 flex items-center justify-between border-t bg dashboard-grid-footer z-30">
+    <div className="dashboard-grid-footer z-30 flex h-96 items-center justify-between border-t bg px-16">
       <QueuedTrack />
       <PlaybackControls className="w-2/5 max-w-[722px]" />
       <SecondaryControls />
@@ -49,7 +49,7 @@ function QueuedTrack() {
         <DialogTrigger type="popover" triggerOnContextMenu placement="top">
           <Link to={getTrackLink(track)} className="flex-shrink-0">
             <TrackImage
-              className="rounded w-56 h-56 object-cover"
+              className="h-56 w-56 rounded object-cover"
               track={track}
             />
           </Link>
@@ -59,7 +59,7 @@ function QueuedTrack() {
           <DialogTrigger type="popover" triggerOnContextMenu placement="top">
             <TrackLink
               track={track}
-              className="text-sm whitespace-nowrap min-w-0 max-w-full"
+              className="min-w-0 max-w-full whitespace-nowrap text-sm"
             />
             <TrackContextDialog tracks={[track]} />
           </DialogTrigger>
@@ -82,15 +82,15 @@ function QueuedTrack() {
     content = null;
   }
 
-  return <div className="min-w-180 w-[30%]">{content}</div>;
+  return <div className="w-[30%] min-w-180">{content}</div>;
 }
 
 function SecondaryControls() {
   const {rightSidenavStatus, setRightSidenavStatus} = useContext(
-    DashboardLayoutContext
+    DashboardLayoutContext,
   );
   return (
-    <div className="flex items-center justify-end min-w-180 w-[30%]">
+    <div className="flex w-[30%] min-w-180 items-center justify-end">
       <LyricsButton />
       <DownloadTrackButton />
       <Tooltip label={<Trans message="Queue" />}>
@@ -98,7 +98,7 @@ function SecondaryControls() {
           className="flex-shrink-0"
           onClick={() => {
             setRightSidenavStatus(
-              rightSidenavStatus === 'closed' ? 'open' : 'closed'
+              rightSidenavStatus === 'closed' ? 'open' : 'closed',
             );
           }}
         >
@@ -123,10 +123,9 @@ function OverlayButton() {
   return (
     <Tooltip label={<Trans message="Expand" />}>
       <IconButton
-        className="flex-shrink-0 ml-26"
+        className="ml-26 flex-shrink-0"
         color="chip"
         variant="flat"
-        radius="rounded"
         size="xs"
         iconSize="sm"
         disabled={!playerReady}

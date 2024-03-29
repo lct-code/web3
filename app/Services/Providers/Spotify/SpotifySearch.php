@@ -1,17 +1,17 @@
 <?php namespace App\Services\Providers\Spotify;
 
-use App;
 use App\Services\Providers\Local\LocalSearch;
 use App\Services\Search\SearchInterface;
-use App\Services\Search\SearchSaver;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Contracts\Pagination\Paginator as PaginatorContract;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Log;
+use Illuminate\Support\Facades\Log;
 
 class SpotifySearch extends LocalSearch implements SearchInterface
 {
-    protected array $spotifyResponse;
+    protected array $formattedResults;
 
     public function __construct(
         protected SpotifyHttpClient $httpClient,
@@ -19,25 +19,31 @@ class SpotifySearch extends LocalSearch implements SearchInterface
     ) {
     }
 
-    public function search(string $q, int $limit, array $modelTypes): Collection
-    {
+    public function search(
+        string $q,
+        int $page,
+        int $perPage,
+        array $modelTypes,
+    ): Collection {
         $this->query = urldecode($q);
-        $this->limit = $limit ?: 10;
+        $this->perPage = $perPage ?: 10;
+        $this->page = $page;
 
-        $spotifyTypes = collect($modelTypes)->filter(function ($type) {
-            return in_array($type, ['artist', 'album', 'track']);
-        });
+        $spotifyTypes = collect($modelTypes)->filter(
+            fn($type) => in_array($type, ['artist', 'album', 'track']),
+        );
 
         // if searching only local model types, there's no need to call spotify API
         if ($spotifyTypes->isNotEmpty()) {
             try {
                 $typeString = $spotifyTypes->implode(',');
+                $offset = ($page - 1) * $perPage;
                 $response = $this->httpClient->get(
-                    "search?q=$q&type=$typeString&limit=$limit",
+                    "search?q=$q&type=$typeString&limit=$perPage&offset=$offset",
                 );
-                $this->spotifyResponse = $this->formatResponse($response);
-                $this->spotifyResponse = app(SearchSaver::class)->save(
-                    $this->spotifyResponse,
+                $this->formattedResults = $this->formatResponse($response);
+                $this->formattedResults = (new SpotifySearchSaver())->save(
+                    $this->formattedResults,
                 );
             } catch (RequestException $e) {
                 if ($e->getResponse()) {
@@ -52,26 +58,32 @@ class SpotifySearch extends LocalSearch implements SearchInterface
             }
         }
 
-        return parent::search($q, $limit, $modelTypes);
+        return parent::search($q, $page, $perPage, $modelTypes);
     }
 
     private function formatResponse(array $response): array
     {
-        $artists = collect(Arr::get($response, 'artists.items', []))->map(
-            function ($spotifyArtist) {
-                return $this->normalizer->artist($spotifyArtist);
-            },
-        );
-        $albums = collect(Arr::get($response, 'albums.items', []))->map(
-            function ($spotifyAlbum) {
-                return $this->normalizer->album($spotifyAlbum);
-            },
-        );
-        $tracks = collect(Arr::get($response, 'tracks.items', []))->map(
-            function ($spotifyTrack) {
-                return $this->normalizer->track($spotifyTrack);
-            },
-        );
+        $artists = [
+            'items' => collect(Arr::get($response, 'artists.items', []))->map(
+                fn($spotifyArtist) => $this->normalizer->artist($spotifyArtist),
+            ),
+            'total' => $response['artists']['total'] ?? 0,
+            'offset' => $response['artists']['offset'] ?? 0,
+        ];
+        $albums = [
+            'items' => collect(Arr::get($response, 'albums.items', []))->map(
+                fn($spotifyAlbum) => $this->normalizer->album($spotifyAlbum),
+            ),
+            'total' => $response['albums']['total'] ?? 0,
+            'offset' => $response['albums']['offset'] ?? 0,
+        ];
+        $tracks = [
+            'items' => collect(Arr::get($response, 'tracks.items', []))->map(
+                fn($spotifyTrack) => $this->normalizer->track($spotifyTrack),
+            ),
+            'total' => $response['tracks']['total'] ?? 0,
+            'offset' => $response['tracks']['offset'] ?? 0,
+        ];
         return [
             'albums' => $albums,
             'tracks' => $tracks,
@@ -79,18 +91,39 @@ class SpotifySearch extends LocalSearch implements SearchInterface
         ];
     }
 
-    public function artists(): Collection
+    public function artists(): PaginatorContract
     {
-        return $this->spotifyResponse['artists'] ?? parent::artists();
+        if (isset($this->formattedResults['artists']['items'])) {
+            return $this->paginator($this->formattedResults['artists']);
+        }
+
+        return parent::artists();
     }
 
-    public function albums(): Collection
+    public function albums(): PaginatorContract
     {
-        return $this->spotifyResponse['albums'] ?? parent::albums();
+        if (isset($this->formattedResults['albums']['items'])) {
+            return $this->paginator($this->formattedResults['albums']);
+        }
+
+        return parent::albums();
     }
 
-    public function tracks(): Collection
+    public function tracks(): PaginatorContract
     {
-        return $this->spotifyResponse['tracks'] ?? parent::tracks();
+        if (isset($this->formattedResults['tracks']['items'])) {
+            return $this->paginator($this->formattedResults['tracks']);
+        }
+
+        return parent::tracks();
+    }
+
+    protected function paginator(array $data): PaginatorContract
+    {
+        return new Paginator(
+            items: $data['items'],
+            perPage: $this->perPage,
+            currentPage: $this->page,
+        );
     }
 }

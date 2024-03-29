@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\UserProfile;
 
-use App\User;
+use App\Models\User;
 use Common\Core\BaseController;
 
 class UserUploadedTracksController extends BaseController

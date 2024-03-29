@@ -17,10 +17,13 @@ interface Payload {
 
 export function useDeleteProduct() {
   const {trans} = useTrans();
-  return useMutation((payload: Payload) => updateProduct(payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => updateProduct(payload),
     onSuccess: () => {
       toast(trans(message('Plan deleted')));
-      queryClient.invalidateQueries(DatatableDataQueryKey('billing/products'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('billing/products'),
+      });
     },
     onError: err => showHttpErrorToast(err),
   });

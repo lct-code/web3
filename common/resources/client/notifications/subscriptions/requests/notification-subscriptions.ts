@@ -1,10 +1,10 @@
 import {useQuery} from '@tanstack/react-query';
-import {BackendResponse} from '../../../http/backend-response/backend-response';
+import {BackendResponse} from '@common/http/backend-response/backend-response';
 import {
   NotificationSubscription,
   NotificationSubscriptionGroup,
-} from '../notification-subscription';
-import {apiClient} from '../../../http/query-client';
+} from '@common/notifications/subscriptions/notification-subscription';
+import {apiClient} from '@common/http/query-client';
 
 export interface FetchNotificationSubscriptionsResponse
   extends BackendResponse {
@@ -20,9 +20,9 @@ function fetchNotificationSubscriptions(): Promise<FetchNotificationSubscription
 }
 
 export function useNotificationSubscriptions() {
-  return useQuery(
-    ['notification-subscriptions'],
-    () => fetchNotificationSubscriptions(),
-    {staleTime: Infinity}
-  );
+  return useQuery({
+    queryKey: ['notification-subscriptions'],
+    queryFn: () => fetchNotificationSubscriptions(),
+    staleTime: Infinity,
+  });
 }

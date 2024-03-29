@@ -2,8 +2,7 @@
 
 namespace Common\Core\Policies;
 
-use App\User;
-use Common\Auth\Roles\Role;
+use App\Models\User;
 use Common\Core\Exceptions\AccessResponseWithAction;
 use Common\Settings\Settings;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -72,16 +71,8 @@ abstract class BasePolicy
 
     protected function hasPermission(?User $user, string $permission): bool
     {
-        if ($user?->hasPermission($permission)) {
-            return true;
-        } elseif (
-            Role::where('guests', true)
-                ->first()
-                ?->hasPermission($permission)
-        ) {
-            return true;
-        }
-        return false;
+        $model = $user ?: app('guestRole');
+        return $model?->hasPermission($permission) ?? false;
     }
 
     protected function parseNamespace(

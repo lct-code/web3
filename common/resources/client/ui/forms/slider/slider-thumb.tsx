@@ -85,9 +85,11 @@ export function SliderThumb({
     !isDisabled && 'shadow-md',
     thumbColor({fillColor, isDisabled, isDragging: isDragging}),
     // show thumb on hover and while dragging, otherwise "blur" event will fire on thumb and dragging will stop
-    (showThumbOnHoverOnly && isDragging) || isPointerOver
+    !showThumbOnHoverOnly ||
+      (showThumbOnHoverOnly && isDragging) ||
+      isPointerOver
       ? 'visible'
-      : 'invisible'
+      : 'invisible',
   );
 
   return (
@@ -167,6 +169,6 @@ function thumbColor({
 
   return clsx(
     'hover:bg-primary-dark',
-    isDragging ? 'bg-primary-dark' : 'bg-primary'
+    isDragging ? 'bg-primary-dark' : 'bg-primary',
   );
 }

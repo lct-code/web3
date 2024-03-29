@@ -2,12 +2,13 @@ import {UploadedFile} from '../../uploaded-file';
 import {UploadStrategy, UploadStrategyConfig} from './upload-strategy';
 import {apiClient} from '@common/http/query-client';
 import {getAxiosErrorMessage} from '@common/utils/http/get-axios-error-message';
+import {AxiosProgressEvent} from 'axios';
 
 export class AxiosUpload implements UploadStrategy {
   private abortController: AbortController;
   constructor(
     private file: UploadedFile,
-    private config: UploadStrategyConfig
+    private config: UploadStrategyConfig,
   ) {
     this.abortController = new AbortController();
   }
@@ -17,6 +18,7 @@ export class AxiosUpload implements UploadStrategy {
     const {onSuccess, onError, onProgress, metadata} = this.config;
 
     formData.set('file', this.file.native);
+    formData.set('workspaceId', `12`);
     if (metadata) {
       Object.entries(metadata).forEach(([key, value]) => {
         formData.set(key, `${value}`);
@@ -25,11 +27,11 @@ export class AxiosUpload implements UploadStrategy {
 
     const response = await apiClient
       .post('file-entries', formData, {
-        onUploadProgress: (e: ProgressEvent) => {
-          if (e.lengthComputable) {
+        onUploadProgress: (e: AxiosProgressEvent) => {
+          if (e.event.lengthComputable) {
             onProgress?.({
               bytesUploaded: e.loaded,
-              bytesTotal: e.total,
+              bytesTotal: e.total || 0,
             });
           }
         },
@@ -62,7 +64,7 @@ export class AxiosUpload implements UploadStrategy {
 
   static async create(
     file: UploadedFile,
-    config: UploadStrategyConfig
+    config: UploadStrategyConfig,
   ): Promise<AxiosUpload> {
     return new AxiosUpload(file, config);
   }

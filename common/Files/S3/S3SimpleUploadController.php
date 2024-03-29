@@ -15,7 +15,7 @@ class S3SimpleUploadController extends BaseController
         $this->middleware('auth');
     }
 
-    public function presignPost()
+    public function     presignPost()
     {
         $fileKey = $this->buildFileKey();
 

@@ -22,10 +22,9 @@ export function DataTableExportCsvButton({
       <IconButton
         variant="outline"
         color="primary"
-        radius="rounded"
         size="sm"
         className="flex-shrink-0"
-        disabled={exportCsv.isLoading}
+        disabled={exportCsv.isPending}
         onClick={() => {
           exportCsv.mutate(payload, {
             onSuccess: response => {

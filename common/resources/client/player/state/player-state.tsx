@@ -22,6 +22,13 @@ export type ProviderListeners = {
 
 export type PlayerStoreApi = ReturnType<typeof createPlayerStore>;
 
+export interface AudioTrack {
+  id: number;
+  label: string;
+  language: string;
+  kind: string;
+}
+
 export interface PlayerState {
   options: PlayerStoreOptions;
 
@@ -75,6 +82,10 @@ export interface PlayerState {
   textTracks: TextTrack[];
   currentTextTrack: number;
   setCurrentTextTrack: (id: number) => void;
+
+  audioTracks: AudioTrack[];
+  currentAudioTrack: number;
+  setCurrentAudioTrack: (id: number) => void;
 
   providerName?: MediaItem['provider'];
   providerApi?: PlayerProviderApi;

@@ -14,7 +14,8 @@ export interface ResendConfirmEmailPayload {
 }
 
 export function useResendVerificationEmail() {
-  return useMutation(resendEmail, {
+  return useMutation({
+    mutationFn: resendEmail,
     onSuccess: () => {
       toast(message('Email sent'));
     },

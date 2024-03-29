@@ -5,6 +5,8 @@
         <meta name="google" content="notranslate">
         <base href="{{ $htmlBaseUri }}">
 
+        @yield('head')
+
         @include('common::prerender.meta-tags')
     </head>
 

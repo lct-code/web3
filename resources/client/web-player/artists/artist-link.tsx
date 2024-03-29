@@ -19,8 +19,8 @@ export function ArtistLink({artist, className, ...linkProps}: AlbumLinkProps) {
     <Link
       {...linkProps}
       className={clsx(
-        'hover:underline outline-none focus-visible:underline overflow-x-hidden overflow-ellipsis',
-        className
+        'overflow-x-hidden overflow-ellipsis outline-none hover:underline focus-visible:underline',
+        className,
       )}
       to={finalUri}
     >
@@ -31,7 +31,7 @@ export function ArtistLink({artist, className, ...linkProps}: AlbumLinkProps) {
 
 export function getArtistLink(
   artist: Artist | UserArtist,
-  {absolute}: {absolute?: boolean} = {}
+  {absolute}: {absolute?: boolean} = {},
 ): string {
   let link = `/artist/${artist.id}/${slugifyString(artist.name)}`;
   if (absolute) {

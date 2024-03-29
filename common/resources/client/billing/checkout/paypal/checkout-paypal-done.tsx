@@ -40,7 +40,7 @@ export function CheckoutPaypalDone() {
 function getRedirectMessageConfig(
   status?: 'success' | 'error' | string | null,
   productId?: string,
-  priceId?: string
+  priceId?: string,
 ): BillingRedirectMessageConfig {
   switch (status) {
     case 'success':
@@ -61,7 +61,7 @@ function getRedirectMessageConfig(
 }
 
 function errorLink(productId?: string, priceId?: string): string {
-  return productId && priceId ? `/buy/${productId}/${priceId}` : '/';
+  return productId && priceId ? `/checkout/${productId}/${priceId}` : '/';
 }
 
 function storeSubscriptionDetailsLocally(subscriptionId: string) {

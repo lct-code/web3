@@ -2,7 +2,7 @@
 
 namespace Common\Auth\Controllers;
 
-use App\User;
+use App\Models\User;
 use Common\Core\BaseController;
 use Common\Core\Bootstrap\MobileBootstrapData;
 use Common\Settings\Settings;
@@ -55,7 +55,7 @@ class MobileAuthController extends BaseController
 
     public function register(
         Request $request,
-        CreatesNewUsers $creator
+        CreatesNewUsers $creator,
     ): RegisterResponse {
         event(new Registered(($user = $creator->create($request->all()))));
 

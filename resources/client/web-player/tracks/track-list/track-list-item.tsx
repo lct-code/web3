@@ -22,7 +22,6 @@ import {useTrackPermissions} from '@app/web-player/tracks/hooks/use-track-permis
 import {User} from '@common/auth/user';
 import {UserProfileLink} from '@app/web-player/users/user-profile-link';
 import {TrackActionsBar} from '@app/web-player/tracks/track-actions-bar';
-import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 import clsx from 'clsx';
 
 interface TrackListItemProps {
@@ -45,8 +44,6 @@ export const TrackListItem = memo(
     linksInNewTab = false,
   }: TrackListItemProps) => {
     const {player} = useSettings();
-    const isMobile = useIsMobileMediaQuery();
-    hideArtwork = hideArtwork || !!isMobile;
     const {managesTrack} = useTrackPermissions([track]);
 
     const showWave =
@@ -56,18 +53,18 @@ export const TrackListItem = memo(
       <div
         className={clsx(
           'overflow-hidden',
-          !hideArtwork && 'flex gap-24',
-          className
+          !hideArtwork && 'md:flex md:gap-24',
+          className,
         )}
       >
         {!hideArtwork && (
           <TrackImage
             track={track}
-            className="flex-shrink-0 rounded"
+            className="flex-shrink-0 rounded max-md:hidden"
             size="w-184 h-184"
           />
         )}
-        <div className="flex-auto min-w-0">
+        <div className="min-w-0 flex-auto">
           <div className="flex items-center gap-14">
             <PlaybackToggleButton
               track={track}
@@ -79,7 +76,7 @@ export const TrackListItem = memo(
               equalizerColor="white"
             />
             <div>
-              <div className="text-sm text-muted flex items-center gap-6">
+              <div className="flex items-center gap-6 text-sm text-muted">
                 <ArtistLinks
                   artists={track.artists}
                   target={linksInNewTab ? '_blank' : undefined}
@@ -132,7 +129,7 @@ export const TrackListItem = memo(
         </div>
       </div>
     );
-  }
+  },
 );
 
 interface WaveformWithCommentsProps {
@@ -150,7 +147,7 @@ export function WaveformWithComments({
       <AnimatePresence mode="wait">
         {markerIsVisible && (
           <CommentBarNewCommentForm
-            className="mt-28 mb-8"
+            className="mb-8 mt-28"
             commentable={track}
           />
         )}

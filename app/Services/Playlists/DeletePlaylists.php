@@ -2,7 +2,7 @@
 
 namespace App\Services\Playlists;
 
-use App\Playlist;
+use App\Models\Playlist;
 use Illuminate\Support\Collection;
 use Storage;
 

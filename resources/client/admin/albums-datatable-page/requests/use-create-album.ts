@@ -37,10 +37,13 @@ export interface CreateAlbumPayload
 
 export function useCreateAlbum(form: UseFormReturn<CreateAlbumPayload>) {
   const {trans} = useTrans();
-  return useMutation((payload: CreateAlbumPayload) => createAlbum(payload), {
+  return useMutation({
+    mutationFn: (payload: CreateAlbumPayload) => createAlbum(payload),
     onSuccess: () => {
       toast(trans(message('Album created')));
-      queryClient.invalidateQueries(DatatableDataQueryKey(endpoint));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey(endpoint),
+      });
     },
     onError: err => onFormQueryError(err, form),
   });

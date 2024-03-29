@@ -5,7 +5,6 @@ import {FormImageSelector} from '@common/ui/images/image-selector';
 import {FileUploadProvider} from '@common/uploads/uploader/file-upload-provider';
 import {FormNormalizedModelField} from '@common/ui/forms/normalized-model-field';
 import React from 'react';
-import {ARTIST_MODEL} from '@app/web-player/artists/artist';
 import {Link, useLocation} from 'react-router-dom';
 import {Button} from '@common/ui/buttons/button';
 import {
@@ -25,8 +24,8 @@ export function BackstageRequestFormPage() {
     .pop() as CreateBackstageRequestPayload['type'];
   return (
     <BackstageLayout>
-      <div className="max-w-780 my-40 mx-auto">
-        <h1 className="text-3xl md:text-5xl text-center font-medium">
+      <div className="mx-auto my-40 max-w-780">
+        <h1 className="text-center text-3xl font-medium md:text-5xl">
           <Trans message="Tell us about yourself" />
         </h1>
         <ClaimForm requestType={requestType} />
@@ -52,7 +51,7 @@ function ClaimForm({requestType}: ClaimFormProps) {
             onSuccess: response => {
               navigate(
                 `/backstage/requests/${response.request.id}/request-submitted`,
-                {replace: true}
+                {replace: true},
               );
             },
           });
@@ -63,7 +62,7 @@ function ClaimForm({requestType}: ClaimFormProps) {
           diskPrefix="artist_media"
           variant="avatar"
           previewSize="w-160 h-160"
-          className="my-30 max-w-max mx-auto"
+          className="mx-auto my-30 max-w-max"
           disabled={requestType === 'become-artist'}
         />
         {requestType !== 'become-artist' && (
@@ -71,9 +70,7 @@ function ClaimForm({requestType}: ClaimFormProps) {
             className="mb-24"
             label={<Trans message="Select artist" />}
             name="artist_id"
-            modelType={ARTIST_MODEL}
-            openMenuOnFocus
-            customEndpoint="search/suggestions"
+            endpoint="search/suggestions/artist"
             queryParams={{
               listAll: 'true',
               excludeSelf: 'true',
@@ -89,12 +86,12 @@ function ClaimForm({requestType}: ClaimFormProps) {
             className="mb-24"
           />
         )}
-        <div className="md:flex items-center gap-24 mb-24">
+        <div className="mb-24 items-center gap-24 md:flex">
           <FormTextField
             required
             name="first_name"
             label={<Trans message="First name" />}
-            className="flex-auto mb-24 md:mb-0"
+            className="mb-24 flex-auto md:mb-0"
           />
           <FormTextField
             required
@@ -110,7 +107,7 @@ function ClaimForm({requestType}: ClaimFormProps) {
           className="mb-24"
         />
         <BackstageFormAttachments />
-        <div className="flex gap-24 justify-between border-t pt-34">
+        <div className="flex justify-between gap-24 border-t pt-34">
           <Button
             variant="raised"
             color="white"
@@ -128,7 +125,7 @@ function ClaimForm({requestType}: ClaimFormProps) {
             type="submit"
             className="min-w-140"
             radius="rounded-full"
-            disabled={submitRequest.isLoading}
+            disabled={submitRequest.isPending}
           >
             <Trans message="Submit request" />
           </Button>

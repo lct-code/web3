@@ -3,6 +3,34 @@ import {shallowEqual} from '../utils/shallow-equal';
 import {MetaTag} from './meta-tag';
 import {TitleMetaTagChildren} from './static-page-title';
 import {useTrans, UseTransReturn} from '../i18n/use-trans';
+import {isSsr} from '@common/utils/dom/is-ssr';
+
+const rafPolyfill = (() => {
+  let clock = Date.now();
+
+  return (callback: Function) => {
+    const currentTime = Date.now();
+
+    if (currentTime - clock > 16) {
+      clock = currentTime;
+      callback(currentTime);
+    } else {
+      setTimeout(() => {
+        rafPolyfill(callback);
+      }, 0);
+    }
+  };
+})();
+
+const cafPolyfill = (id: string | number) => clearTimeout(id);
+
+const requestAnimationFrame = !isSsr()
+  ? window.requestAnimationFrame
+  : global.requestAnimationFrame || rafPolyfill;
+
+const cancelAnimationFrame = !isSsr()
+  ? window.cancelAnimationFrame
+  : global.cancelAnimationFrame || cafPolyfill;
 
 export const helmetAttribute = 'data-be-helmet';
 let rafId: number | null;
@@ -13,6 +41,9 @@ interface HelmetProps {
 }
 export const Helmet = memo(({children, tags}: HelmetProps) => {
   const {trans} = useTrans();
+
+  if (isSsr()) return null;
+
   if (!tags && children) {
     tags = mapChildrenToTags(children, trans);
   }
@@ -24,7 +55,7 @@ export const Helmet = memo(({children, tags}: HelmetProps) => {
 
 function mapChildrenToTags(
   children: ReactElement | ReactElement[],
-  trans: UseTransReturn['trans']
+  trans: UseTransReturn['trans'],
 ): MetaTag[] {
   return Children.map(children, child => {
     switch (child.type) {
@@ -41,7 +72,7 @@ function mapChildrenToTags(
 
 function titleTagChildrenToString(
   children: TitleMetaTagChildren,
-  trans: UseTransReturn['trans']
+  trans: UseTransReturn['trans'],
 ): string {
   if (children == null) return '';
   if (typeof children === 'string') return children;
@@ -55,20 +86,38 @@ function titleTagChildrenToString(
 }
 
 function removeOldTags() {
-  document.head.querySelectorAll(`[${helmetAttribute}]`).forEach(tag => {
-    document.head.removeChild(tag);
-  });
+  if (isSsr()) return;
+  document.head
+    .querySelectorAll(
+      'meta:not([data-keep]), script[type="application/ld+json"]:not([data-keep]), title, link[rel="canonical"]',
+    )
+    .forEach(tag => {
+      document.head.removeChild(tag);
+    });
 }
 
-function updateTags(tags?: MetaTag[]) {
+function updateTags(tags?: MetaTag[] | string) {
   if (rafId) {
     cancelAnimationFrame(rafId);
   }
   rafId = requestAnimationFrame(() => {
     removeOldTags();
-    tags?.forEach(tag => {
-      updateTag(tag);
-    });
+
+    if (typeof tags === 'string') {
+      const template = document.createElement('template');
+      template.innerHTML = tags;
+      template.content.childNodes.forEach(node => {
+        if (node instanceof HTMLElement) {
+          node.setAttribute(helmetAttribute, 'true');
+          document.head.prepend(node);
+        }
+      });
+    } else {
+      tags?.forEach(tag => {
+        updateTag(tag);
+      });
+    }
+
     rafId = null;
   });
 }
@@ -97,5 +146,5 @@ function updateTag(tag: MetaTag) {
   }
 
   newElement.setAttribute(helmetAttribute, 'true');
-  document.head.appendChild(newElement);
+  document.head.prepend(newElement);
 }

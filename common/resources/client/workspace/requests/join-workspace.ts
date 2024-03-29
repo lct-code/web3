@@ -20,16 +20,19 @@ interface Props {
 
 export function useJoinWorkspace() {
   const {setWorkspaceId} = useActiveWorkspaceId() || {};
-  return useMutation((props: Props) => joinWorkspace(props), {
+  return useMutation({
+    mutationFn: (props: Props) => joinWorkspace(props),
     onSuccess: response => {
       toast(message('Joined workspace'));
       setWorkspaceId(response.workspace.id);
-      queryClient.invalidateQueries(WorkspaceQueryKeys.fetchUserWorkspaces);
-      queryClient.invalidateQueries(useUserNotifications.key);
+      queryClient.invalidateQueries({
+        queryKey: WorkspaceQueryKeys.fetchUserWorkspaces,
+      });
+      queryClient.invalidateQueries({queryKey: useUserNotifications.key});
     },
     onError: e => {
       if (axios.isAxiosError(e) && e.response && e.response.status === 404) {
-        queryClient.invalidateQueries(useUserNotifications.key);
+        queryClient.invalidateQueries({queryKey: useUserNotifications.key});
         toast.danger(message('This invite is no longer valid'));
       } else {
         showHttpErrorToast(e);

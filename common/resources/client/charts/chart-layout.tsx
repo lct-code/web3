@@ -27,21 +27,21 @@ export function ChartLayout(props: ChartLayoutProps) {
   return (
     <div
       className={clsx(
-        'bg border rounded h-full flex flex-col flex-auto',
+        'rounded-panel flex h-full flex-auto flex-col border bg',
         minHeight,
-        className
+        className,
       )}
     >
-      <div className="text-xs p-14 flex-shrink-0 flex justify-between">
-        <div className="font-semibold text-sm">{title}</div>
+      <div className="flex flex-shrink-0 items-center justify-between p-14 text-xs">
+        <div className="text-sm font-semibold">{title}</div>
         {description && <div className="text-muted">{description}</div>}
       </div>
       <div
         ref={contentRef}
         className={clsx(
-          'p-14 relative',
-          contentIsFlex && 'flex-auto flex items-center justify-center',
-          contentClassName
+          'relative p-14',
+          contentIsFlex && 'flex flex-auto items-center justify-center',
+          contentClassName,
         )}
       >
         {children}

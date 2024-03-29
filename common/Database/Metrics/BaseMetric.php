@@ -3,7 +3,7 @@
 namespace Common\Database\Metrics;
 
 use Common\Database\Metrics\Traits\RoundingPrecision;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Expression;
 

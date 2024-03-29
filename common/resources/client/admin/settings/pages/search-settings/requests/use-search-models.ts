@@ -7,7 +7,10 @@ interface Response extends BackendResponse {
 }
 
 export function useSearchModels() {
-  return useQuery(['search-models'], () => fetchModels());
+  return useQuery({
+    queryKey: ['search-models'],
+    queryFn: () => fetchModels(),
+  });
 }
 
 function fetchModels(): Promise<Response> {

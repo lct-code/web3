@@ -48,6 +48,7 @@ export function SubscriptionSettings() {
             <StripeSection />
             <SettingsSeparator />
             <JsonChipField
+              label={<Trans message="Accepted cards" />}
               name="client.billing.accepted_cards"
               placeholder={trans({message: 'Add new card...'})}
             />
@@ -95,7 +96,7 @@ function PaypalSection() {
       >
         <Trans message="PayPal gateway" />
       </FormSwitch>
-      {paypalIsEnabled && (
+      {paypalIsEnabled ? (
         <SettingsErrorGroup name="paypal_group">
           {isInvalid => (
             <Fragment>
@@ -134,7 +135,7 @@ function PaypalSection() {
             </Fragment>
           )}
         </SettingsErrorGroup>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -143,7 +144,7 @@ function StripeSection() {
   const {watch} = useFormContext<AdminSettings>();
   const stripeEnabled = watch('client.billing.stripe.enable');
   return (
-    <>
+    <Fragment>
       <FormSwitch
         name="client.billing.stripe.enable"
         description={
@@ -158,7 +159,7 @@ function StripeSection() {
       >
         <Trans message="Stripe gateway" />
       </FormSwitch>
-      {stripeEnabled && (
+      {stripeEnabled ? (
         <SettingsErrorGroup name="stripe_group" separatorBottom={false}>
           {isInvalid => (
             <Fragment>
@@ -185,7 +186,7 @@ function StripeSection() {
             </Fragment>
           )}
         </SettingsErrorGroup>
-      )}
-    </>
+      ) : null}
+    </Fragment>
   );
 }

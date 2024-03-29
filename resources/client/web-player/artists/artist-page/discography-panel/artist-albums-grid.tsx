@@ -14,7 +14,7 @@ interface ArtistAlbumsGridProps {
 export function ArtistAlbumsGrid({initialAlbums}: ArtistAlbumsGridProps) {
   const query = useArtistAlbums(initialAlbums, 'grid');
 
-  if (!query.isInitialLoading && !query.items.length) {
+  if (!query.isLoading && !query.items.length) {
     return <NoDiscographyMessage />;
   }
 

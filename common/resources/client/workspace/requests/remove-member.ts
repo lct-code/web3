@@ -30,12 +30,15 @@ function removeMember({
 export function useRemoveMember() {
   const {workspaceId, setWorkspaceId} = useActiveWorkspaceId();
   const {user} = useAuth();
-  return useMutation((props: Props) => removeMember(props), {
+  return useMutation({
+    mutationFn: (props: Props) => removeMember(props),
     onSuccess: (response, props) => {
-      queryClient.invalidateQueries(WorkspaceQueryKeys.fetchUserWorkspaces);
-      queryClient.invalidateQueries(
-        WorkspaceQueryKeys.workspaceWithMembers(props.workspaceId)
-      );
+      queryClient.invalidateQueries({
+        queryKey: WorkspaceQueryKeys.fetchUserWorkspaces,
+      });
+      queryClient.invalidateQueries({
+        queryKey: WorkspaceQueryKeys.workspaceWithMembers(props.workspaceId),
+      });
 
       // if user left workspace that is currently active, switch to personal workspace
       if (props.memberId === user?.id && workspaceId === props.workspaceId) {

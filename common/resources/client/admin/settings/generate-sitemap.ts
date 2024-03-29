@@ -12,7 +12,8 @@ function GenerateSitemap(): Promise<Response> {
 }
 
 export function useGenerateSitemap() {
-  return useMutation(() => GenerateSitemap(), {
+  return useMutation({
+    mutationFn: () => GenerateSitemap(),
     onSuccess: () => {
       toast(message('Sitemap generated'));
     },

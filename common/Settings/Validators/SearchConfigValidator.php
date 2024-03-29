@@ -2,7 +2,7 @@
 
 namespace Common\Settings\Validators;
 
-use App\User;
+use App\Models\User;
 use Arr;
 use Exception;
 use Laravel\Scout\Builder;

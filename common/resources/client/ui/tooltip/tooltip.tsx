@@ -3,7 +3,7 @@ import {
   forwardRef,
   Fragment,
   HTMLAttributes,
-  ReactNode,
+  ReactElement,
   Ref,
   useCallback,
   useEffect,
@@ -17,9 +17,9 @@ import {PopoverAnimation} from '../overlays/popover-animation';
 import {useFloatingPosition} from '../overlays/floating-position';
 import {createPortal} from 'react-dom';
 import {mergeProps} from '@react-aria/utils';
-import {Placement} from '@floating-ui/react-dom';
-import {Options as OffsetOptions} from '@floating-ui/core/src/middleware/offset';
+import {OffsetOptions, Placement} from '@floating-ui/react-dom';
 import {rootEl} from '../../core/root-el';
+import {MessageDescriptor} from '@common/i18n/message-descriptor';
 
 const TOOLTIP_COOLDOWN = 500;
 const tooltips: Record<string, ((immediate?: boolean) => void) | undefined> =
@@ -38,13 +38,14 @@ const closeOpenTooltips = (tooltipId: string) => {
 };
 
 interface Props {
-  label: ReactNode;
+  label: ReactElement<MessageDescriptor> | string;
   placement?: Placement;
-  children: JSX.Element;
+  children: ReactElement;
   variant?: 'neutral' | 'positive' | 'danger';
   delay?: number;
   isDisabled?: boolean;
   offset?: OffsetOptions;
+  usePortal?: boolean;
 }
 export const Tooltip = forwardRef<HTMLElement, Props>(
   (
@@ -56,11 +57,12 @@ export const Tooltip = forwardRef<HTMLElement, Props>(
       variant = 'neutral',
       delay = 1500,
       isDisabled,
+      usePortal = true,
       ...domProps
     },
     ref
   ) => {
-    const {x, y, reference, floating, strategy, arrowRef, arrowStyle} =
+    const {x, y, reference, strategy, arrowRef, arrowStyle, refs} =
       useFloatingPosition({
         placement,
         offset,
@@ -168,6 +170,43 @@ export const Tooltip = forwardRef<HTMLElement, Props>(
       }
     }, [isOpen, hideTooltip]);
 
+    const tooltipContent = (
+      <AnimatePresence>
+        {isOpen && (
+          <m.div
+            {...PopoverAnimation}
+            ref={refs.setFloating}
+            id={tooltipId}
+            role="tooltip"
+            onPointerEnter={() => {
+              showTooltipWithWarmup(true);
+            }}
+            onPointerLeave={() => {
+              hideTooltip();
+            }}
+            className={clsx(
+              'z-tooltip my-4 max-w-240 break-words rounded px-8 py-4 text-xs text-white shadow',
+              variant === 'positive' && 'bg-positive',
+              variant === 'danger' && 'bg-danger',
+              variant === 'neutral' && 'bg-toast'
+            )}
+            style={{
+              position: strategy,
+              top: y ?? '',
+              left: x ?? '',
+            }}
+          >
+            <div
+              ref={arrowRef as Ref<HTMLDivElement>}
+              className="absolute h-8 w-8 rotate-45 bg-inherit"
+              style={arrowStyle}
+            />
+            {label}
+          </m.div>
+        )}
+      </AnimatePresence>
+    );
+
     return (
       <Fragment>
         {cloneElement(
@@ -198,48 +237,15 @@ export const Tooltip = forwardRef<HTMLElement, Props>(
               onBlur: () => {
                 hideTooltip();
               },
+              'aria-label':
+                typeof label === 'string' ? label : label.props.message,
             } as HTMLAttributes<HTMLElement>,
             domProps
           )
         )}
-        {rootEl &&
-          createPortal(
-            <AnimatePresence>
-              {isOpen && (
-                <m.div
-                  {...PopoverAnimation}
-                  ref={floating}
-                  id={tooltipId}
-                  role="tooltip"
-                  onPointerEnter={() => {
-                    showTooltipWithWarmup(true);
-                  }}
-                  onPointerLeave={() => {
-                    hideTooltip();
-                  }}
-                  className={clsx(
-                    'rounded shadow px-8 py-4 text-xs break-words max-w-240 my-4 z-tooltip text-white',
-                    variant === 'positive' && 'bg-positive',
-                    variant === 'danger' && 'bg-danger',
-                    variant === 'neutral' && 'bg-toast'
-                  )}
-                  style={{
-                    position: strategy,
-                    top: y ?? '',
-                    left: x ?? '',
-                  }}
-                >
-                  <div
-                    ref={arrowRef as Ref<HTMLDivElement>}
-                    className="absolute w-8 h-8 rotate-45 bg-inherit"
-                    style={arrowStyle}
-                  />
-                  {label}
-                </m.div>
-              )}
-            </AnimatePresence>,
-            rootEl
-          )}
+        {usePortal
+          ? rootEl && createPortal(tooltipContent, rootEl)
+          : tooltipContent}
       </Fragment>
     );
   }

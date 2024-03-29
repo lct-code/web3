@@ -2,7 +2,7 @@
 
 namespace Common\Workspaces\Controllers;
 
-use App\User;
+use App\Models\User;
 use Auth;
 use Common\Core\BaseController;
 use Common\Workspaces\Actions\JoinWorkspace;

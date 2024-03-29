@@ -11,14 +11,16 @@ interface Response extends BackendResponse {
 export function resetMinutesLimitQuery() {
   const {user} = getBootstrapData();
   if (user?.id) {
-    queryClient.resetQueries(['minutesLimit', user.id]);
+    queryClient.resetQueries({queryKey: ['minutesLimit', user.id]});
   }
 }
 
 export function useUserMinutesLimit() {
   const {user} = useAuth();
   const userId = user?.id!;
-  return useQuery(['minutesLimit', userId], () => fetchLimit(userId), {
+  return useQuery({
+    queryKey: ['minutesLimit', userId],
+    queryFn: () => fetchLimit(userId),
     enabled: userId != null,
   });
 }

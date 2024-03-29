@@ -32,7 +32,7 @@ export function CreateUserPage() {
       }}
       form={form}
       title={<Trans message="Add new user" />}
-      isLoading={createUser.isLoading}
+      isLoading={createUser.isPending}
       avatarManager={avatarManager}
     >
       <FormTextField

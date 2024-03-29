@@ -7,7 +7,7 @@ export interface PlainRect {
   height: number;
 }
 
-export function getBoundingClientRect(el: HTMLElement) {
+export function getBoundingClientRect(el: HTMLElement | Range) {
   const rect = el.getBoundingClientRect();
   return {
     top: rect.top,

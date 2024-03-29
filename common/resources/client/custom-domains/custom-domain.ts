@@ -1,6 +1,6 @@
 import {User} from '../auth/user';
 
-export interface CustomDomain {
+export interface CustomDomain<R = Record<string, any>> {
   id: number;
   host: string;
   user_id: number;
@@ -8,6 +8,6 @@ export interface CustomDomain {
   global: boolean;
   created_at: string;
   updated_at: string;
-  resource?: Record<string, any>;
+  resource?: R;
   model_type: 'customDomain';
 }

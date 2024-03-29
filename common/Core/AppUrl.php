@@ -2,45 +2,41 @@
 
 namespace Common\Core;
 
-use Common\Domains\CustomDomain;
-use Config;
-use DB;
 use Illuminate\Support\Arr;
-use Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class AppUrl
 {
     /**
      * If host in .env file and current request did not match, but
      * we were able to find a matching custom domain in database.
-     *
-     * @var CustomDomain|null
      */
-    public $matchedCustomDomain = null;
+    public ?object $matchedCustomDomain = null;
 
     /**
      * Url "app.url" config item was changed to dynamically.
-     *
-     * @var string|null
      */
-    public $newAppUrl;
+    public ?string $newAppUrl = null;
 
     /**
      * Whether hosts from APP_URL in .env file and current request match.
      * This will strip "www" and schemes from both and only compare hosts.
-     *
-     * @var bool
      */
-    public $envAndCurrentHostsAreEqual;
+    public bool $envAndCurrentHostsAreEqual;
 
-    /**
-     * @var string
-     */
-    public $htmlBaseUri;
+    public string $htmlBaseUri;
 
-    public function init()
+    public string $originalAppUrl;
+
+    public function init(): static
     {
-        $this->maybeDynamicallyUpdate();
+        $this->originalAppUrl = config('app.url');
+        if (config('common.site.dynamic_app_url')) {
+            $this->maybeDynamicallyUpdate();
+        } else {
+            $this->envAndCurrentHostsAreEqual = true;
+        }
         $this->registerHtmlBaseUri();
         return $this;
     }
@@ -80,7 +76,7 @@ class AppUrl
             // update social auth urls as well
             foreach (config('services') as $serviceName => $serviceConfig) {
                 if (isset($serviceConfig['redirect'])) {
-                    Config::set(
+                    config(
                         "services.$serviceName.redirect",
                         "$this->newAppUrl/secure/auth/social/$serviceName/callback",
                     );
@@ -100,7 +96,7 @@ class AppUrl
         }
     }
 
-    private function registerHtmlBaseUri()
+    private function registerHtmlBaseUri(): void
     {
         $htmlBaseUri = '/';
 
@@ -112,10 +108,7 @@ class AppUrl
         $this->htmlBaseUri = $htmlBaseUri;
     }
 
-    /**
-     * @return string
-     */
-    public function getRequestHost()
+    public function getRequestHost(): string
     {
         return $this->getHostFrom(app('request')->getHost());
     }

@@ -1,36 +1,40 @@
 <?php namespace App\Http\Controllers\Search;
 
+use App\Models\Album;
+use App\Models\Artist;
+use App\Models\Playlist;
+use App\Models\Track;
+use App\Models\User;
 use App\Services\Providers\ProviderResolver;
-use App\Track;
 use Common\Core\BaseController;
-use Common\Settings\Settings;
-use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 
 class SearchController extends BaseController
 {
-    public function __construct(
-        protected Request $request,
-        protected Settings $settings,
-        protected ProviderResolver $provider,
-    ) {
-    }
-
     public function index()
     {
-        $modelTypes = explode(',', $this->request->get('types'));
-
-        $limit = $this->request->get('limit', 3);
-        $query = $this->request->get('query');
-        $contentProvider = $this->provider->get(
-            'search',
-            request('localOnly') ? 'local' : null,
-        );
-        $response = [
+        $defaultModelTypes = [
+            Artist::MODEL_TYPE,
+            Album::MODEL_TYPE,
+            Track::MODEL_TYPE,
+            User::MODEL_TYPE,
+            Playlist::MODEL_TYPE,
+        ];
+        $loader = request('loader', 'searchPage');
+        $perPage = $loader === 'searchPage' ? 20 : 3;
+        $query = request()->route('query') ?: request('query');
+        $data = [
             'query' => e($query),
             'results' => [],
+            'loader' => $loader,
         ];
+
+        if (request('modelTypes')) {
+            $modelTypes = explode(',', request('modelTypes'));
+        } else {
+            $modelTypes = $defaultModelTypes;
+        }
 
         if ($query) {
             $modelTypes = array_filter($modelTypes, function ($modelType) {
@@ -40,29 +44,30 @@ class SearchController extends BaseController
                 )->allowed();
             });
 
-            $results = $contentProvider->search($query, $limit, $modelTypes);
-
-            if ($this->request->get('normalize')) {
-                $results = $results->mapWithKeys(function (
-                    $models,
-                    $modelName,
-                ) {
-                    return [
-                        $modelName => $models->map(
-                            fn($model) => $model->toNormalizedArray(),
-                        ),
-                    ];
-                });
-            }
-
-            $response['results'] = $results;
-
-            if ($this->request->get('flatten')) {
-                $response['results'] = Arr::flatten($response['results'], 1);
-            }
+            $data['results'] = (new ProviderResolver())
+                ->get('search')
+                ->search($query, request('page') ?? 1, $perPage, $modelTypes);
         }
 
-        return $this->success($response);
+        return $this->renderClientOrApi([
+            'pageName' => $loader === 'searchPage' ? 'search-page' : null,
+            'data' => $data,
+        ]);
+    }
+
+    public function searchSingleModelType(string $modelType)
+    {
+        $this->authorize('index', modelTypeToNamespace($modelType));
+
+        $data = (new ProviderResolver())
+            ->get('search')
+            ->search(request('query'), request('page'), request('perPage'), [
+                $modelType,
+            ]);
+
+        return $this->success([
+            'pagination' => $data[Str::plural($modelType)]->toArray(),
+        ]);
     }
 
     public function searchAudio(
@@ -72,7 +77,7 @@ class SearchController extends BaseController
     ) {
         $this->authorize('index', Track::class);
 
-        $results = $this->provider
+        $results = (new ProviderResolver())
             ->get('audio_search')
             ->search($trackId, $artistName, $trackName, 1);
 
@@ -84,7 +89,7 @@ class SearchController extends BaseController
      */
     private function filterOutBlockedArtists(array $results): array
     {
-        if ($artists = $this->settings->get('artists.blocked')) {
+        if ($artists = settings('artists.blocked')) {
             $artists = json_decode($artists);
 
             if (isset($results['artists'])) {

@@ -1,6 +1,6 @@
 <?php
 
-use App\Track;
+use App\Models\Track;
 use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration {

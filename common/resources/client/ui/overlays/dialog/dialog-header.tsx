@@ -13,11 +13,16 @@ interface DialogHeaderProps {
   onDismiss?: () => void;
   hideDismissButton?: boolean;
   leftAdornment?: ReactNode;
+  // Will hide default close button visually, but still accessible by screen readers
   rightAdornment?: ReactNode;
+  // Will show between title and close button
+  actions?: ReactNode;
   size?: DialogSize;
   padding?: string;
+  justify?: string;
   showDivider?: boolean;
   titleTextSize?: string;
+  titleFontWeight?: string;
   closeButtonSize?: ButtonSize;
 }
 export function DialogHeader(props: DialogHeaderProps) {
@@ -31,8 +36,11 @@ export function DialogHeader(props: DialogHeaderProps) {
     hideDismissButton = false,
     size,
     showDivider,
+    justify = 'justify-between',
+    titleFontWeight = 'font-semibold',
     titleTextSize = size === 'xs' ? 'text-xs' : 'text-sm',
     closeButtonSize = size === 'xs' ? 'xs' : 'sm',
+    actions,
   } = props;
   const {labelId, isDismissable, close} = useContext(DialogContext);
 
@@ -40,24 +48,23 @@ export function DialogHeader(props: DialogHeaderProps) {
     <div
       className={clsx(
         className,
-        'flex items-center justify-between gap-10 flex-shrink-0',
+        'flex flex-shrink-0 items-center gap-10',
+        titleFontWeight,
         showDivider && 'border-b',
         getPadding(props),
-        color || 'text-main'
+        color || 'text-main',
+        justify
       )}
     >
       {leftAdornment}
       <h3
         id={labelId}
-        className={clsx(
-          className,
-          titleTextSize,
-          'font-semibold leading-5 opacity-90'
-        )}
+        className={clsx(titleTextSize, 'mr-auto leading-5 opacity-90')}
       >
         {children}
       </h3>
       {rightAdornment}
+      {actions}
       {isDismissable && !hideDismissButton && (
         <IconButton
           aria-label="Dismiss"
@@ -69,10 +76,7 @@ export function DialogHeader(props: DialogHeaderProps) {
             }
           }}
           size={closeButtonSize}
-          className={clsx(
-            'text-muted ml-auto -mr-8',
-            rightAdornment && 'sr-only'
-          )}
+          className={clsx('-mr-8 text-muted', rightAdornment && 'sr-only')}
         >
           <CloseIcon />
         </IconButton>

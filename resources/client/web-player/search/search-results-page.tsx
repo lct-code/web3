@@ -2,16 +2,22 @@ import {
   SearchResponse,
   useSearchResults,
 } from '@app/web-player/search/requests/use-search-results';
-import {mainSearchModels} from '@app/web-player/search/search-autocomplete';
 import {Link, useParams} from 'react-router-dom';
 import {PageStatus} from '@common/http/page-status';
-import React, {Fragment, ReactNode, useEffect, useMemo, useState} from 'react';
+import React, {
+  Fragment,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {Tabs} from '@common/ui/tabs/tabs';
 import {TabList} from '@common/ui/tabs/tab-list';
 import {Tab} from '@common/ui/tabs/tab';
 import {Trans} from '@common/i18n/trans';
 import {TabPanel, TabPanels} from '@common/ui/tabs/tab-panels';
-import {Track} from '@app/web-player/tracks/track';
+import {Track, TRACK_MODEL} from '@app/web-player/tracks/track';
 import {TrackTable} from '@app/web-player/tracks/track-table/track-table';
 import {KeyboardArrowRightIcon} from '@common/icons/material/KeyboardArrowRight';
 import {ContentGrid} from '@app/web-player/playable-item/content-grid';
@@ -19,26 +25,29 @@ import {ArtistGridItem} from '@app/web-player/artists/artist-grid-item';
 import {AlbumGridItem} from '@app/web-player/albums/album-grid-item';
 import {PlaylistGridItem} from '@app/web-player/playlists/playlist-grid-item';
 import {UserGridItem} from '@app/web-player/users/user-grid-item';
-import {Artist} from '@app/web-player/artists/artist';
-import {Album} from '@app/web-player/albums/album';
-import {Playlist} from '@app/web-player/playlists/playlist';
-import {User} from '@common/auth/user';
+import {Artist, ARTIST_MODEL} from '@app/web-player/artists/artist';
+import {Album, ALBUM_MODEL} from '@app/web-player/albums/album';
+import {Playlist, PLAYLIST_MODEL} from '@app/web-player/playlists/playlist';
+import {User, USER_MODEL} from '@common/auth/user';
 import {IllustratedMessage} from '@common/ui/images/illustrated-message';
 import {SearchIcon} from '@common/icons/material/Search';
 import {useSettings} from '@common/core/settings/use-settings';
 import {UseQueryResult} from '@tanstack/react-query';
-import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 import {TextField} from '@common/ui/forms/input-field/text-field/text-field';
 import {useTrans} from '@common/i18n/use-trans';
 import {message} from '@common/i18n/message';
 import {useNavigate} from '@common/utils/hooks/use-navigate';
+import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
+import {SimplePaginationResponse} from '@common/http/backend-response/pagination-response';
+import {InfiniteScrollSentinel} from '@common/ui/infinite-scroll/infinite-scroll-sentinel';
+import {useInfiniteSearchResults} from '@app/web-player/search/requests/use-infinite-search-results';
+import {getScrollParent} from '@react-aria/utils';
 
 export function SearchResultsPage() {
   const {searchQuery} = useParams();
   const query = useSearchResults({
+    loader: 'searchPage',
     query: searchQuery,
-    types: mainSearchModels,
-    limit: 20,
   });
 
   return (
@@ -50,10 +59,11 @@ export function SearchResultsPage() {
 }
 
 function MobileSearchBar() {
-  const isMobile = useIsMobileMediaQuery();
   const {searchQuery = ''} = useParams();
   const navigate = useNavigate();
   const {trans} = useTrans();
+  const isMobile = useIsMobileMediaQuery();
+
   if (!isMobile) {
     return null;
   }
@@ -102,7 +112,13 @@ function PageContent({query}: PageContentProps) {
     );
   }
 
-  return <PageStatus query={query} loaderClassName="absolute inset-0 m-auto" />;
+  return (
+    <PageStatus
+      query={query}
+      loaderIsScreen={false}
+      loaderClassName="absolute inset-0 m-auto"
+    />
+  );
 }
 
 interface SearchResultsProps {
@@ -112,7 +128,8 @@ function SearchResults({results}: SearchResultsProps) {
   const {tabName = 'all', searchQuery} = useParams();
   const tabNames = useMemo(() => {
     const names = ['tracks', 'artists', 'albums', 'playlists', 'users'].filter(
-      tabName => results[tabName as keyof SearchResponse['results']]?.length
+      tabName =>
+        results[tabName as keyof SearchResponse['results']]?.data.length,
     );
     return ['all', ...names];
   }, [results]);
@@ -136,9 +153,7 @@ function SearchResults({results}: SearchResultsProps) {
     return base;
   };
 
-  const haveResults = Object.entries(results).some(
-    ([, items]) => items?.length
-  );
+  const haveResults = Object.entries(results).some(([, r]) => r?.data.length);
 
   if (!haveResults) {
     return (
@@ -163,27 +178,27 @@ function SearchResults({results}: SearchResultsProps) {
         <Tab elementType={Link} to={tabLink()}>
           <Trans message="Top results" />
         </Tab>
-        {results.tracks?.length ? (
+        {results.tracks?.data.length ? (
           <Tab elementType={Link} to={tabLink('tracks')}>
             <Trans message="Tracks" />
           </Tab>
         ) : null}
-        {results.artists?.length ? (
+        {results.artists?.data.length ? (
           <Tab elementType={Link} to={tabLink('artists')}>
             <Trans message="Artists" />
           </Tab>
         ) : null}
-        {results.albums?.length ? (
+        {results.albums?.data.length ? (
           <Tab elementType={Link} to={tabLink('albums')}>
             <Trans message="Albums" />
           </Tab>
         ) : null}
-        {results.playlists?.length ? (
+        {results.playlists?.data.length ? (
           <Tab elementType={Link} to={tabLink('playlists')}>
             <Trans message="Playlists" />
           </Tab>
         ) : null}
-        {results.users?.length ? (
+        {results.users?.data.length ? (
           <Tab elementType={Link} to={tabLink('users')}>
             <Trans message="Profiles" />
           </Tab>
@@ -193,29 +208,29 @@ function SearchResults({results}: SearchResultsProps) {
         <TabPanel>
           <TopResultsPanel results={results} />
         </TabPanel>
-        {results.tracks?.length ? (
+        {results.tracks?.data.length ? (
           <TabPanel>
-            <TrackResults tracks={results.tracks} />
+            <PaginatedTrackResults data={results.tracks!} />
           </TabPanel>
         ) : null}
-        {results.artists?.length ? (
+        {results.artists?.data.length ? (
           <TabPanel>
-            <ArtistResults artists={results.artists} />
+            <PaginatedArtistResults data={results.artists!} />
           </TabPanel>
         ) : null}
-        {results.albums?.length ? (
+        {results.albums?.data.length ? (
           <TabPanel>
-            <AlbumResults albums={results.albums} />
+            <PaginatedAlbumResults data={results.albums!} />
           </TabPanel>
         ) : null}
-        {results.playlists?.length ? (
+        {results.playlists?.data.length ? (
           <TabPanel>
-            <PlaylistResults playlists={results.playlists} />
+            <PaginatedPlaylistResults data={results.playlists!} />
           </TabPanel>
         ) : null}
-        {results.users?.length ? (
+        {results.users?.data.length ? (
           <TabPanel>
-            <ProfileResults users={results.users} />
+            <PaginatedProfileResults data={results.users!} />
           </TabPanel>
         ) : null}
       </TabPanels>
@@ -228,113 +243,173 @@ function TopResultsPanel({
 }: SearchResultsProps) {
   return (
     <Fragment>
-      {tracks?.length ? (
-        <TrackResults tracks={tracks.slice(0, 5)} showMore />
+      {tracks?.data.length ? (
+        <TrackResults data={tracks.data.slice(0, 5)} showMore />
       ) : null}
-      {artists?.length ? (
-        <ArtistResults artists={artists.slice(0, 5)} showMore />
+      {artists?.data.length ? (
+        <ArtistResults data={artists.data.slice(0, 5)} showMore />
       ) : null}
-      {albums?.length ? (
-        <AlbumResults albums={albums.slice(0, 5)} showMore />
+      {albums?.data.length ? (
+        <AlbumResults data={albums.data.slice(0, 5)} showMore />
       ) : null}
-      {playlists?.length ? (
-        <PlaylistResults playlists={playlists.slice(0, 5)} showMore />
+      {playlists?.data.length ? (
+        <PlaylistResults data={playlists.data.slice(0, 5)} showMore />
       ) : null}
-      {users?.length ? (
-        <ProfileResults users={users.slice(0, 5)} showMore />
+      {users?.data.length ? (
+        <ProfileResults data={users.data.slice(0, 5)} showMore />
       ) : null}
     </Fragment>
   );
 }
 
-interface TracksPanelProps {
-  tracks: Track[];
+interface ResultPanelProps<T> {
+  data: T[];
+  showMore?: boolean;
+  children?: ReactNode;
+}
+
+interface PaginatedResultPanelProps<T> {
+  data: SimplePaginationResponse<T>;
   showMore?: boolean;
 }
-function TrackResults({tracks, showMore}: TracksPanelProps) {
+
+function TrackResults({data, showMore, children}: ResultPanelProps<Track>) {
   return (
     <div className="py-24">
       <PanelTitle to={showMore ? 'tracks' : undefined}>
         <Trans message="Tracks" />
       </PanelTitle>
-      <TrackTable tracks={tracks} />
+      <TrackTable tracks={data} />
+      {children}
     </div>
   );
 }
 
-interface ArtistResultsProps {
-  artists: Artist[];
-  showMore?: boolean;
+function PaginatedTrackResults({
+  data,
+  showMore,
+}: PaginatedResultPanelProps<Track>) {
+  const query = useInfiniteSearchResults<Track>(TRACK_MODEL, data);
+  return (
+    <TrackResults data={query.items} showMore={showMore}>
+      <InfiniteScrollSentinel query={query} />
+    </TrackResults>
+  );
 }
-function ArtistResults({artists, showMore}: ArtistResultsProps) {
+
+function PaginatedArtistResults({
+  data,
+  showMore,
+}: PaginatedResultPanelProps<Artist>) {
+  const query = useInfiniteSearchResults<Artist>(ARTIST_MODEL, data);
+  return (
+    <ArtistResults data={query.items} showMore={showMore}>
+      <InfiniteScrollSentinel query={query} />
+    </ArtistResults>
+  );
+}
+
+function ArtistResults({data, showMore, children}: ResultPanelProps<Artist>) {
   return (
     <div className="py-24">
       <PanelTitle to={showMore ? 'artists' : undefined}>
         <Trans message="Artists" />
       </PanelTitle>
       <ContentGrid>
-        {artists.map(artist => (
+        {data.map(artist => (
           <ArtistGridItem key={artist.id} artist={artist} />
         ))}
       </ContentGrid>
+      {children}
     </div>
   );
 }
 
-interface AlbumResultsProps {
-  albums: Album[];
-  showMore?: boolean;
-}
-function AlbumResults({albums, showMore}: AlbumResultsProps) {
+function AlbumResults({data, showMore, children}: ResultPanelProps<Album>) {
   return (
     <div className="py-24">
       <PanelTitle to={showMore ? 'albums' : undefined}>
         <Trans message="Albums" />
       </PanelTitle>
       <ContentGrid>
-        {albums.map(album => (
+        {data.map(album => (
           <AlbumGridItem key={album.id} album={album} />
         ))}
       </ContentGrid>
+      {children}
     </div>
   );
 }
 
-interface PlaylistResultsProps {
-  playlists: Playlist[];
-  showMore?: boolean;
+function PaginatedAlbumResults({
+  data,
+  showMore,
+}: PaginatedResultPanelProps<Album>) {
+  const query = useInfiniteSearchResults<Album>(ALBUM_MODEL, data);
+  return (
+    <AlbumResults data={query.items} showMore={showMore}>
+      <InfiniteScrollSentinel query={query} />
+    </AlbumResults>
+  );
 }
-function PlaylistResults({playlists, showMore}: PlaylistResultsProps) {
+
+function PlaylistResults({
+  data,
+  showMore,
+  children,
+}: ResultPanelProps<Playlist>) {
   return (
     <div className="py-24">
       <PanelTitle to={showMore ? 'playlists' : undefined}>
         <Trans message="Playlists" />
       </PanelTitle>
       <ContentGrid>
-        {playlists.map(album => (
-          <PlaylistGridItem key={album.id} playlist={album} />
+        {data.map(playlist => (
+          <PlaylistGridItem key={playlist.id} playlist={playlist} />
         ))}
       </ContentGrid>
+      {children}
     </div>
   );
 }
 
-interface ProfileResultsProps {
-  users: User[];
-  showMore?: boolean;
+function PaginatedPlaylistResults({
+  data,
+  showMore,
+}: PaginatedResultPanelProps<Playlist>) {
+  const query = useInfiniteSearchResults<Playlist>(PLAYLIST_MODEL, data);
+  return (
+    <PlaylistResults data={query.items} showMore={showMore}>
+      <InfiniteScrollSentinel query={query} />
+    </PlaylistResults>
+  );
 }
-function ProfileResults({users, showMore}: ProfileResultsProps) {
+
+function ProfileResults({data, showMore, children}: ResultPanelProps<User>) {
   return (
     <div className="py-24">
       <PanelTitle to={showMore ? 'users' : undefined}>
         <Trans message="Profiles" />
       </PanelTitle>
       <ContentGrid>
-        {users.map(user => (
+        {data.map(user => (
           <UserGridItem key={user.id} user={user} />
         ))}
       </ContentGrid>
+      {children}
     </div>
+  );
+}
+
+function PaginatedProfileResults({
+  data,
+  showMore,
+}: PaginatedResultPanelProps<User>) {
+  const query = useInfiniteSearchResults<User>(USER_MODEL, data);
+  return (
+    <ProfileResults data={query.items} showMore={showMore}>
+      <InfiniteScrollSentinel query={query} />
+    </ProfileResults>
   );
 }
 
@@ -343,10 +418,20 @@ interface PanelTitleProps {
   to?: string;
 }
 function PanelTitle({children, to}: PanelTitleProps) {
+  const ref = useRef<HTMLHeadingElement>(null!);
   return (
-    <h2 className="text-2xl font-medium mb-24 w-max">
+    <h2 className="mb-24 w-max text-2xl font-medium" ref={ref}>
       {to ? (
-        <Link to={to} className="hover:text-primary flex items-center gap-2">
+        <Link
+          to={to}
+          className="flex items-center gap-2 hover:text-primary"
+          onClick={() => {
+            const scrollParent = getScrollParent(ref.current);
+            if (scrollParent) {
+              scrollParent.scrollTo({top: 0});
+            }
+          }}
+        >
           {children}
           <KeyboardArrowRightIcon className="mt-4" />
         </Link>

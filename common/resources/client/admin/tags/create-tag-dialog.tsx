@@ -52,7 +52,7 @@ export function CreateTagDialog() {
         </Button>
         <Button
           form={formId}
-          disabled={createNewTag.isLoading}
+          disabled={createNewTag.isPending}
           variant="flat"
           color="primary"
           type="submit"

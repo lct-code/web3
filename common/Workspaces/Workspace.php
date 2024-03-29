@@ -2,18 +2,19 @@
 
 namespace Common\Workspaces;
 
-use App\User;
+use App\Models\User;
 use App\Workspaces\WorkspaceRelationships;
 use Auth;
-use Common\Search\Searchable;
+use Common\Core\BaseModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Workspace extends Model
+class Workspace extends BaseModel
 {
-    use WorkspaceRelationships, Searchable, HasFactory;
+    use WorkspaceRelationships, HasFactory;
+
+    const MODEL_TYPE = 'workspace';
 
     protected $guarded = ['id'];
 
@@ -117,6 +118,15 @@ class Workspace extends Model
         return $this;
     }
 
+    public function toNormalizedArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'model_type' => self::MODEL_TYPE,
+        ];
+    }
+
     public function toSearchableArray(): array
     {
         return [
@@ -135,5 +145,10 @@ class Workspace extends Model
     protected static function newFactory(): WorkspaceFactory
     {
         return WorkspaceFactory::new();
+    }
+
+    public static function getModelTypeAttribute(): string
+    {
+        return self::MODEL_TYPE;
     }
 }

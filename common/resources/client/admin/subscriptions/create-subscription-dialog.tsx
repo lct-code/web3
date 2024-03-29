@@ -43,7 +43,7 @@ export function CreateSubscriptionDialog() {
         </Button>
         <Button
           form={formId}
-          disabled={createSubscription.isLoading}
+          disabled={createSubscription.isPending}
           variant="flat"
           color="primary"
           type="submit"

@@ -3,7 +3,6 @@ import {FormTextField} from '@common/ui/forms/input-field/text-field/text-field'
 import {Trans} from '@common/i18n/trans';
 import {FormImageSelector} from '@common/ui/images/image-selector';
 import {FormNormalizedModelField} from '@common/ui/forms/normalized-model-field';
-import {ALBUM_MODEL} from '@app/web-player/albums/album';
 import {FormArtistPicker} from '@app/web-player/artists/artist-picker/form-artist-picker';
 import {FormNormalizedModelChipField} from '@common/tags/form-normalized-model-chip-field';
 import {useTrans} from '@common/i18n/use-trans';
@@ -31,7 +30,7 @@ export function TrackForm({
   const isMobile = useIsMobileMediaQuery();
 
   return (
-    <div className="md:flex gap-24">
+    <div className="gap-24 md:flex">
       <div className="flex-shrink-0">
         <FormImageSelector
           name="image"
@@ -45,7 +44,7 @@ export function TrackForm({
           {uploadButton ? uploadButton : <TrackFormUploadButton />}
         </div>
       </div>
-      <div className="flex-auto mt-24 md:mt-0">
+      <div className="mt-24 flex-auto md:mt-0">
         <FormTextField
           name="name"
           label={<Trans message="Name" />}
@@ -58,9 +57,7 @@ export function TrackForm({
             className="mb-24"
             label={<Trans message="Album" />}
             name="album_id"
-            modelType={ALBUM_MODEL}
-            openMenuOnFocus
-            customEndpoint="search/suggestions"
+            endpoint="search/suggestions/album"
           />
         )}
         <FormArtistPicker name="artists" className="mb-24" />

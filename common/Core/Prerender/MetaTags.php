@@ -99,20 +99,12 @@ class MetaTags implements Arrayable
         return url($this->get('og:image'));
     }
 
-    /**
-     * @param string $position
-     * @return array
-     */
-    public function getMenu($position)
+    public function getMenu(string $position): array
     {
-        $menus = $this->settings->getJson('menus');
         $default = ['items' => []];
-
         return Arr::first(
-            $menus,
-            function ($menu) use ($position) {
-                return $menu['position'] === $position;
-            },
+            settings('menus'),
+            fn($menu) => in_array($position, $menu['positions']),
             $default,
         );
     }

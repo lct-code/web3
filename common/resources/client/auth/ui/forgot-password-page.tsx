@@ -68,7 +68,7 @@ export function ForgotPasswordPage() {
           variant="flat"
           color="primary"
           size="md"
-          disabled={sendEmail.isLoading}
+          disabled={sendEmail.isPending}
         >
           <Trans message="Continue" />
         </Button>

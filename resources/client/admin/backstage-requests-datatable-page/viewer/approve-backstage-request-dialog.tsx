@@ -58,8 +58,8 @@ export function ApproveBackstageRequestDialog({request}: Props) {
             name="notes"
             placeholder={trans(
               message(
-                'Add any extra notes that should be sent to use via notification email'
-              )
+                'Add any extra notes that should be sent to use via notification email',
+              ),
             )}
             inputElementType="textarea"
             rows={6}
@@ -75,7 +75,7 @@ export function ApproveBackstageRequestDialog({request}: Props) {
           color="primary"
           type="submit"
           form={formId}
-          disabled={approveRequest.isLoading}
+          disabled={approveRequest.isPending}
         >
           <Trans message="Approve" />
         </Button>

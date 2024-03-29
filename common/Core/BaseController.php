@@ -1,8 +1,9 @@
 <?php namespace Common\Core;
 
-use App\User;
-use Common\Auth\Roles\Role;
+use App\Models\User;
 use Common\Core\Prerender\HandlesSeo;
+use Common\Core\Rendering\DetectsCrawlers;
+use Common\Core\Rendering\RendersClientSideApp;
 use Illuminate\Auth\Access\Response as AuthResponse;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Support\Arrayable;
@@ -16,7 +17,12 @@ use Illuminate\Support\Facades\Auth;
 
 class BaseController extends Controller
 {
-    use AuthorizesRequests, DispatchesJobs, ValidatesRequests, HandlesSeo;
+    use AuthorizesRequests,
+        DispatchesJobs,
+        ValidatesRequests,
+        HandlesSeo,
+        RendersClientSideApp,
+        DetectsCrawlers;
 
     // todo: refactor bedrive and belink policies to use basePolicy permission check and remove guest fetching here
 
@@ -38,9 +44,59 @@ class BaseController extends Controller
             $guest = new User();
             // make sure ID is not NULL to avoid false positives in authorization
             $guest->forceFill(['id' => -1]);
-            $guest->setRelation('roles', Role::where('guests', 1)->get());
+            $guest->setRelation('roles', collect([app('guestRole')]));
             return $this->authorizeForUser($guest, $ability, $arguments);
         }
+    }
+
+    public function renderClientOrApi(array $options)
+    {
+        $ssrEnabled =
+            config('common.site.ssr_enabled') && !Arr::get($options, 'noSSR');
+        $data = Arr::get($options, 'data', []);
+        $pageName = Arr::get($options, 'pageName');
+        $isCrawler = $this->isCrawler();
+        if ($pageName) {
+            $customPath = storage_path(
+                "app/editable-views/seo-tags/$pageName.blade.php",
+            );
+            $seoTagsView = file_exists($customPath)
+                ? "editable-views::seo-tags.$pageName"
+                : "seo.$pageName.seo-tags";
+        }
+
+        // if it's an API request, simply return data as JSON
+        if (isApiRequest()) {
+            // only include SEO tags for internal API requests
+            if (requestIsFromFrontend() && isset($seoTagsView)) {
+                $data['seo'] = view($seoTagsView, $options['data'])->render();
+            }
+            return response()->json($data);
+        }
+
+        // if it's a web request and SSR is disabled, prerender a simple blade page for crawlers
+        if (
+            !Arr::get($options, 'noPrerender') &&
+            !$ssrEnabled &&
+            $isCrawler &&
+            $pageName &&
+            file_exists(
+                resource_path("views/seo/$pageName/prerender.blade.php"),
+            )
+        ) {
+            return view("seo.$pageName.prerender", $data)->with([
+                'htmlBaseUri' => app(AppUrl::class)->htmlBaseUri,
+                'seoTagsView' => $seoTagsView ?? null,
+            ]);
+        }
+
+        // finally render the full react app with optional SSR
+        return $this->renderClientSideApp([
+            'pageName' => $pageName,
+            'pageData' => $data,
+            'seoTagsView' => $seoTagsView ?? null,
+            'noSSR' => !$ssrEnabled,
+        ]);
     }
 
     public function success(
@@ -74,7 +130,7 @@ class BaseController extends Controller
      * Return error response with specified messages.
      */
     public function error(
-        string $message = '',
+        ?string $message = '',
         array $errors = [],
         int $status = 422,
         $data = [],

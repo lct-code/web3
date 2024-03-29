@@ -17,13 +17,13 @@ export default function AdminReportPage() {
   const title = <Trans message="Visitors report" />;
 
   return (
-    <div className="min-h-full gap-12 md:gap-24 p-12 md:p-24 overflow-x-hidden">
-      <div className="md:flex items-center justify-between gap-24 mb-24">
+    <div className="min-h-full gap-12 overflow-x-hidden p-12 md:gap-24 md:p-24">
+      <div className="mb-24 items-center justify-between gap-24 md:flex">
         <StaticPageTitle>{title}</StaticPageTitle>
-        <h1 className="mb-24 md:mb-0 text-3xl font-light">{title}</h1>
+        <h1 className="mb-24 text-3xl font-light md:mb-0">{title}</h1>
         <ReportDateSelector value={dateRange} onChange={setDateRange} />
       </div>
-      <AdminHeaderReport report={data?.headerReport} dateRange={dateRange} />
+      <AdminHeaderReport report={data?.headerReport} />
       <VisitorsReportCharts
         report={data?.visitorsReport}
         isLoading={isLoading}

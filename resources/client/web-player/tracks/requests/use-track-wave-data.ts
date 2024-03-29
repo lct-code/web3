@@ -2,7 +2,6 @@ import {useQuery} from '@tanstack/react-query';
 import {apiClient, queryClient} from '@common/http/query-client';
 import {BackendResponse} from '@common/http/backend-response/backend-response';
 import {Comment} from '@common/comments/comment';
-import {showHttpErrorToast} from '@common/utils/http/show-http-error-toast';
 
 interface WaveDataResponse extends BackendResponse {
   waveData: number[][];
@@ -14,15 +13,16 @@ function queryKey(trackId: number | string) {
 }
 
 export function invalidateWaveData(trackId: number | string) {
-  queryClient.invalidateQueries(queryKey(trackId));
+  queryClient.invalidateQueries({queryKey: queryKey(trackId)});
 }
 
 export function useTrackWaveData(
   trackId: number | string,
-  {enabled}: {enabled?: boolean} = {}
+  {enabled}: {enabled?: boolean} = {},
 ) {
-  return useQuery(queryKey(trackId), () => fetchWaveData(trackId), {
-    onError: err => showHttpErrorToast(err),
+  return useQuery({
+    queryKey: queryKey(trackId),
+    queryFn: () => fetchWaveData(trackId),
     enabled,
   });
 }

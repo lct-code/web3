@@ -6,17 +6,17 @@ export type RangedDatasetGranularity =
   | 'month'
   | 'year';
 
-export interface ReportMetric<T extends DatasetItem = DatasetItem> {
+export interface ReportMetric<T = unknown, E = unknown> {
   labels?: string[];
   granularity?: RangedDatasetGranularity;
   total?: number;
-  datasets: {label: string; data: T[]}[];
+  datasets: ({label: string; data: T[]} & E)[];
 }
 
 export interface DatasetItem {
   label?: string;
   value: number;
-  date: string;
+  date?: string;
   endDate?: string;
 }
 

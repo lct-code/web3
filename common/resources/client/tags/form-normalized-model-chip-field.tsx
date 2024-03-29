@@ -20,7 +20,7 @@ export function FormNormalizedModelChipField({
   allowCustomValue = false,
 }: Props) {
   const [inputValue, setInputValue] = useState('');
-  const {data, isLoading} = useNormalizedModels(model, {
+  const {data, isLoading} = useNormalizedModels(`normalized-models/${model}`, {
     query: inputValue,
   });
   return (
@@ -43,7 +43,7 @@ export function FormNormalizedModelChipField({
           startIcon={
             result.image ? (
               <img
-                className="rounded-full object-cover w-24 h-24"
+                className="h-24 w-24 rounded-full object-cover"
                 src={result.image}
                 alt=""
               />

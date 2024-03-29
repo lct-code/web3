@@ -17,7 +17,7 @@ export const loadImage = (
       if (image.naturalWidth >= minWidth) {
         resolve(image);
       } else {
-        reject(image);
+        reject('Could not load youtube image');
       }
     };
     Object.assign(image, {onload: handler, onerror: handler, src});

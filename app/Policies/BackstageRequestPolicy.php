@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\BackstageRequest;
-use App\User;
+use App\Models\BackstageRequest;
+use App\Models\User;
 use Common\Core\Policies\BasePolicy;
 
 class BackstageRequestPolicy extends BasePolicy

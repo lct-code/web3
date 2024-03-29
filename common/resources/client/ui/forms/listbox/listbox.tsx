@@ -4,6 +4,7 @@ import React, {
   ComponentPropsWithoutRef,
   JSXElementConstructor,
   ReactElement,
+  ReactNode,
   RefObject,
   useEffect,
   useMemo,
@@ -24,13 +25,20 @@ interface Props extends ComponentPropsWithoutRef<'div'> {
   listbox: UseListboxReturn;
   mobileOverlay?: JSXElementConstructor<OverlayProps>;
   children?: ReactElement;
+  searchField?: ReactNode;
   isLoading?: boolean;
+  onClose?: () => void;
+  prepend?: boolean;
 }
 export function Listbox({
   listbox,
   children: trigger,
   isLoading,
   mobileOverlay = Tray,
+  searchField,
+  onClose,
+  prepend,
+  className: listboxClassName,
   ...domProps
 }: Props) {
   const isMobile = useIsMobileDevice();
@@ -45,16 +53,18 @@ export function Listbox({
     refs,
   } = listbox;
 
-  const Overlay = isMobile ? mobileOverlay : Popover;
+  const Overlay = !prepend && isMobile ? mobileOverlay : Popover;
 
   const className = clsx(
-    'py-4 text-base sm:text-sm outline-none bg-paper shadow-xl border max-h-inherit overflow-y-auto',
+    'text-base sm:text-sm outline-none bg max-h-inherit flex flex-col',
+    !prepend && 'shadow-xl border py-4',
+    listboxClassName,
 
     // tray will apply its own rounding and max width
-    Overlay === Popover && 'rounded',
+    Overlay === Popover && 'rounded-panel',
     Overlay === Popover && floatingWidth === 'auto'
       ? `max-w-288 ${floatingMinWidth}`
-      : ''
+      : '',
   );
 
   const children = useMemo(() => {
@@ -65,7 +75,7 @@ export function Listbox({
         prev.push(
           cloneElement(curr.element, {
             key: curr.element.key || curr.element.props.value,
-          })
+          }),
         );
       } else if (!renderedSections.includes(curr.section)) {
         const section = cloneElement(curr.section, {
@@ -82,36 +92,44 @@ export function Listbox({
     }, []);
   }, [collection]);
 
+  const showContent = children.length > 0 || (showEmptyMessage && !isLoading);
+
+  const innerContent = showContent ? (
+    <div className={className} role="presentation">
+      {searchField}
+      <FocusContainer isLoading={isLoading} {...domProps}>
+        {children}
+      </FocusContainer>
+    </div>
+  ) : null;
+
   return (
     <ListBoxContext.Provider value={listbox}>
       {trigger}
-      {rootEl &&
-        createPortal(
-          <AnimatePresence>
-            {isOpen && (children.length > 0 || showEmptyMessage) && (
-              <Overlay
-                triggerRef={refs.reference as RefObject<HTMLElement>}
-                restoreFocus
-                isOpen={isOpen}
-                onClose={() => {
-                  setIsOpen(false);
-                }}
-                isDismissable
-                style={positionStyle}
-                ref={floating}
-              >
-                <FocusContainer
-                  isLoading={isLoading}
-                  className={className}
-                  {...domProps}
+      {prepend
+        ? innerContent
+        : rootEl &&
+          createPortal(
+            <AnimatePresence>
+              {isOpen && showContent && (
+                <Overlay
+                  triggerRef={refs.reference as RefObject<HTMLElement>}
+                  restoreFocus
+                  isOpen={isOpen}
+                  onClose={() => {
+                    onClose?.();
+                    setIsOpen(false);
+                  }}
+                  isDismissable
+                  style={positionStyle}
+                  ref={floating}
                 >
-                  {children}
-                </FocusContainer>
-              </Overlay>
-            )}
-          </AnimatePresence>,
-          rootEl
-        )}
+                  {innerContent!}
+                </Overlay>
+              )}
+            </AnimatePresence>,
+            rootEl,
+          )}
     </ListBoxContext.Provider>
   );
 }
@@ -131,7 +149,7 @@ function FocusContainer({
     listboxId,
     virtualFocus,
     focusItem,
-    state: {activeIndex, setActiveIndex},
+    state: {activeIndex, setActiveIndex, selectedIndex},
   } = useListboxContext();
   const autoFocusRef = useRef(true);
   const domRef = useRef<HTMLDivElement>(null);
@@ -145,46 +163,40 @@ function FocusContainer({
   // on trigger keyDown and focus won't be applied to items
   useEffect(() => {
     if (autoFocusRef.current) {
+      const indexToFocus = activeIndex ?? selectedIndex;
       // if no activeIndex, focus menu itself
-      if (activeIndex == null && !virtualFocus) {
+      if (indexToFocus == null && !virtualFocus) {
         requestAnimationFrame(() => {
           domRef.current?.focus({preventScroll: true});
         });
-      } else if (activeIndex != null) {
+      } else if (indexToFocus != null) {
         // wait until next frame, otherwise auto scroll might not work
         requestAnimationFrame(() => {
-          focusItem('increment', activeIndex);
+          focusItem('increment', indexToFocus);
         });
       }
     }
     autoFocusRef.current = false;
-  }, [activeIndex, focusItem, virtualFocus]);
+  }, [activeIndex, selectedIndex, focusItem, virtualFocus]);
 
   return (
     <div
-      tabIndex={-1}
+      tabIndex={virtualFocus ? undefined : -1}
       role={role}
       id={listboxId}
-      className={className}
+      className="flex-auto overflow-y-auto overscroll-contain outline-none"
       ref={domRef}
       {...domProps}
     >
-      {children.length ? children : <EmptyMessage isLoading={isLoading} />}
+      {children.length ? children : <EmptyMessage />}
     </div>
   );
 }
 
-interface EmptyMessageProps {
-  isLoading?: boolean;
-}
-function EmptyMessage({isLoading}: EmptyMessageProps) {
+function EmptyMessage() {
   return (
-    <div className="italic px-8 py-4 text-sm text-muted">
-      {isLoading ? (
-        <Trans message="Loading..." />
-      ) : (
-        <Trans message="There are no items matching your query" />
-      )}
+    <div className="px-8 py-4 text-sm italic text-muted">
+      <Trans message="There are no items matching your query" />
     </div>
   );
 }

@@ -23,6 +23,8 @@ export function UpdateLyricDialog({lyric}: Props) {
       id: lyric.id,
       track_id: lyric.track_id,
       text: lyric.text,
+      is_synced: lyric.is_synced,
+      duration: lyric.duration,
     },
   });
   const updateLyric = useUpdateLyric(form);
@@ -51,7 +53,7 @@ export function UpdateLyricDialog({lyric}: Props) {
         </Button>
         <Button
           form={formId}
-          disabled={updateLyric.isLoading}
+          disabled={updateLyric.isPending}
           variant="flat"
           color="primary"
           type="submit"

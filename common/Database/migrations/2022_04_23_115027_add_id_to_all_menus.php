@@ -15,7 +15,7 @@ class AddIdToAllMenus extends Migration
         $setting = Setting::where('name', 'menus')->first();
         if ( ! $setting) return;
 
-        $transformed = collect(json_decode($setting['value'], true))->map(
+        $transformed = collect($setting['value'])->map(
             function ($menu) {
                 if (!isset($menu['id'])) {
                     $menu['id'] = Str::random('6');

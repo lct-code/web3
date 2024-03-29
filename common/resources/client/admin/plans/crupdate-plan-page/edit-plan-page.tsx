@@ -41,7 +41,7 @@ function PageContent({product}: PageContentProps) {
       title={
         <Trans message="Edit “:name“ plan" values={{name: product.name}} />
       }
-      isLoading={updateProduct.isLoading}
+      isLoading={updateProduct.isPending}
     >
       <CrupdatePlanForm />
     </CrupdateResourceLayout>

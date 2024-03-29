@@ -4,6 +4,7 @@ use Carbon\Carbon;
 use Common\Settings\Setting;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class SettingsTableSeeder extends Seeder
 {
@@ -38,6 +39,22 @@ class SettingsTableSeeder extends Seeder
             }
             $setting['value'] = (string) $setting['value'];
 
+            // add ids to menus and menu items, if don't have one already
+            if ($setting['name'] === 'menus') {
+                $value = json_decode($setting['value'], true);
+                foreach ($value as &$menu) {
+                    if (!isset($menu['id'])) {
+                        $menu['id'] = Str::random(6);
+                    }
+                    foreach ($menu['items'] as &$item) {
+                        if (!isset($item['id'])) {
+                            $item['id'] = Str::random(6);
+                        }
+                    }
+                }
+                $setting['value'] = json_encode($value);
+            }
+
             return $setting;
         }, $defaultSettings);
 
@@ -58,13 +75,10 @@ class SettingsTableSeeder extends Seeder
     /**
      * Merge existing menus setting json with new one.
      */
-    private function mergeMenusSetting(array $defaultSettings)
+    private function mergeMenusSetting(array $defaultSettings): void
     {
         $existing =
-            json_decode(
-                $this->setting->where('name', 'menus')->first()->value,
-                true,
-            ) ?? [];
+            $this->setting->where('name', 'menus')->first()->value ?? [];
         $new = json_decode(
             Arr::first(
                 $defaultSettings,
@@ -73,17 +87,18 @@ class SettingsTableSeeder extends Seeder
             true,
         );
 
-        foreach ($new as $menu) {
-            $alreadyHas = Arr::first($existing, function ($value) use ($menu) {
-                return $value['name'] === $menu['name'];
-            });
+        foreach ($new as $newMenu) {
+            $alreadyHas = Arr::first(
+                $existing,
+                fn($value) => $value['name'] === $newMenu['name'],
+            );
 
-            foreach ($menu['items'] as $index => $item) {
-                $menu['items'][$index]['order'] = $index;
+            foreach ($newMenu['items'] as $index => $item) {
+                $newMenu['items'][$index]['order'] = $index;
             }
 
             if (!$alreadyHas) {
-                $existing[] = $menu;
+                $existing[] = $newMenu;
             }
         }
 

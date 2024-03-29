@@ -9,7 +9,7 @@ class GmailApiMailTransport extends AbstractTransport
 {
     public function doSend(SentMessage $message): void
     {
-        app(GmailClient::class)->sendEmail($message->toString());
+        (new GmailClient())->sendEmail($message->toString());
     }
 
     public function __toString(): string

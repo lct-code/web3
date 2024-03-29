@@ -1,7 +1,7 @@
 <?php namespace App\Http\Controllers\UserLibrary;
 
+use App\Models\User;
 use App\Services\Tracks\Queries\LibraryTracksQuery;
-use App\User;
 use Carbon\Carbon;
 use Common\Core\BaseController;
 use Common\Database\Paginator;
@@ -22,8 +22,8 @@ class UserLibraryTracksController extends BaseController
         $this->authorize('show', $user);
 
         $query = (new LibraryTracksQuery([
-            'orderBy' => request()->get('orderBy', 'likes_created_at'),
-            'orderDir' => request()->get('orderDir', 'desc'),
+            'orderBy' => request('orderBy', 'likes.created_at'),
+            'orderDir' => request('orderDir', 'desc'),
         ]))->get($user->id);
         $paginator = new Paginator($query, request()->all());
         $paginator->dontSort = true;
@@ -58,10 +58,6 @@ class UserLibraryTracksController extends BaseController
         ) {
             $likeable['user_id'] = Auth::user()->id;
             $likeable['created_at'] = Carbon::now();
-            // track => App\Track
-            $likeable['likeable_type'] = modelTypeToNamespace(
-                $likeable['likeable_type'],
-            );
             return $likeable;
         });
         DB::table('likes')->insert($likeables->toArray());
@@ -78,9 +74,7 @@ class UserLibraryTracksController extends BaseController
         $userId = Auth::id();
         $values = collect(request()->get('likeables'))
             ->map(function ($likeable) use ($userId) {
-                // track => App\Track
-                $likeableType = 'App\\\\' . ucfirst($likeable['likeable_type']);
-                return "('$userId', '{$likeable['likeable_id']}', '{$likeableType}')";
+                return "('$userId', '{$likeable['likeable_id']}', '{$likeable['likeable_type']}')";
             })
             ->implode(', ');
         DB::table('likes')

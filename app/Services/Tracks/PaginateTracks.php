@@ -2,25 +2,23 @@
 
 namespace App\Services\Tracks;
 
-use App\Genre;
-use App\Track;
+use App\Models\Track;
 use Common\Database\Datasource\Datasource;
 use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Str;
 
 class PaginateTracks
 {
-    public function execute(array $params, Genre $genre = null): AbstractPaginator
+    public function execute(array $params, $builder = null): AbstractPaginator
     {
-        if ($genre) {
-            $builder = $genre->tracks();
-        } else {
+        if (!$builder) {
             $builder = Track::query();
         }
 
         $builder
-            ->with('album')
-            ->with('artists');
+            ->with('album.artists')
+            ->with(['artists', 'genres'])
+            ->withCount('plays');
 
         $datasource = new Datasource($builder, $params);
         $order = $datasource->getOrder();

@@ -30,12 +30,16 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
+    rollupOptions: {
+      external: ['puppeteer', 'ioredis'],
+    },
   },
   plugins: [
     tsconfigPaths(),
     react(),
     laravel({
       input: ['resources/client/main.tsx'],
+      ssr: ['resources/client/server-entry.tsx'],
       refresh: false,
     }),
     basePath(),

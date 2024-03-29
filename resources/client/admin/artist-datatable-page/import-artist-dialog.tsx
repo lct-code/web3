@@ -66,7 +66,7 @@ export function ImportArtistDialog() {
           variant="flat"
           color="primary"
           type="submit"
-          disabled={importArtist.isLoading}
+          disabled={importArtist.isPending}
         >
           <Trans message="Import" />
         </Button>

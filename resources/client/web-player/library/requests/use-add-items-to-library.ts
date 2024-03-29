@@ -14,15 +14,15 @@ interface Payload {
 }
 
 export function useAddItemsToLibrary() {
-  return useMutation((payload: Payload) => addToLibrary(payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => addToLibrary(payload),
     onSuccess: (response, payload) => {
       toast(getMessage(payload.likeables[0]));
       userLibrary().add(payload.likeables);
       // tracks/albums/artists
-      queryClient.invalidateQueries([
-        `${payload.likeables[0].model_type}s`,
-        'library',
-      ]);
+      queryClient.invalidateQueries({
+        queryKey: [`${payload.likeables[0].model_type}s`, 'library'],
+      });
     },
     onError: r => showHttpErrorToast(r),
   });

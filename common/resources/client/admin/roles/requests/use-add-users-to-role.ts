@@ -13,19 +13,18 @@ interface Payload {
 }
 
 export function useAddUsersToRole(role: Role) {
-  return useMutation(
-    ({userIds}: Payload) => addUsersToRole({userIds, roleId: role.id}),
-    {
-      onSuccess: (response, payload) => {
-        toast(
-          message('Assigned [one 1 user|other :count users] to {role}', {
-            values: {count: payload.userIds.length, role: role.name},
-          })
-        );
-      },
-      onError: err => showHttpErrorToast(err),
-    }
-  );
+  return useMutation({
+    mutationFn: ({userIds}: Payload) =>
+      addUsersToRole({userIds, roleId: role.id}),
+    onSuccess: (response, payload) => {
+      toast(
+        message('Assigned [one 1 user|other :count users] to {role}', {
+          values: {count: payload.userIds.length, role: role.name},
+        }),
+      );
+    },
+    onError: err => showHttpErrorToast(err),
+  });
 }
 
 function addUsersToRole({

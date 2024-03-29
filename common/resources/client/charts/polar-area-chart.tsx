@@ -4,7 +4,7 @@ import {ChartColors} from './chart-colors';
 import {useSelectedLocale} from '../i18n/selected-locale';
 import {useMemo} from 'react';
 import {formatReportData} from './data/format-report-data';
-import {ReportMetric} from '../admin/analytics/report-metric';
+import {DatasetItem, ReportMetric} from '../admin/analytics/report-metric';
 import {FormattedDatasetItem} from './data/formatted-dataset-item';
 import clsx from 'clsx';
 
@@ -21,7 +21,7 @@ const PolarAreaChartOptions: ChartOptions<'polarArea'> = {
 
 interface PolarAreaChartProps
   extends Omit<BaseChartProps<'polarArea'>, 'type' | 'data'> {
-  data?: ReportMetric;
+  data?: ReportMetric<DatasetItem>;
 }
 export function PolarAreaChart({
   data,

@@ -1,15 +1,20 @@
 <?php
 
 use Common\Auth\Controllers\SocialAuthController;
+use Common\Auth\Controllers\TwoFactorQrCodeController;
 use Common\Billing\Invoices\InvoiceController;
 use Common\Core\Controllers\HomeController;
-use Common\Core\Controllers\UpdateController;
+use Common\Core\Update\UpdateController;
 use Common\Csv\BaseCsvExportController;
 use Common\Domains\CustomDomainController;
+use Common\Files\Controllers\DownloadFileController;
 use Common\Settings\Mail\ConnectGmailAccountController;
 use Common\Workspaces\Controllers\WorkspaceMembersController;
 
 Route::group(['middleware' => 'web'], function () {
+    // Download
+    Route::get('file-entries/download/{hashes}', [DownloadFileController::class, 'download']);
+
     // UPDATE
     Route::get('update', [UpdateController::class, 'show']);
     Route::get('secure/update', [UpdateController::class, 'show']);
@@ -67,7 +72,6 @@ Route::group(['middleware' => 'web'], function () {
     });
 
     // CUSTOM DOMAINS
-
     Route::group(
         ['prefix' => 'secure', 'middleware' => 'customDomainsEnabled'],
         function () {
@@ -85,6 +89,12 @@ Route::group(['middleware' => 'web'], function () {
             ]);
         },
     );
+
+    // TWO FACTOR AUTH
+    Route::get('auth/user/two-factor/qr-code', [
+        TwoFactorQrCodeController::class,
+        'show',
+    ])->middleware(['auth']);
 
     // Laravel Auth routes with names so route('login') and similar calls don't error out
     Route::get('login', [HomeController::class, 'show'])->name('login');

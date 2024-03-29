@@ -23,6 +23,8 @@ interface DashboardLayoutProps extends ComponentPropsWithoutRef<'div'> {
   initialRightSidenavStatus?: DashboardSidenavStatus;
   onRightSidenavChange?: (status: DashboardSidenavStatus) => void;
   height?: string;
+  gridClassName?: string;
+  blockBodyOverflow?: boolean;
 }
 export function DashboardLayout({
   children,
@@ -33,10 +35,13 @@ export function DashboardLayout({
   onRightSidenavChange,
   name,
   leftSidenavCanBeCompact,
-  height = 'h-full',
+  height = 'h-screen',
+  className,
+  gridClassName = 'dashboard-grid',
+  blockBodyOverflow = true,
   ...domProps
 }: DashboardLayoutProps) {
-  useBlockBodyOverflow();
+  useBlockBodyOverflow(!blockBodyOverflow);
   const isMobile = useMediaQuery('(max-width: 1024px)');
 
   const isCompactModeInitially = useMemo(() => {
@@ -46,7 +51,7 @@ export function DashboardLayout({
   const [leftSidenavStatus, setLeftSidenavStatus] = useControlledState(
     leftSidenav,
     isMobile ? 'closed' : defaultLeftSidenavStatus,
-    onLeftSidenavChange
+    onLeftSidenavChange,
   );
 
   const rightSidenavStatusDefault = useMemo(() => {
@@ -58,7 +63,7 @@ export function DashboardLayout({
     }
     const userSelected = getFromLocalStorage(
       `${name}.sidenav.right.position`,
-      'open'
+      'open',
     );
     if (userSelected != null) {
       return userSelected;
@@ -68,14 +73,14 @@ export function DashboardLayout({
   const [rightSidenavStatus, _setRightSidenavStatus] = useControlledState(
     rightSidenav,
     rightSidenavStatusDefault,
-    onRightSidenavChange
+    onRightSidenavChange,
   );
   const setRightSidenavStatus = useCallback(
     (status: DashboardSidenavStatus) => {
       _setRightSidenavStatus(status);
       setInLocalStorage(`${name}.sidenav.right.position`, status);
     },
-    [_setRightSidenavStatus, name]
+    [_setRightSidenavStatus, name],
   );
 
   const shouldShowUnderlay =
@@ -95,10 +100,7 @@ export function DashboardLayout({
     >
       <div
         {...domProps}
-        className={clsx(
-          'dashboard-grid test-overflow relative isolate',
-          height
-        )}
+        className={clsx('relative isolate', gridClassName, className, height)}
       >
         {children}
         <AnimatePresence>

@@ -192,7 +192,8 @@ class BaseSitemapGenerator
             "\n";
 
         foreach ($index as $resourceName => $resourceSitemapCount) {
-            for ($i = 0; $i <= $resourceSitemapCount; $i++) {
+            // sitemap count starts from 1
+            for ($i = 0; $i <= $resourceSitemapCount - 1; $i++) {
                 $url = "{$baseUrl}/{$resourceName}-sitemap-$i.xml";
                 $string .=
                     "\t<sitemap>\n" .

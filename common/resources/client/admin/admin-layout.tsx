@@ -8,7 +8,7 @@ import {DashboardNavbar} from '../ui/layout/dashboard-navbar';
 export function AdminLayout() {
   return (
     <DashboardLayout name="admin" leftSidenavCanBeCompact>
-      <DashboardNavbar size="sm" color="primary" menuPosition="admin-navbar" />
+      <DashboardNavbar size="sm" menuPosition="admin-navbar" />
       <DashboardSidenav position="left" size="sm">
         <AdminSidebar />
       </DashboardSidenav>

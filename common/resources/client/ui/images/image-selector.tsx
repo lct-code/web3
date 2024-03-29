@@ -45,7 +45,6 @@ interface ImageSelectorProps {
   disabled?: boolean;
   value?: string;
   onChange?: (newValue: string) => void;
-  highlightSelector?: string;
   defaultValue?: string;
   diskPrefix: string;
   showRemoveButton?: boolean;
@@ -149,7 +148,7 @@ export function ImageSelector({
   ) : null;
 
   const useDefaultButton =
-    defaultValue && value !== defaultValue ? (
+    defaultValue != null && value !== defaultValue ? (
       <Button
         variant="outline"
         color="primary"
@@ -217,7 +216,7 @@ export function ImageSelector({
           </VariantElement>
           {uploadStatus === 'inProgress' && (
             <ProgressBar
-              className="absolute top-0 left-0 right-0"
+              className="absolute left-0 right-0 top-0"
               size="xs"
               value={percentage}
             />
@@ -259,12 +258,12 @@ function InputVariant({
     return (
       <Fragment>
         <div
-          className={`${previewSize} border rounded bg-fg-base/8 p-6 relative overflow-hidden mb-10`}
+          className={`${previewSize} relative mb-10 overflow-hidden rounded border bg-fg-base/8 p-6`}
         >
           <img
             className={clsx(
-              'h-full mx-auto rounded',
-              stretchPreview ? 'object-cover' : 'object-contain'
+              'mx-auto h-full rounded',
+              stretchPreview ? 'object-cover' : 'object-contain',
             )}
             onClick={() => handleUpload()}
             src={imageUrl}
@@ -292,7 +291,7 @@ function InputVariant({
     className: clsx(
       inputFieldClassNames.input,
       'py-8',
-      'file:bg-primary file:text-on-primary file:border-none file:rounded file:text-sm file:font-semibold file:px-10 file:h-24 file:mr-10'
+      'file:bg-primary file:text-on-primary file:border-none file:rounded file:text-sm file:font-semibold file:px-10 file:h-24 file:mr-10',
     ),
   });
 }
@@ -317,8 +316,8 @@ function SquareVariant({
           previewSize,
           previewRadius,
           !imageUrl && 'border',
-          'bg-fg-base/8 z-20 flex flex-col items-center justify-center gap-14 bg-no-repeat bg-center group',
-          stretchPreview ? 'bg-cover' : 'bg-contain p-6'
+          'group z-20 flex flex-col items-center justify-center gap-14 bg-fg-base/8 bg-center bg-no-repeat',
+          stretchPreview ? 'bg-cover' : 'bg-contain p-6',
         )}
         style={imageUrl ? {backgroundImage: `url(${imageUrl})`} : undefined}
         onClick={() => handleUpload()}
@@ -331,7 +330,7 @@ function SquareVariant({
           color="white"
           size="xs"
           className={clsx(
-            showEditButtonOnHover && 'invisible group-hover:visible'
+            showEditButtonOnHover && 'invisible group-hover:visible',
           )}
           disabled={disabled}
         >
@@ -344,7 +343,7 @@ function SquareVariant({
       </div>
       {children}
       {(removeButton || useDefaultButton) && (
-        <div className="mt-14">
+        <div className="mt-8">
           {removeButton && cloneElement(removeButton, {variant: 'link'})}
           {useDefaultButton &&
             cloneElement(useDefaultButton, {variant: 'link'})}
@@ -371,8 +370,8 @@ function AvatarVariant({
       <AvatarPlaceholderIcon
         viewBox="0 0 48 48"
         className={clsx(
-          'w-full h-full text-primary/40 bg-primary-light/40',
-          previewRadius
+          'h-full w-full bg-primary-light/40 text-primary/40',
+          previewRadius,
         )}
       />
     );
@@ -386,19 +385,20 @@ function AvatarVariant({
         {imageUrl ? (
           <img
             src={imageUrl}
-            className={clsx('w-full h-full object-cover', previewRadius)}
+            className={clsx('h-full w-full object-cover', previewRadius)}
             alt=""
           />
         ) : (
           placeholderIcon
         )}
-        <div className="bg-paper shadow-xl absolute -bottom-6 -right-6 rounded-full">
+        <div className="absolute -bottom-6 -right-6 rounded-full bg-paper shadow-xl">
           <IconButton
             disabled={isLoading || disabled}
             type="button"
             variant="outline"
             size="sm"
             color="primary"
+            radius="rounded-full"
           >
             <AddAPhotoIcon />
           </IconButton>

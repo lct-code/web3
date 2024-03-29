@@ -31,9 +31,9 @@ class OutgoingMailCredentialsValidator implements SettingsValidator
         'sparkpost_secret', // Sparkpost
     ];
 
-    public function fails($settings)
+    public function fails($values)
     {
-        $this->setConfigDynamically($settings);
+        $this->setConfigDynamically($values);
 
         try {
             Mail::to(Auth::user()->email)->send(new MailCredentialsMailable());

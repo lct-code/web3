@@ -24,20 +24,20 @@ const Endpoint = (id: number) => `billing/products/${id}`;
 export function useUpdateProduct(form: UseFormReturn<UpdateProductPayload>) {
   const {trans} = useTrans();
   const navigate = useNavigate();
-  return useMutation(
-    (payload: UpdateProductPayload) => updateProduct(payload),
-    {
-      onSuccess: response => {
-        toast(trans(message('Plan updated')));
-        queryClient.invalidateQueries([Endpoint(response.product.id)]);
-        queryClient.invalidateQueries(
-          DatatableDataQueryKey('billing/products')
-        );
-        navigate('/admin/plans');
-      },
-      onError: err => onFormQueryError(err, form),
-    }
-  );
+  return useMutation({
+    mutationFn: (payload: UpdateProductPayload) => updateProduct(payload),
+    onSuccess: response => {
+      toast(trans(message('Plan updated')));
+      queryClient.invalidateQueries({
+        queryKey: [Endpoint(response.product.id)],
+      });
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('billing/products'),
+      });
+      navigate('/admin/plans');
+    },
+    onError: err => onFormQueryError(err, form),
+  });
 }
 
 function updateProduct({

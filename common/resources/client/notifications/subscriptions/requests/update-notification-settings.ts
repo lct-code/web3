@@ -15,7 +15,7 @@ type UpdateNotificationSettingsPayload = {
 }[];
 
 function UpdateNotificationSettings(
-  payload: UpdateNotificationSettingsPayload
+  payload: UpdateNotificationSettingsPayload,
 ): Promise<Response> {
   return apiClient
     .put('notifications/me/subscriptions', {selections: payload})
@@ -23,15 +23,13 @@ function UpdateNotificationSettings(
 }
 
 export function useUpdateNotificationSettings() {
-  return useMutation(
-    (payload: UpdateNotificationSettingsPayload) =>
+  return useMutation({
+    mutationFn: (payload: UpdateNotificationSettingsPayload) =>
       UpdateNotificationSettings(payload),
-    {
-      onSuccess: () => {
-        toast(message('Updated preferences'));
-        queryClient.invalidateQueries(['notification-subscriptions']);
-      },
-      onError: err => showHttpErrorToast(err),
-    }
-  );
+    onSuccess: () => {
+      toast(message('Updated preferences'));
+      queryClient.invalidateQueries({queryKey: ['notification-subscriptions']});
+    },
+    onError: err => showHttpErrorToast(err),
+  });
 }

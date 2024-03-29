@@ -25,7 +25,7 @@ export function CacheSettings() {
         variant="outline"
         size="xs"
         color="primary"
-        disabled={clearCache.isLoading}
+        disabled={clearCache.isPending}
         onClick={() => {
           clearCache.mutate();
         }}

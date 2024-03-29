@@ -18,16 +18,17 @@ export function useActiveUpload() {
   const uploadIdRef = useRef<string>();
 
   const uploadSingle = useFileUploadStore(s => s.uploadSingle);
+  const _abortUpload = useFileUploadStore(s => s.abortUpload);
   const updateFileUpload = useFileUploadStore(s => s.updateFileUpload);
   const activeUpload = useFileUploadStore(s =>
-    uploadIdRef.current ? s.fileUploads.get(uploadIdRef.current) : null
+    uploadIdRef.current ? s.fileUploads.get(uploadIdRef.current) : null,
   );
 
   const uploadFile = useCallback(
     (file: File | UploadedFile, config?: UploadStrategyConfig) => {
       uploadIdRef.current = uploadSingle(file, config);
     },
-    [uploadSingle]
+    [uploadSingle],
   );
 
   const selectAndUploadFile = useCallback(
@@ -38,7 +39,7 @@ export function useActiveUpload() {
       uploadFile(files[0], config);
       return files[0];
     },
-    [uploadFile]
+    [uploadFile],
   );
 
   const deleteEntry = useCallback(
@@ -66,11 +67,17 @@ export function useActiveUpload() {
             : undefined,
           deleteForever: true,
         },
-        {onSuccess: handleSuccess}
+        {onSuccess: handleSuccess},
       );
     },
-    [deleteFileEntries, activeUpload, updateFileUpload]
+    [deleteFileEntries, activeUpload, updateFileUpload],
   );
+
+  const abortUpload = useCallback(() => {
+    if (activeUpload) {
+      _abortUpload(activeUpload.file.id);
+    }
+  }, [activeUpload, _abortUpload]);
 
   return {
     uploadFile,
@@ -79,7 +86,8 @@ export function useActiveUpload() {
     uploadStatus: activeUpload?.status,
     entry: activeUpload?.entry,
     deleteEntry,
-    isDeletingEntry: deleteFileEntries.isLoading,
+    isDeletingEntry: deleteFileEntries.isPending,
     activeUpload,
+    abortUpload,
   };
 }

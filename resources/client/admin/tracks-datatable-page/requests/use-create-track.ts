@@ -36,13 +36,16 @@ interface Options {
 
 export function useCreateTrack(
   form: UseFormReturn<CreateTrackPayload> | UseFormReturn<TrackUploadPayload>,
-  {onSuccess}: Options = {}
+  {onSuccess}: Options = {},
 ) {
   const {trans} = useTrans();
-  return useMutation((payload: CreateTrackPayload) => createTrack(payload), {
+  return useMutation({
+    mutationFn: (payload: CreateTrackPayload) => createTrack(payload),
     onSuccess: response => {
       toast(trans(message('Track created')));
-      queryClient.invalidateQueries(DatatableDataQueryKey(endpoint));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey(endpoint),
+      });
       onSuccess?.(response);
     },
     onError: err => onFormQueryError(err, form),

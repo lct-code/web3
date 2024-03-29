@@ -17,10 +17,14 @@ type Listeners = Omit<ListenersWithState, 'error'> & {
 };
 
 export interface PlayerStoreOptions {
+  persistQueueInLocalStorage?: boolean;
+  autoPlay?: boolean;
   initialData?: PlayerInitialData;
   listeners?: Partial<Listeners>;
   defaultVolume?: number;
   pauseWhileSeeking?: boolean;
+  onBeforePlayNext?: (media?: MediaItem) => boolean | undefined;
+  onBeforePlayPrevious?: (media?: MediaItem) => boolean | undefined;
   onDestroy?: () => void;
   setMediaSessionMetadata?: (mediaItem: MediaItem) => void;
   onBeforePlay?: () => Promise<void> | undefined;

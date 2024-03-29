@@ -13,12 +13,16 @@ import {CustomMenuItem} from '../../menus/custom-menu';
 import {useRecaptcha} from '../../recaptcha/use-recaptcha';
 import {StaticPageTitle} from '../../seo/static-page-title';
 import {useSettings} from '../../core/settings/use-settings';
+import {useContext} from 'react';
+import {SiteConfigContext} from '@common/core/settings/site-config-context';
 
 export function RegisterPage() {
   const {
     branding,
     registration: {disable},
+    social,
   } = useSettings();
+  const {auth} = useContext(SiteConfigContext);
   const {verify, isVerifying} = useRecaptcha('register');
 
   const {pathname} = useLocation();
@@ -65,7 +69,7 @@ export function RegisterPage() {
   return (
     <AuthLayout heading={heading} message={message}>
       <StaticPageTitle>
-        <Trans message="Login" />
+        <Trans message="Register" />
       </StaticPageTitle>
       <Form
         form={form}
@@ -98,6 +102,7 @@ export function RegisterPage() {
           label={<Trans message="Confirm password" />}
           required
         />
+        {auth?.registerFields ? <auth.registerFields /> : null}
         <PolicyCheckboxes />
         <Button
           className="block w-full"
@@ -105,12 +110,18 @@ export function RegisterPage() {
           variant="flat"
           color="primary"
           size="md"
-          disabled={register.isLoading || isVerifying}
+          disabled={register.isPending || isVerifying}
         >
           <Trans message="Create account" />
         </Button>
         <SocialAuthSection
-          dividerMessage={<Trans message="Or sign up with" />}
+          dividerMessage={
+            social.compact_buttons ? (
+              <Trans message="Or sign up with" />
+            ) : (
+              <Trans message="OR" />
+            )
+          }
         />
       </Form>
     </AuthLayout>
@@ -130,7 +141,7 @@ function PolicyCheckboxes() {
         <FormCheckbox
           key={policy.id}
           name={policy.id}
-          className="block mb-4"
+          className="mb-4 block"
           required
         >
           <Trans

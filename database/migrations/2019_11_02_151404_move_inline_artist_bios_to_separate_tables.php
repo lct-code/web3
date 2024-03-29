@@ -1,6 +1,6 @@
 <?php
 
-use App\Artist;
+use App\Models\Artist;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Collection;
 

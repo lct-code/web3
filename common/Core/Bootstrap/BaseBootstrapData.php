@@ -1,15 +1,17 @@
 <?php namespace Common\Core\Bootstrap;
 
-use App\User;
+use App\Models\User;
 use Common\Admin\Appearance\Themes\CssTheme;
+use Common\Auth\Jobs\LogActiveSessionJob;
 use Common\Auth\Roles\Role;
 use Common\Billing\Gateways\Stripe\FormatsMoney;
 use Common\Core\AppUrl;
-use Common\Core\Prerender\MetaTags;
 use Common\Localizations\LocalizationsRepository;
 use Common\Settings\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Jenssegers\Agent\Agent;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class BaseBootstrapData implements BootstrapData
 {
@@ -31,7 +33,13 @@ class BaseBootstrapData implements BootstrapData
             $this->data['user'] = $this->data['user']->toArray();
         }
 
-        return base64_encode(json_encode($this->data));
+        return json_encode($this->data);
+    }
+
+    public function set(string $key, mixed $value): static
+    {
+        Arr::set($this->data, $key, $value);
+        return $this;
     }
 
     public function get($key = null)
@@ -56,23 +64,23 @@ class BaseBootstrapData implements BootstrapData
 
     public function init(): self
     {
-        $this->data['settings'] = $this->settings->getUnflattened();
+        $this->data['settings'] = settings()->getUnflattened();
         $this->data['csrf_token'] = csrf_token();
+        $this->data['is_mobile_device'] = app(Agent::class)->isMobile();
         $this->data['settings']['base_url'] = config('app.url');
+        $this->data['settings']['asset_url'] = config('app.asset_url');
         $this->data['settings']['html_base_uri'] = app(
             AppUrl::class,
         )->htmlBaseUri;
         $this->data['settings']['version'] = config('common.site.version');
+        $this->data['sentry_release'] = config('sentry.release');
         $this->data['default_meta_tags'] = $this->getDefaultMetaTags();
         $this->data['user'] = $this->getCurrentUser();
-        $this->data['guest_role'] = $this->role
-            ->where('guests', true)
-            ->with('permissions')
-            ->first();
+        $this->data['guest_role'] = app('guestRole')?->load('permissions');
         $this->data['i18n'] =
             $this->localizationsRepository->getByNameOrCode(
                 app()->getLocale(),
-                $this->settings->get('i18n.enable', true),
+                settings('i18n.enable', true),
             ) ?:
             null;
         $this->data['themes'] = $this->getThemes();
@@ -88,25 +96,30 @@ class BaseBootstrapData implements BootstrapData
         }
 
         $alreadyAccepted =
-            !$this->settings->get('cookie_notice.enable') ||
+            !settings('cookie_notice.enable') ||
             (bool) Arr::get($_COOKIE, 'cookie_notice', false);
         $this->data['show_cookie_notice'] =
             !$alreadyAccepted && $this->isCookieLawCountry();
+
+        $this->logActiveSession();
 
         return $this;
     }
 
     public function getThemes(): array
     {
-        $themes = app(CssTheme::class)
-            ->where('default_dark', true)
+        $themes = CssTheme::where('default_dark', true)
             ->orWhere('default_light', true)
             ->get();
+
+        if ($themes->isEmpty()) {
+            $themes = CssTheme::limit(2)->get();
+        }
 
         $selectedTheme = null;
 
         // first, get theme from cookie or url param, if theme change by user is enabled
-        if ($this->settings->get('themes.user_change')) {
+        if (settings('themes.user_change')) {
             if ($themeFromUrl = $this->request->get('beThemeId')) {
                 $selectedTheme = $themes->find($themeFromUrl);
             } else {
@@ -117,7 +130,7 @@ class BaseBootstrapData implements BootstrapData
         }
 
         // if no theme was selected, get default theme specified by admin
-        if (!$selectedTheme && $defaultId = $this->settings->get('themes.default_id')) {
+        if (!$selectedTheme && ($defaultId = settings('themes.default_id'))) {
             $selectedTheme = $themes->find($defaultId);
         }
 
@@ -141,7 +154,7 @@ class BaseBootstrapData implements BootstrapData
         if ($user) {
             // load user subscriptions, if billing is enabled
             if (
-                app(Settings::class)->get('billing.enable') &&
+                settings('billing.enable') &&
                 !$user->relationLoaded('subscriptions')
             ) {
                 $user->load('subscriptions.price');
@@ -160,11 +173,17 @@ class BaseBootstrapData implements BootstrapData
         return $user;
     }
 
-    protected function getDefaultMetaTags(): array
+    protected function getDefaultMetaTags(): string
     {
-        $namespace = 'home.show';
-        $meta = new MetaTags(config("seo.$namespace"), [], $namespace);
-        return $meta->toArray();
+        $pageName = 'landing-page';
+        $customPath = storage_path(
+            "app/editable-views/seo-tags/$pageName.blade.php",
+        );
+        if (file_exists($customPath)) {
+            return view("editable-views::seo-tags.$pageName")->render();
+        } else {
+            return view("seo.$pageName.seo-tags")->render();
+        }
     }
 
     protected function isCookieLawCountry(): bool
@@ -173,5 +192,22 @@ class BaseBootstrapData implements BootstrapData
         // prettier-ignore
         return in_array($isoCode, ['AT', 'BE', 'BG', 'BR', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', 'FR', 'GB', 'HR', 'HU', 'IE', 'IT','LT', 'LU', 'LV', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK',
         ]);
+    }
+
+    protected function logActiveSession(): void
+    {
+        if ($this->data['user']) {
+            $token = $this->data['user']->currentAccessToken();
+            LogActiveSessionJob::dispatch([
+                'user_id' => $this->data['user']->id,
+                'ip_address' => getIp(),
+                'user_agent' => $this->request->userAgent(),
+                'session_id' => session()->getId(),
+                'token' =>
+                    $token instanceof PersonalAccessToken
+                        ? $token->token
+                        : null,
+            ]);
+        }
     }
 }

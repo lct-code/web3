@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Playlist;
-use App\User;
+use App\Models\Playlist;
+use App\Models\User;
 use Common\Core\Policies\BasePolicy;
 use Illuminate\Database\Eloquent\Collection;
 

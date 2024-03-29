@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Artist;
 
-use App\Artist;
+use App\Models\Artist;
 use App\Services\Artists\PaginateArtistTracks;
 use Common\Core\BaseController;
 

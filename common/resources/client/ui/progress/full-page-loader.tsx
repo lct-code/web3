@@ -4,12 +4,14 @@ import clsx from 'clsx';
 
 interface FullPageLoaderProps {
   className?: string;
+  screen?: boolean;
 }
-export function FullPageLoader({className}: FullPageLoaderProps) {
+export function FullPageLoader({className, screen}: FullPageLoaderProps) {
   return (
     <div
       className={clsx(
-        'flex items-center justify-center h-full w-full flex-auto',
+        'flex items-center justify-center flex-auto',
+        screen ? 'h-screen w-screen' : 'h-full w-full',
         className
       )}
     >

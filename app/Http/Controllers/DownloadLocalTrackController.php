@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Track;
+use App\Models\Track;
 use Common\Core\BaseController;
 use Common\Files\FileEntry;
 use Common\Files\Response\FileResponseFactory;
-use Str;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class DownloadLocalTrackController extends BaseController
@@ -19,7 +19,7 @@ class DownloadLocalTrackController extends BaseController
 
     public function download($id)
     {
-        $track = $this->track->findOrFail($id);
+        $track = $this->track->findOrFail($id)->makeVisible('src');
 
         $this->authorize('download', $track);
 

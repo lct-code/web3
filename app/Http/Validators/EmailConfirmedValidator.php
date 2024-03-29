@@ -1,7 +1,7 @@
 <?php namespace App\Http\Validators;
 
 use App;
-use App\User;
+use App\Models\User;
 use Common\Settings\Settings;
 
 class EmailConfirmedValidator {

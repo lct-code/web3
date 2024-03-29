@@ -5,22 +5,36 @@ import {useParams} from 'react-router-dom';
 import {PaginationResponse} from '@common/http/backend-response/pagination-response';
 import {Track} from '@app/web-player/tracks/track';
 import {Playlist} from '@app/web-player/playlists/playlist';
+import {getBootstrapData} from '@common/core/bootstrap-data/use-backend-bootstrap-data';
 
-interface GetPlaylistResponse extends BackendResponse {
+export interface GetPlaylistResponse extends BackendResponse {
   playlist: Playlist;
   tracks: PaginationResponse<Track>;
   totalDuration: number;
+  loader: Params['loader'];
 }
 
-export function usePlaylist() {
+interface Params {
+  loader: 'playlistPage' | 'playlist';
+}
+
+export function usePlaylist(params: Params) {
   const {playlistId} = useParams();
-  return useQuery(['playlists', +playlistId!], () =>
-    fetchPlaylist(playlistId!)
-  );
+  return useQuery({
+    queryKey: ['playlists', +playlistId!],
+    queryFn: () => fetchPlaylist(playlistId!),
+    initialData: () => {
+      const data = getBootstrapData().loaders?.[params.loader];
+      if (data?.playlist?.id == playlistId && data?.loader === params.loader) {
+        return data;
+      }
+      return undefined;
+    },
+  });
 }
 
 function fetchPlaylist(
-  playlistId: number | string
+  playlistId: number | string,
 ): Promise<GetPlaylistResponse> {
   return apiClient
     .get(`playlists/${playlistId}`)

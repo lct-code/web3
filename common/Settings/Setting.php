@@ -1,5 +1,7 @@
 <?php namespace Common\Settings;
 
+use Exception;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
@@ -10,31 +12,64 @@ class Setting extends Model
 
     protected $casts = ['private' => 'bool'];
 
-    public function getValueAttribute(mixed $value): mixed
+    protected function value(): Attribute
     {
-        if ($value === 'false') {
-            return false;
-        }
+        return Attribute::make(
+            get: function ($value) {
+                if (
+                    in_array($this->attributes['name'], Settings::$secretKeys)
+                ) {
+                    try {
+                        $value = decrypt($value);
+                    } catch (Exception $e) {
+                        $value = '';
+                    }
+                }
 
-        if ($value === 'true') {
-            return true;
-        }
+                if (in_array($this->attributes['name'], Settings::$jsonKeys)) {
+                    $value = json_decode($value, true);
+                }
 
-        if (ctype_digit($value)) {
-            return (int) $value;
-        }
+                if ($value === 'false') {
+                    return false;
+                }
 
-        return $value;
-    }
+                if ($value === 'true') {
+                    return true;
+                }
 
-    public function setValueAttribute($value)
-    {
-        if ($value === true) {
-            $value = 'true';
-        } elseif ($value === false) {
-            $value = 'false';
-        }
+                if (ctype_digit($value)) {
+                    return (int) $value;
+                }
 
-        $this->attributes['value'] = (string) $value;
+                return $value;
+            },
+            set: function ($value) {
+                $value = !is_null($value) ? $value : '';
+
+                if (
+                    in_array($this->attributes['name'], Settings::$jsonKeys) &&
+                    !is_string($value)
+                ) {
+                    $value = json_encode($value);
+                }
+
+                if ($value === true) {
+                    $value = 'true';
+                } elseif ($value === false) {
+                    $value = 'false';
+                }
+
+                $value = (string) $value;
+
+                if (
+                    in_array($this->attributes['name'], Settings::$secretKeys)
+                ) {
+                    $value = encrypt($value);
+                }
+
+                return $value;
+            },
+        );
     }
 }

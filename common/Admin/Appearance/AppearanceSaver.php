@@ -27,15 +27,10 @@ class AppearanceSaver
                 $this->saveCustomCode($groupValues);
             } elseif ($groupName === 'themes') {
                 $this->syncThemes($groupValues['all']);
-            } elseif ($groupName === 'seo') {
-                $this->saveSeoSettings($groupValues);
             }
         }
 
         if (!empty($values['settings'])) {
-            // prevent issues due to both settings and appearance having "seo" field
-            unset($values['settings']['seo']);
-
             //generate and store favicon
             if (isset($values['settings']['branding']['favicon'])) {
                 $path = $values['settings']['branding']['favicon'];
@@ -98,13 +93,5 @@ class AppearanceSaver
                 $existing->fill($newValue)->save();
             }
         }
-    }
-
-    private function saveSeoSettings(array $settings): void
-    {
-        $seoSettings = collect($settings)
-            ->mapWithKeys(fn($s) => [$s['key'] => $s['value']])
-            ->toArray();
-        $this->settings->save($seoSettings);
     }
 }

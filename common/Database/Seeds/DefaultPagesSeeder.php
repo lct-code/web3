@@ -5,19 +5,22 @@ use Illuminate\Database\Seeder;
 
 class DefaultPagesSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        $path = app('path.common') . '/resources/lorem.html';
-        $lorem = file_get_contents($path);
-
         CustomPage::firstOrCreate(
             [
                 'slug' => 'privacy-policy',
             ],
             [
-                'title' => 'Privacy Policy',
+                'title' => 'Example Privacy Policy',
                 'slug' => 'privacy-policy',
-                'body' => '<h1>Example Privacy Policy</h1>' . $lorem,
+                'body' => $this->replacePlaceholders(
+                    file_get_contents(
+                        base_path(
+                            'common/resources/defaults/privacy-policy.html',
+                        ),
+                    ),
+                ),
                 'type' => 'default',
             ],
         );
@@ -27,9 +30,15 @@ class DefaultPagesSeeder extends Seeder
                 'slug' => 'terms-of-service',
             ],
             [
-                'title' => 'Terms of Service',
+                'title' => 'Example Terms of Service',
                 'slug' => 'terms-of-service',
-                'body' => '<h1>Example Terms of Service</h1>' . $lorem,
+                'body' => $this->replacePlaceholders(
+                    file_get_contents(
+                        base_path(
+                            'common/resources/defaults/terms-of-service.html',
+                        ),
+                    ),
+                ),
                 'type' => 'default',
             ],
         );
@@ -39,11 +48,32 @@ class DefaultPagesSeeder extends Seeder
                 'slug' => 'about-us',
             ],
             [
-                'title' => 'About Us',
+                'title' => 'Example About Us',
                 'slug' => 'about-us',
-                'body' => '<h1>Example About Us</h1>' . $lorem,
+                'body' => file_get_contents(
+                    base_path('common/resources/lorem.html'),
+                ),
                 'type' => 'default',
             ],
+        );
+    }
+
+    protected function replacePlaceholders(string $text): string
+    {
+        return str_replace(
+            [
+                '[Website Name]',
+                '[Website URL]',
+                '[Contact Email]',
+                '[Your Country/State]',
+            ],
+            [
+                config('app.name'),
+                url('/'),
+                settings('mail.contact_page_address'),
+                'United States',
+            ],
+            $text,
         );
     }
 }

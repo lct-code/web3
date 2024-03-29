@@ -18,7 +18,7 @@ export function ContactUsPage() {
   const {verify, isVerifying} = useRecaptcha('contact');
 
   return (
-    <div className="flex flex-col bg-alt min-h-full">
+    <div className="flex flex-col bg-alt min-h-screen">
       <StaticPageTitle>
         <Trans message="Contact us" />
       </StaticPageTitle>
@@ -68,7 +68,7 @@ export function ContactUsPage() {
               type="submit"
               variant="flat"
               color="primary"
-              disabled={submitForm.isLoading || isVerifying}
+              disabled={submitForm.isPending || isVerifying}
             >
               <Trans message="Send" />
             </Button>

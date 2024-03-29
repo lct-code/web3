@@ -22,8 +22,9 @@ export function InfoDialogTrigger({
   return (
     <DialogTrigger type="popover" triggerOnHover>
       <IconButton
-        className={clsx('text-muted opacity-70', className)}
-        size="xs"
+        className={clsx('ml-4 text-muted opacity-70', className)}
+        iconSize="xs"
+        size="2xs"
       >
         <InfoDialogTriggerIcon viewBox="0 0 16 16" />
       </IconButton>

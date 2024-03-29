@@ -2,32 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\Channel;
-use Auth;
+use App\Models\Artist;
+use Common\Billing\Models\Product;
 use Common\Core\Controllers\HomeController;
-use Common\Settings\Settings;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class AppHomeController extends HomeController
 {
-    protected function handleSeo(&$data = [], $options = [])
+    public function __invoke()
     {
-        if (request()->method() === 'GET' && defined('SHOULD_PRERENDER')) {
-            $settings = app(Settings::class);
-            if (
-                ($settings->get('homepage.type') === 'channel' ||
-                    (Auth::check() &&
-                        $settings->get('homepage.type') === 'landingPage')) &&
-                ($channel = Channel::find($settings->get('homepage.value')))
-            ) {
-                $options['prerender.config'] = 'channel.show';
-                $options['prerender.view'] = 'channel.show';
-                $data['channel'] = $channel->loadContent()->toArray();
-            } else {
-                $options['prerender.view'] = 'home.show';
-                $options['prerender.config'] = 'home.show';
-            }
+        if (
+            Str::startsWith(settings('homepage.type'), 'channel') ||
+            (Auth::check() && settings('homepage.type') === 'landingPage')
+        ) {
+            return app(FallbackRouteController::class)->renderChannel(
+                settings('homepage.value'),
+            );
+        } else {
+            return $this->renderClientOrApi([
+                'pageName' => 'landing-page',
+                'data' => [
+                    'loader' => 'landingPage',
+                    'products' => Product::with(['permissions', 'prices'])
+                        ->limit(15)
+                        ->orderBy('position', 'asc')
+                        ->get(),
+                    'trendingArtists' => Artist::orderBy('views', 'desc')
+                        ->take(8)
+                        ->get(),
+                ],
+            ]);
         }
-
-        return parent::handleSeo($data, $options);
     }
 }

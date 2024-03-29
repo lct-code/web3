@@ -15,7 +15,7 @@ class CustomPageController extends BaseController
      */
     public function __construct(
         protected CustomPage $page,
-        protected Request $request
+        protected Request $request,
     ) {
     }
 
@@ -59,9 +59,16 @@ class CustomPageController extends BaseController
             ->where('slug', $id)
             ->orWhere('id', $id)
             ->firstOrFail();
+
         $this->authorize('show', $page);
 
-        return $this->success(['page' => $page]);
+        return $this->renderClientOrApi([
+            'pageName' => 'custom-page',
+            'data' => [
+                'page' => $page,
+                'loader' => 'customPage',
+            ],
+        ]);
     }
 
     public function store()

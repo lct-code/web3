@@ -2,12 +2,15 @@ import React, {ComponentPropsWithRef, useContext} from 'react';
 
 export type DialogType = 'modal' | 'popover' | 'tray';
 
-export interface DialogContextValue {
+export interface DialogContextValue<T = unknown> {
   labelId: string;
   descriptionId: string;
   type: DialogType;
   isDismissable?: boolean;
-  close: (value?: any) => void;
+  close: (value?: T) => void;
+  value: T;
+  setValue: (value: T) => void;
+  initialValue: T;
   formId: string;
   dialogProps: ComponentPropsWithRef<'div'>;
   disableInitialTransition?: boolean;
@@ -15,6 +18,6 @@ export interface DialogContextValue {
 
 export const DialogContext = React.createContext<DialogContextValue>(null!);
 
-export function useDialogContext() {
-  return useContext(DialogContext);
+export function useDialogContext<T = unknown>() {
+  return useContext(DialogContext) as DialogContextValue<T>;
 }

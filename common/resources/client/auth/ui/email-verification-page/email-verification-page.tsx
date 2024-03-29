@@ -1,11 +1,12 @@
-import {useUser} from '../use-user';
-import {Trans} from '../../../i18n/trans';
+import {useUser} from '@common/auth/ui/use-user';
+import {Trans} from '@common/i18n/trans';
 import mailSentSvg from './mail-sent.svg';
-import {SvgImage} from '../../../ui/images/svg-image/svg-image';
-import {Button} from '../../../ui/buttons/button';
-import {useResendVerificationEmail} from '../../requests/use-resend-verification-email';
-import {useIsDarkMode} from '../../../ui/themes/use-is-dark-mode';
-import {useSettings} from '../../../core/settings/use-settings';
+import {SvgImage} from '@common/ui/images/svg-image/svg-image';
+import {Button} from '@common/ui/buttons/button';
+import {useResendVerificationEmail} from '@common/auth/requests/use-resend-verification-email';
+import {useIsDarkMode} from '@common/ui/themes/use-is-dark-mode';
+import {useSettings} from '@common/core/settings/use-settings';
+import {useLogout} from '@common/auth/requests/logout';
 
 export function EmailVerificationPage() {
   const {data} = useUser('me');
@@ -15,9 +16,10 @@ export function EmailVerificationPage() {
   } = useSettings();
   const isDarkMode = useIsDarkMode();
   const logoSrc = isDarkMode ? logo_light : logo_dark;
+  const logout = useLogout();
 
   return (
-    <div className="flex flex-col items-center p-24 bg-alt w-full min-h-full">
+    <div className="flex min-h-screen w-screen flex-col items-center bg-alt p-24">
       {logoSrc && (
         <img
           src={logoSrc}
@@ -25,9 +27,9 @@ export function EmailVerificationPage() {
           className="my-60 block h-42 w-auto"
         />
       )}
-      <div className="bg-paper px-14 py-28 rounded shadow border max-w-580 flex flex-col items-center text-center">
-        <SvgImage src={mailSentSvg} className="h-144" />
-        <h1 className="text-3xl mt-40 mb-20">
+      <div className="flex max-w-580 flex-col items-center rounded border bg-paper px-14 py-28 text-center shadow">
+        <SvgImage src={mailSentSvg} height="h-144" />
+        <h1 className="mb-20 mt-40 text-3xl">
           <Trans message="Verify your email" />
         </h1>
         <div className="mb-24 text-sm">
@@ -39,17 +41,22 @@ export function EmailVerificationPage() {
         <div className="text-sm">
           <Trans message="If you did not receive an email, click the button below and we will send you another one." />
         </div>
-        <Button
-          className="mt-30"
-          variant="flat"
-          color="primary"
-          disabled={resendEmail.isLoading || !data?.user.email}
-          onClick={() => {
-            resendEmail.mutate({email: data!.user.email});
-          }}
-        >
-          <Trans message="Resend email" />
-        </Button>
+        <div className="mt-30">
+          <Button
+            className="mr-10"
+            variant="flat"
+            color="primary"
+            disabled={resendEmail.isPending || !data?.user.email}
+            onClick={() => {
+              resendEmail.mutate({email: data!.user.email});
+            }}
+          >
+            <Trans message="Resend email" />
+          </Button>
+          <Button variant="outline" onClick={() => logout.mutate()}>
+            <Trans message="Logout" />
+          </Button>
+        </div>
       </div>
     </div>
   );

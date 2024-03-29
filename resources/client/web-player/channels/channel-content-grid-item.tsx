@@ -1,4 +1,3 @@
-import {ChannelContentItem} from '@app/web-player/channels/channel';
 import {ARTIST_MODEL} from '@app/web-player/artists/artist';
 import {ArtistGridItem} from '@app/web-player/artists/artist-grid-item';
 import {ALBUM_MODEL} from '@app/web-player/albums/album';
@@ -12,10 +11,11 @@ import {PLAYLIST_MODEL} from '@app/web-player/playlists/playlist';
 import {PlaylistGridItem} from '@app/web-player/playlists/playlist-grid-item';
 import {USER_MODEL} from '@common/auth/user';
 import {UserGridItem} from '@app/web-player/users/user-grid-item';
+import {ChannelContentModel} from '@app/admin/channels/channel-content-config';
 
 interface Props {
-  item: ChannelContentItem;
-  items?: ChannelContentItem[];
+  item: ChannelContentModel;
+  items?: ChannelContentModel[];
 }
 export function ChannelContentGridItem({item, items}: Props) {
   switch (item.model_type) {

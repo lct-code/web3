@@ -18,7 +18,7 @@ import {ToggleRepostMenuButton} from '@app/web-player/context-dialog/toggle-repo
 import {getRadioLink} from '@app/web-player/radio/get-radio-link';
 import {useShouldShowRadioButton} from '@app/web-player/tracks/context-dialog/use-should-show-radio-button';
 import {useDialogContext} from '@common/ui/overlays/dialog/dialog-context';
-import {openGlobalDialog} from '@app/web-player/state/global-dialog-store';
+import {openDialog} from '@common/ui/overlays/store/dialog-store';
 import {ConfirmationDialog} from '@common/ui/overlays/dialog/confirmation-dialog';
 import {useDeleteTracks} from '@app/web-player/tracks/requests/use-delete-tracks';
 import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
@@ -26,7 +26,13 @@ import {getArtistLink} from '@app/web-player/artists/artist-link';
 import {getAlbumLink} from '@app/web-player/albums/album-link';
 import {ShareMediaButton} from '@app/web-player/context-dialog/share-media-button';
 import {useSettings} from '@common/core/settings/use-settings';
-import {LyricsDialog} from '@app/web-player/tracks/lyrics/lyrics-dialog';
+import {trackIsLocallyUploaded} from '@app/web-player/tracks/utils/track-is-locally-uploaded';
+import {useAuth} from '@common/auth/use-auth';
+import {downloadFileFromUrl} from '@common/uploads/utils/download-file-from-url';
+import {useNavigate} from '@common/utils/hooks/use-navigate';
+import {usePlayerStore} from '@common/player/hooks/use-player-store';
+import {usePlayerActions} from '@common/player/hooks/use-player-actions';
+import {trackToMediaItem} from '@app/web-player/tracks/utils/track-to-media-item';
 
 export interface TrackContextDialogProps {
   tracks: Track[];
@@ -44,6 +50,9 @@ export function TrackContextDialog({
   const shouldShowRadio = useShouldShowRadioButton();
   const {player} = useSettings();
   const {close} = useDialogContext();
+  const navigate = useNavigate();
+  const cuedTrack = usePlayerStore(s => s.cuedMedia?.meta as Track | undefined);
+  const {play} = usePlayerActions();
 
   const loadTracks = useCallback(() => {
     return Promise.resolve(tracks);
@@ -98,9 +107,12 @@ export function TrackContextDialog({
           )}
           {!player?.hide_lyrics && tracks.length === 1 && (
             <ContextMenuButton
-              onClick={() => {
+              onClick={async () => {
                 close();
-                openGlobalDialog(LyricsDialog, {track: firstTrack});
+                if (cuedTrack?.id !== firstTrack.id) {
+                  await play(trackToMediaItem(firstTrack));
+                }
+                navigate('/lyrics');
               }}
             >
               <Trans message="View lyrics" />
@@ -114,6 +126,7 @@ export function TrackContextDialog({
             </CopyLinkMenuButton>
           )}
           {tracks.length === 1 && <ShareMediaButton item={firstTrack} />}
+          {tracks.length === 1 && <DownloadTrackButton track={firstTrack} />}
           {tracks.length === 1 ? (
             <ToggleRepostMenuButton item={tracks[0]} />
           ) : null}
@@ -140,9 +153,37 @@ export function TrackContextDialog({
   );
 }
 
+interface DownloadTrackButtonProps {
+  track: Track;
+}
+function DownloadTrackButton({track}: DownloadTrackButtonProps) {
+  const {player, base_url} = useSettings();
+  const {close: closeMenu} = useDialogContext();
+  const {hasPermission} = useAuth();
+
+  if (
+    !player?.enable_download ||
+    !track ||
+    !trackIsLocallyUploaded(track) ||
+    !hasPermission('music.download')
+  ) {
+    return null;
+  }
+
+  return (
+    <ContextMenuButton
+      onClick={() => {
+        closeMenu();
+        downloadFileFromUrl(`${base_url}/api/v1/tracks/${track.id}/download`);
+      }}
+    >
+      <Trans message="Download" />
+    </ContextMenuButton>
+  );
+}
+
 function DeleteButton({tracks}: TrackContextDialogProps) {
   const {close: closeMenu} = useDialogContext();
-  const deleteTracks = useDeleteTracks();
   const {canDelete} = useTrackPermissions(tracks);
 
   if (!canDelete) {
@@ -151,23 +192,41 @@ function DeleteButton({tracks}: TrackContextDialogProps) {
 
   return (
     <ContextMenuButton
-      disabled={deleteTracks.isLoading}
       onClick={() => {
         closeMenu();
-        openGlobalDialog(ConfirmationDialog, {
-          isDanger: true,
-          title: <Trans message="Delete tracks" />,
-          body: (
-            <Trans message="Are you sure you want to delete selected tracks?" />
-          ),
-          confirm: <Trans message="Delete" />,
-          onConfirm: () => {
-            deleteTracks.mutate({trackIds: tracks.map(t => t.id)});
-          },
+        openDialog(DeleteTrackDialog, {
+          tracks,
         });
       }}
     >
       <Trans message="Delete" />
     </ContextMenuButton>
+  );
+}
+
+interface DeleteTrackDialogProps {
+  tracks: Track[];
+}
+function DeleteTrackDialog({tracks}: DeleteTrackDialogProps) {
+  const deleteTracks = useDeleteTracks();
+  const {close} = useDialogContext();
+  return (
+    <ConfirmationDialog
+      isDanger
+      title={<Trans message="Delete tracks" />}
+      body={
+        <Trans message="Are you sure you want to delete selected tracks?" />
+      }
+      isLoading={deleteTracks.isPending}
+      confirm={<Trans message="Delete" />}
+      onConfirm={() => {
+        deleteTracks.mutate(
+          {trackIds: tracks.map(t => t.id)},
+          {
+            onSuccess: () => close(),
+          },
+        );
+      }}
+    />
   );
 }

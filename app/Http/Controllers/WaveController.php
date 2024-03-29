@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Track;
+use App\Models\Track;
 use Common\Comments\Comment;
 use Common\Core\BaseController;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
@@ -45,7 +45,7 @@ class WaveController extends BaseController
 
         $comments = app(Comment::class)
             ->where('commentable_id', $track->id)
-            ->where('commentable_type', Track::class)
+            ->where('commentable_type', Track::MODEL_TYPE)
             ->rootOnly()
             ->with('user')
             ->limit(30)

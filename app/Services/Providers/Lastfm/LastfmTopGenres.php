@@ -1,7 +1,6 @@
 <?php namespace App\Services\Providers\Lastfm;
 
-use App;
-use App\Genre;
+use App\Models\Genre;
 use App\Services\HttpClient;
 use App\Services\Providers\ContentProvider;
 use App\Services\Providers\SaveOrUpdate;

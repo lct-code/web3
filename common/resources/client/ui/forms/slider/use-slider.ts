@@ -16,11 +16,11 @@ import {clamp} from '@common/utils/number/clamp';
 import {usePointerEvents} from '../../interactions/use-pointer-events';
 import {useNumberFormatter} from '@common/i18n/use-number-formatter';
 import type {NumberFormatOptions} from '@internationalized/number';
-import {InputSize} from '../input-field/input-size';
 
 export interface UseSliderProps<T = number[]> {
   formatOptions?: NumberFormatOptions;
   onPointerDown?: () => void;
+  onPointerMove?: (e: React.PointerEvent) => void;
   onChange?: (value: T) => void;
   onChangeEnd?: (value: T) => void;
   value?: T;
@@ -30,7 +30,7 @@ export interface UseSliderProps<T = number[]> {
   maxValue?: number;
   step?: number;
   isDisabled?: boolean;
-  size?: InputSize;
+  size?: 'xs' | 'sm' | 'md';
   label?: ReactNode;
   inline?: boolean;
   className?: string;
@@ -40,6 +40,7 @@ export interface UseSliderProps<T = number[]> {
   trackColor?: 'primary' | 'neutral' | string;
   showThumbOnHoverOnly?: boolean;
   thumbSize?: string;
+  wrapperHeight?: string;
 }
 
 export interface UseSliderReturn {
@@ -82,6 +83,7 @@ export function useSlider({
   getValueLabel,
   showThumbOnHoverOnly,
   thumbSize,
+  onPointerMove,
   ...props
 }: UseSliderProps): UseSliderReturn {
   const [isPointerOver, setIsPointerOver] = useState(false);
@@ -93,7 +95,7 @@ export function useSlider({
   const [values, setValues] = useControlledState<number[]>(
     props.value ? props.value : undefined,
     props.defaultValue ?? ([minValue] as any),
-    props.onChange as any
+    props.onChange as any,
   );
   // need to also store values in ref, because state value would
   // lag behind by one between pointer down and move callbacks
@@ -102,7 +104,7 @@ export function useSlider({
 
   // indices of thumbs that are being dragged currently (state and ref for same reasons as above)
   const [draggedThumbs, setDraggedThumbs] = useState<boolean[]>(
-    new Array(values.length).fill(false)
+    new Array(values.length).fill(false),
   );
   const draggedThumbsRef = useRef<boolean[] | null>(null);
   draggedThumbsRef.current = draggedThumbs;
@@ -147,7 +149,7 @@ export function useSlider({
     draggedThumbsRef.current = replaceIndex(
       draggedThumbsRef.current || [],
       index,
-      dragging
+      dragging,
     );
     setDraggedThumbs(draggedThumbsRef.current);
 
@@ -158,7 +160,7 @@ export function useSlider({
   };
 
   const [focusedThumb, setFocusedThumb] = useState<number | undefined>(
-    undefined
+    undefined,
   );
 
   const getValuePercent = (value: number) => {
@@ -186,7 +188,7 @@ export function useSlider({
 
   // allows disabling individual thumbs in range slider, instead of disable the whole slider
   const editableThumbsRef = useRef<boolean[]>(
-    new Array(values.length).fill(true)
+    new Array(values.length).fill(true),
   );
   const isThumbEditable = (index: number) => editableThumbsRef.current[index];
   const setThumbEditable = (index: number, editable: boolean) => {
@@ -297,6 +299,9 @@ export function useSlider({
     },
     onPointerLeave: () => {
       setIsPointerOver(false);
+    },
+    onPointerMove: (e: React.PointerEvent) => {
+      onPointerMove?.(e);
     },
   });
 

@@ -11,6 +11,7 @@ return [
     ['name' => 'social.google.enable', 'value' => true],
     ['name' => 'social.twitter.enable', 'value' => true],
     ['name' => 'social.facebook.enable', 'value' => true],
+    ['name' => 'social.compact_buttons', 'value' => true],
 
     // real time
     ['name' => 'realtime.enable', 'value' => false],
@@ -24,11 +25,11 @@ return [
     // logos
     [
         'name' => 'branding.logo_dark',
-        'value' => 'images/logo-dark.png',
+        'value' => 'images/logo-dark.svg',
     ],
     [
         'name' => 'branding.logo_light',
-        'value' => 'images/logo-light.png',
+        'value' => 'images/logo-light.svg',
     ],
 
     // translations

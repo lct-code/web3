@@ -14,14 +14,12 @@ export function usePlayerClickHandler() {
   }, [player]);
 
   return useCallback(() => {
-    // todo: causes 300ms delay on click/pause
     if (!player.getState().providerReady) return;
     clickRef.current += 1;
+    togglePlay();
     if (clickRef.current === 1) {
       setTimeout(() => {
-        if (clickRef.current === 1) {
-          togglePlay();
-        } else {
+        if (clickRef.current > 1) {
           player.toggleFullscreen();
         }
         clickRef.current = 0;

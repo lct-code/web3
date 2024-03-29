@@ -2,12 +2,12 @@
 
 namespace Common\Settings\Validators;
 
+use Common\Auth\Oauth;
+use Common\Core\HttpClient;
 use Config;
 use Exception;
 use Illuminate\Support\Arr;
 use Socialite;
-use Common\Auth\Oauth;
-use Common\Core\HttpClient;
 
 class TwitterLoginValidator implements SettingsValidator
 {
@@ -31,9 +31,9 @@ class TwitterLoginValidator implements SettingsValidator
         ]);
     }
 
-    public function fails($settings)
+    public function fails($values)
     {
-        $this->setConfigDynamically($settings);
+        $this->setConfigDynamically($values);
 
         try {
             Socialite::driver('twitter')->redirect();

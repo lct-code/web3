@@ -36,7 +36,7 @@ function PageContent({role}: PageContentProps) {
         updateRole.mutate(values);
       }}
       title={<Trans message="Edit “:name“ role" values={{name: role.name}} />}
-      isLoading={updateRole.isLoading}
+      isLoading={updateRole.isPending}
     >
       <Tabs isLazy>
         <TabList>

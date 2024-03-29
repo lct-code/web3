@@ -12,7 +12,7 @@ interface Props {
 }
 export function BackstageArtistInsights({isNested}: Props) {
   const {artistId} = useParams();
-  const {data} = useArtist({});
+  const {data} = useArtist({loader: 'artist'});
   return (
     <BackstageInsightsLayout
       reportModel={`artist=${artistId}`}

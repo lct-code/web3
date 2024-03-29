@@ -1,4 +1,4 @@
-import {useQuery} from '@tanstack/react-query';
+import {keepPreviousData, useQuery} from '@tanstack/react-query';
 import {apiClient} from '../../http/query-client';
 import {BackendResponse} from '../../http/backend-response/backend-response';
 import {Product} from '../product';
@@ -13,14 +13,12 @@ export interface FetchProductResponse extends BackendResponse {
 
 export function useCheckoutProduct() {
   const {productId, priceId} = useParams();
-  const query = useQuery(
-    [endpoint(productId!)],
-    () => fetchProduct(productId!),
-    {
-      keepPreviousData: true,
-      enabled: productId != null && priceId != null,
-    }
-  );
+  const query = useQuery({
+    queryKey: [endpoint(productId!)],
+    queryFn: () => fetchProduct(productId!),
+    placeholderData: keepPreviousData,
+    enabled: productId != null && priceId != null,
+  });
 
   const product = query.data?.product;
   const price =
@@ -31,7 +29,7 @@ export function useCheckoutProduct() {
 }
 
 function fetchProduct(
-  productId: string | number
+  productId: string | number,
 ): Promise<FetchProductResponse> {
   return apiClient.get(endpoint(productId)).then(response => response.data);
 }

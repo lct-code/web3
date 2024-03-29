@@ -8,7 +8,9 @@ export interface FetchAdminSettingsResponse
     AdminSettings {}
 
 export function useAdminSettings() {
-  return useQuery(['fetchAdminSettings'], () => fetchAdminSettings(), {
+  return useQuery({
+    queryKey: ['fetchAdminSettings'],
+    queryFn: () => fetchAdminSettings(),
     // prevent automatic re-fetching so diffing with previous settings work properly
     staleTime: Infinity,
   });

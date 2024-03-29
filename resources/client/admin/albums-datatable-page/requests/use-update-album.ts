@@ -28,31 +28,31 @@ const Endpoint = (id: number) => `albums/${id}`;
 
 export function useUpdateAlbum(
   form: UseFormReturn<UpdateAlbumPayload>,
-  albumId: number
+  albumId: number,
 ) {
   const {trans} = useTrans();
   const navigate = useNavigate();
   const {pathname} = useLocation();
-  return useMutation(
-    (payload: UpdateAlbumPayload) => updateAlbum(albumId, payload),
-    {
-      onSuccess: response => {
-        toast(trans(message('Album updated')));
-        queryClient.invalidateQueries(DatatableDataQueryKey('albums'));
-        if (pathname.includes('admin')) {
-          navigate('/admin/albums');
-        } else {
-          navigate(getAlbumLink(response.album));
-        }
-      },
-      onError: err => onFormQueryError(err, form),
-    }
-  );
+  return useMutation({
+    mutationFn: (payload: UpdateAlbumPayload) => updateAlbum(albumId, payload),
+    onSuccess: response => {
+      toast(trans(message('Album updated')));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('albums'),
+      });
+      if (pathname.includes('admin')) {
+        navigate('/admin/albums');
+      } else {
+        navigate(getAlbumLink(response.album));
+      }
+    },
+    onError: err => onFormQueryError(err, form),
+  });
 }
 
 function updateAlbum(
   id: number,
-  payload: UpdateAlbumPayload
+  payload: UpdateAlbumPayload,
 ): Promise<Response> {
   return apiClient
     .put(Endpoint(id), prepareAlbumPayload(payload))

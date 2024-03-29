@@ -2,11 +2,11 @@
 
 namespace App\Services\Tracks;
 
-use App\Album;
-use App\Genre;
+use App\Models\Album;
+use App\Models\Genre;
+use App\Models\Track;
 use App\Notifications\ArtistUploadedMedia;
 use App\Services\Providers\SaveOrUpdate;
-use App\Track;
 use Arr;
 use Auth;
 use Common\Tags\Tag;
@@ -109,11 +109,11 @@ class CrupdateTrack
             $track->artists
                 ->first()
                 ->followers()
-                ->chunkById(1000, function ($followers) use ($album) {
+                ->chunkById(1000, function ($followers) use ($track) {
                     try {
                         Notification::send(
                             $followers,
-                            new ArtistUploadedMedia($album),
+                            new ArtistUploadedMedia($track),
                         );
                     } catch (Exception $e) {
                         //

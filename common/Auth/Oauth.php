@@ -1,15 +1,17 @@
 <?php namespace Common\Auth;
 
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
+use Common\Auth\Actions\CreateUser;
+use Common\Auth\Events\SocialConnected;
+use Common\Auth\Events\SocialLogin;
 use Common\Core\Bootstrap\BootstrapData;
 use Common\Core\Bootstrap\MobileBootstrapData;
-use Common\Settings\Settings;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
-use Laravel\Socialite\Contracts\Factory as SocialiteFactory;
+use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\One\User as OneUser;
 use Laravel\Socialite\Two\User as TwoUser;
 
@@ -20,17 +22,6 @@ class Oauth
 
     private array $validProviders = ['google', 'facebook', 'twitter', 'envato'];
 
-    public function __construct(
-        protected SocialiteFactory $socialite,
-        protected UserRepository $userCreator,
-        protected Settings $settings,
-        protected User $user
-    ) {
-    }
-
-    /**
-     * Log user in with provider service or throw 404 if service is not valid.
-     */
     public function loginWith(string $provider)
     {
         if (Auth::user()) {
@@ -40,17 +31,14 @@ class Oauth
             );
         }
 
-        return $this->connectCurrentUserTo($provider);
+        return $this->redirect($provider);
     }
 
-    /**
-     * Connect currently logged-in user to specified social account.
-     */
-    public function connectCurrentUserTo(string $providerName)
+    public function redirect(string $providerName)
     {
         $this->validateProvider($providerName);
 
-        return $this->socialite->driver($providerName)->redirect();
+        return Socialite::driver($providerName)->redirect();
     }
 
     /**
@@ -62,7 +50,7 @@ class Oauth
 
         Session::put([Oauth::RETRIEVE_PROFILE_ONLY_KEY => true]);
 
-        $driver = $this->socialite->driver($providerName);
+        $driver = Socialite::driver($providerName);
 
         // get user profile url from facebook
         if ($providerName === 'facebook') {
@@ -91,26 +79,19 @@ class Oauth
     public function socializeWith(
         string $provider,
         ?string $token,
-        ?string $secret
+        ?string $secret,
     ) {
         $this->validateProvider($provider);
 
         if ($token && $secret) {
-            $user = $this->socialite
-                ->driver($provider)
-                ->userFromTokenAndSecret($token, $secret);
+            $user = Socialite::driver($provider)->userFromTokenAndSecret(
+                $token,
+                $secret,
+            );
         } elseif ($token) {
-            $user = $this->socialite->driver($provider)->userFromToken($token);
+            $user = Socialite::driver($provider)->userFromToken($token);
         } else {
-            $user = $this->socialite->with($provider)->user();
-        }
-
-        //persist envato purchases in session if user is signing in
-        //with envato, so we can attach them to user later
-        if ($provider === 'envato' && !empty($user->purchases)) {
-            $this->persistSocialProfileData([
-                'envato_purchases' => $user->purchases,
-            ]);
+            $user = Socialite::with($provider)->user();
         }
 
         return $user;
@@ -118,11 +99,8 @@ class Oauth
 
     /**
      * Return existing social profile from database for specified external social profile.
-     *
-     * @param $profile
-     * @return SocialProfile|null
      */
-    public function getExistingProfile($profile)
+    public function getExistingProfile(mixed $profile): ?SocialProfile
     {
         if (!$profile) {
             return null;
@@ -149,14 +127,14 @@ class Oauth
         //create a new user if one does not exist with specified email
         if (!$user) {
             $img = str_replace('http://', 'https://', $profile->avatar);
-            $user = $this->userCreator->create([
+            $user = (new CreateUser())->execute([
                 'email' => $profile->email,
                 'avatar' => $img,
-                'email_verified_at' => Carbon::now(),
+                'email_verified_at' => now(),
             ]);
         }
 
-        //save this social profile data, so we can login the user easily next time
+        //save this social profile data, so we can log in the user easily next time
         $user
             ->social_profiles()
             ->create(
@@ -167,19 +145,14 @@ class Oauth
                 ),
             );
 
-        //save data about user supplied envato purchase code
-        if ($purchases = $this->getPersistedData('envato_purchases')) {
-            $user->updatePurchases($purchases);
-        }
-
-        return $this->logUserIn($user);
+        return $this->logUserIn($user, $service);
     }
 
     public function updateSocialProfileData(
         SocialProfile $profile,
         string $service,
         $data,
-        User|null $user = null
+        User|null $user = null,
     ): void {
         $data = $this->transformSocialProfileData(
             $service,
@@ -190,14 +163,11 @@ class Oauth
         $profile->fill($data)->save();
     }
 
-    /**
-     * Attach specified social profile to user.
-     */
     public function attachProfileToExistingUser(
         User $user,
         mixed $profile,
-        string $service
-    ): mixed {
+        string $service,
+    ) {
         $payload = $this->transformSocialProfileData(
             $service,
             $profile,
@@ -220,29 +190,23 @@ class Oauth
             $user->social_profiles()->create($payload);
         }
 
-        //save data about user supplied envato purchase code
-        if ($purchases = $this->getPersistedData('envato_purchases')) {
-            $user->updatePurchases($purchases);
-        }
-
         $response = [
             'bootstrapData' => app(BootstrapData::class)
                 ->init()
                 ->getEncoded(),
         ];
 
+        event(new SocialConnected($user, $service));
+
         return request()->expectsJson()
             ? $response
             : $this->getPopupResponse('SUCCESS', $response);
     }
 
-    /**
-     * @param TwoUser|OneUser $data
-     */
     private function transformSocialProfileData(
         string $service,
-        mixed $data,
-        int $userId
+        TwoUser|OneUser $data,
+        int $userId,
     ): array {
         return [
             'service_name' => $service,
@@ -281,13 +245,13 @@ class Oauth
      * Log given user into the app and return
      * a view to close popup in front end.
      */
-    public function logUserIn(User $user)
+    public function logUserIn(User $user, string $serviceName)
     {
-        $user = Auth::loginUsingId($user->id, true)->loadPermissions();
-        if (request()->get('tokenForDevice')) {
+        Auth::loginUsingId($user->id, true);
+        if (request('tokenForDevice')) {
             $response = app(MobileBootstrapData::class)
                 ->init()
-                ->refreshToken(request()->get('tokenForDevice'))
+                ->refreshToken(request('tokenForDevice'))
                 ->get();
         } else {
             $response = [
@@ -296,6 +260,9 @@ class Oauth
                     ->getEncoded(),
             ];
         }
+
+        event(new SocialLogin($user, $serviceName));
+
         if (request()->expectsJson()) {
             return $response;
         } else {
@@ -308,11 +275,9 @@ class Oauth
         if (request()->wantsJson()) {
             return response()->json(['errorMessage' => $message], 500);
         } else {
-            return response()->view(
-                'common::oauth.popup',
-                ['status' => 'ERROR', 'errorMessage' => $message],
-                500,
-            );
+            return $this->getPopupResponse('ERROR', [
+                'errorMessage' => $message,
+            ]);
         }
     }
 
@@ -341,7 +306,7 @@ class Oauth
      * Store specified social profile information in the session
      * for use in subsequent social login process steps.
      */
-    public function persistSocialProfileData(array $data)
+    public function persistSocialProfileData(array $data): void
     {
         foreach ($data as $key => $value) {
             Session::put("social_profile.$key", $value);
@@ -350,9 +315,8 @@ class Oauth
 
     /**
      * Check if provider user want to login with is valid, if not throw 404
-     * @param string $provider
      */
-    private function validateProvider($provider)
+    private function validateProvider(string $provider): void
     {
         if (!in_array($provider, $this->validProviders)) {
             abort(404);
@@ -361,11 +325,8 @@ class Oauth
 
     /**
      * Get users unique identifier on social service from given profile.
-     *
-     * @param Object $profile
-     * @return string|integer
      */
-    private function getUsersIdentifierOnService($profile)
+    private function getUsersIdentifierOnService(mixed $profile): int|string
     {
         return $profile->id ?? $profile->email;
     }

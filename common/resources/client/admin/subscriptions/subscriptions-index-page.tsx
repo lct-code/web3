@@ -30,18 +30,19 @@ const endpoint = 'billing/subscriptions';
 
 const columnConfig: ColumnConfig<Subscription>[] = [
   {
-    key: 'usr_id',
+    key: 'user_id',
     allowsSorting: true,
     width: 'flex-3 min-w-200',
     visibleInMode: 'all',
     header: () => <Trans message="Customer" />,
-    body: subscriptions => (
-      <NameWithAvatar
-        image={subscriptions.user!.avatar}
-        label={subscriptions.user!.display_name}
-        description={subscriptions.user!.email}
-      />
-    ),
+    body: subscription =>
+      subscription.user && (
+        <NameWithAvatar
+          image={subscription.user.avatar}
+          label={subscription.user.display_name}
+          description={subscription.user.email}
+        />
+      ),
   },
   {
     key: 'status',
@@ -69,7 +70,7 @@ const columnConfig: ColumnConfig<Subscription>[] = [
     body: subscription => subscription.product?.name,
   },
   {
-    key: 'gateway',
+    key: 'gateway_name',
     allowsSorting: true,
     header: () => <Trans message="Gateway" />,
     body: subscription => (
@@ -172,9 +173,11 @@ function SuspendSubscriptionButton({subscription}: SubscriptionActionsProps) {
       {subscriptionId: subscription.id},
       {
         onSuccess: () => {
-          queryClient.invalidateQueries(DatatableDataQueryKey(endpoint));
+          queryClient.invalidateQueries({
+            queryKey: DatatableDataQueryKey(endpoint),
+          });
         },
-      }
+      },
     );
   };
 
@@ -191,7 +194,7 @@ function SuspendSubscriptionButton({subscription}: SubscriptionActionsProps) {
         <IconButton
           size="md"
           className="text-muted"
-          disabled={cancelSubscription.isLoading}
+          disabled={cancelSubscription.isPending}
         >
           <PauseIcon />
         </IconButton>
@@ -201,7 +204,7 @@ function SuspendSubscriptionButton({subscription}: SubscriptionActionsProps) {
         body={
           <div>
             <Trans message="Are you sure you want to cancel this subscription?" />
-            <div className="font-semibold text-sm mt-10">
+            <div className="mt-10 text-sm font-semibold">
               <Trans message="This will put user on grace period until their next scheduled renewal date. Subscription can be renewed until that date by user or from admin area." />
             </div>
           </div>
@@ -219,9 +222,11 @@ function ResumeSubscriptionButton({subscription}: SubscriptionActionsProps) {
       {subscriptionId: subscription.id},
       {
         onSuccess: () => {
-          queryClient.invalidateQueries(DatatableDataQueryKey(endpoint));
+          queryClient.invalidateQueries({
+            queryKey: DatatableDataQueryKey(endpoint),
+          });
         },
-      }
+      },
     );
   };
 
@@ -239,7 +244,7 @@ function ResumeSubscriptionButton({subscription}: SubscriptionActionsProps) {
           size="md"
           className="text-muted"
           onClick={handleResumeSubscription}
-          disabled={resumeSubscription.isLoading}
+          disabled={resumeSubscription.isPending}
         >
           <PlayArrowIcon />
         </IconButton>
@@ -249,7 +254,7 @@ function ResumeSubscriptionButton({subscription}: SubscriptionActionsProps) {
         body={
           <div>
             <Trans message="Are you sure you want to resume this subscription?" />
-            <div className="font-semibold text-sm mt-10">
+            <div className="mt-10 text-sm font-semibold">
               <Trans message="This will put user on their original plan and billing cycle." />
             </div>
           </div>
@@ -268,9 +273,11 @@ function CancelSubscriptionButton({subscription}: SubscriptionActionsProps) {
       {subscriptionId: subscription.id, delete: true},
       {
         onSuccess: () => {
-          queryClient.invalidateQueries(DatatableDataQueryKey(endpoint));
+          queryClient.invalidateQueries({
+            queryKey: DatatableDataQueryKey(endpoint),
+          });
         },
-      }
+      },
     );
   };
 
@@ -287,7 +294,7 @@ function CancelSubscriptionButton({subscription}: SubscriptionActionsProps) {
         <IconButton
           size="md"
           className="text-muted"
-          disabled={cancelSubscription.isLoading}
+          disabled={cancelSubscription.isPending}
         >
           <CloseIcon />
         </IconButton>
@@ -298,7 +305,7 @@ function CancelSubscriptionButton({subscription}: SubscriptionActionsProps) {
         body={
           <div>
             <Trans message="Are you sure you want to delete this subscription?" />
-            <div className="font-semibold text-sm mt-10">
+            <div className="mt-10 text-sm font-semibold">
               <Trans message="This will permanently delete the subscription and immediately cancel it on billing gateway. Subscription will not be renewable anymore." />
             </div>
           </div>

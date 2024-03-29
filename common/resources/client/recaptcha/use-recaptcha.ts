@@ -48,6 +48,7 @@ async function execute(siteKey: string, action: string): Promise<boolean> {
 
 function load(siteKey: string) {
   return lazyLoader.loadAsset(
-    `https://www.google.com/recaptcha/api.js?render=${siteKey}`
+    `https://www.google.com/recaptcha/api.js?render=${siteKey}`,
+    {id: 'recaptcha-js'},
   );
 }

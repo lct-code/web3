@@ -1,31 +1,30 @@
 <?php namespace Common\Files;
 
-use App\User;
+use App\Models\User;
 use Arr;
 use Auth;
+use Common\Core\BaseModel;
 use Common\Files\Traits\HandlesEntryPaths;
 use Common\Files\Traits\HashesId;
-use Common\Search\Searchable;
 use Common\Tags\HandlesTags;
 use Common\Tags\Tag;
 use Common\Workspaces\Traits\BelongsToWorkspace;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
-class FileEntry extends Model
+class FileEntry extends BaseModel
 {
     use SoftDeletes,
         HashesId,
         HandlesEntryPaths,
         HandlesTags,
-        Searchable,
         BelongsToWorkspace;
 
+    public const MODEL_TYPE = 'fileEntry';
     protected $guarded = ['id'];
     protected $hidden = ['pivot', 'preview_token'];
     protected $appends = ['hash', 'url'];
@@ -94,11 +93,15 @@ class FileEntry extends Model
             return null;
         }
 
+        $endpoint = config('common.site.file_preview_endpoint');
+
         if (Arr::get($this->attributes, 'public')) {
-            return Storage::disk('public')->url(
-                "$this->disk_prefix/$this->file_name",
-            );
-        } elseif ($endpoint = config('common.site.file_preview_endpoint')) {
+            $publicPath =  "$this->disk_prefix/$this->file_name";
+            if ($endpoint) {
+                return "$endpoint/storage/$publicPath";
+            }
+            return Storage::disk('public')->url($publicPath);
+        } elseif ($endpoint) {
             return "$endpoint/uploads/{$this->file_name}/{$this->file_name}";
         } else {
             return "api/v1/file-entries/{$this->attributes['id']}";
@@ -157,7 +160,7 @@ class FileEntry extends Model
                 ->select('file_entry_id')
                 ->from('file_entry_models')
                 ->where('model_id', $userId)
-                ->where('model_type', User::class);
+                ->where('model_type', User::MODEL_TYPE);
 
             // if $owner is not null, need to load either only
             // entries user owns or entries user does not own
@@ -218,12 +221,24 @@ class FileEntry extends Model
 
     public function resolveRouteBinding($value, $field = null): ?self
     {
-        // ID might be with extension: "4546.mp4" or as hash: "ja4d5ad4" or int: 4546
+        // value might be ID with extension: "4546.mp4" or hash: "ja4d5ad4" or ID int: 4546 or filename
+
+        if (str_contains($value, '.') && str_contains($value, '-')) {
+            return $this->withTrashed()
+                ->where('file_name', $value)
+                ->firstOrFail();
+        }
+
         $intValue = (int) $value;
         if ($intValue === 0) {
             $intValue = $this->decodeHash($intValue);
         }
         return $this->withTrashed()->findOrFail($intValue);
+    }
+
+    protected function makeAllSearchableUsing($query)
+    {
+        return $query->with(['tags']);
     }
 
     public function toSearchableArray(): array
@@ -247,6 +262,17 @@ class FileEntry extends Model
         ];
     }
 
+    public function toNormalizedArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->type,
+            'image' => null,
+            'model_type' => self::MODEL_TYPE,
+        ];
+    }
+
     public static function filterableFields(): array
     {
         return [
@@ -261,5 +287,10 @@ class FileEntry extends Model
             'type',
             'workspace_id',
         ];
+    }
+
+    public static function getModelTypeAttribute(): string
+    {
+        return static::MODEL_TYPE;
     }
 }

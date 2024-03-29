@@ -1,15 +1,22 @@
 @import 'ui/progress/animation.css';
 @import 'ui/skeleton/skeleton.css';
 @import 'ui/layout/dashbboard-layout.css';
-@import 'text-editor/editor-styles.css';
+@import 'text-editor/highlight/editor-styles.css';
 @import 'admin/ads/ad-host.css';
+@import 'uploads/file-type-colors.css';
 @import 'player/player-styles.css';
+@import "custom-page/custom-page-body.css";
 
 @layer base {
   html,
   body,
   #root {
-    @apply w-full h-full antialiased;
+    @apply min-h-screen;
+    @apply antialiased;
+  }
+
+  html {
+    font-family: var(--be-font-family, theme('fontFamily.sans'));
   }
 
   body {
@@ -17,26 +24,31 @@
   }
 
   #root {
-    @apply text-main bg;
+    @apply bg text-main;
   }
 
-  .dark ::-webkit-scrollbar {
+  .dark ::-webkit-scrollbar,
+  .dark::-webkit-scrollbar {
     max-height: 10px;
     max-width: 10px;
     width: auto;
   }
 
   .dark ::-webkit-scrollbar-corner,
-  .dark ::-webkit-scrollbar-track {
+  .dark::-webkit-scrollbar-corner,
+  .dark ::-webkit-scrollbar-track,
+  .dark::-webkit-scrollbar-track {
     background: #2a2a2a;
   }
 
-  .dark ::-webkit-scrollbar-thumb {
+  .dark ::-webkit-scrollbar-thumb,
+  .dark::-webkit-scrollbar-thumb {
     background: #5a5a5a;
     border: 1px solid #2a2a2a;
     border-radius: 10px;
   }
 
+  .dark,
   .dark * {
     scrollbar-width: thin;
     scrollbar-color: #5a5a5a #2a2a2a;
@@ -115,4 +127,8 @@
   .no-page-overflow #root {
     overflow: hidden;
   }
+}
+
+.prose li > p {
+  margin: 0;
 }

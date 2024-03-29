@@ -2,11 +2,10 @@
 
 namespace App\Services\Providers\Spotify;
 
-use App\Artist;
+use App\Models\Artist;
+use App\Models\Track;
 use App\Services\Providers\SaveOrUpdate;
-use App\Track;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Support\Collection;
 
 class SpotifyTrackSaver
@@ -15,15 +14,14 @@ class SpotifyTrackSaver
 
     public function save(Collection $spotifyAlbums, Collection $savedAlbums)
     {
+        // set memory to unlimited
+        ini_set('memory_limit', '-1');
+
         $spotifyTracks = $spotifyAlbums
             ->map(function ($spotifyAlbum) use ($savedAlbums) {
-                try {
-                    $albumId = $savedAlbums
-                        ->where('spotify_id', $spotifyAlbum['spotify_id'])
-                        ->first()->id;
-                } catch (Exception $e) {
-                    dd($spotifyAlbum, $savedAlbums->toArray());
-                }
+                $albumId = $savedAlbums
+                    ->where('spotify_id', $spotifyAlbum['spotify_id'])
+                    ->first()->id;
                 return $spotifyAlbum['tracks']->map(function ($albumTrack) use (
                     $albumId,
                 ) {
@@ -58,10 +56,16 @@ class SpotifyTrackSaver
             ->map(function ($normalizedTrack) use (
                 $savedArtists,
                 $savedTracks,
+                $spotifyTracks,
             ) {
                 return $normalizedTrack['artists']->map(function (
                     $normalizedArtist,
-                ) use ($normalizedTrack, $savedArtists, $savedTracks) {
+                ) use (
+                    $normalizedTrack,
+                    $savedArtists,
+                    $savedTracks,
+                    $spotifyTracks,
+                ) {
                     $savedTrack = $savedTracks[$normalizedTrack['spotify_id']];
                     $savedArtist =
                         $savedArtists[$normalizedArtist['spotify_id']];

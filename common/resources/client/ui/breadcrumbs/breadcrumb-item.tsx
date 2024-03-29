@@ -51,8 +51,7 @@ export function BreadcrumbItem(props: BreadcrumbItemProps) {
   return (
     <li
       className={clsx(
-        `inline-flex justify-start items-center relative min-w-0 ${sizeStyle?.font}`,
-        isMenuTrigger && 'flex-shrink-0',
+        `relative inline-flex min-w-0 flex-shrink-0 items-center justify-start ${sizeStyle?.font}`,
         (!isClickable || isDisabled) && 'pointer-events-none',
         !isCurrent && isDisabled && 'text-disabled'
       )}
@@ -61,9 +60,9 @@ export function BreadcrumbItem(props: BreadcrumbItemProps) {
         {...domProps}
         className={clsx(
           className,
-          'px-8 cursor-pointer rounded whitespace-nowrap overflow-hidden',
+          'cursor-pointer overflow-hidden whitespace-nowrap rounded px-8',
           !isMenuTrigger && 'py-4 hover:bg-hover',
-          !isMenuTrigger && isLink && 'focus-visible:ring outline-none'
+          !isMenuTrigger && isLink && 'outline-none focus-visible:ring'
         )}
       >
         {children}

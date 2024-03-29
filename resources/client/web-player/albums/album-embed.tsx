@@ -11,15 +11,17 @@ import {Album} from '@app/web-player/albums/album';
 import {AlbumListItem} from '@app/web-player/albums/album-list/album-list-item';
 import {PlayerStoreOptions} from '@common/player/state/player-store-options';
 import {PlayerOutlet} from '@common/player/ui/player-outlet';
+import {PlayerPoster} from '@common/player/ui/controls/player-poster';
 
 export function AlbumEmbed() {
-  const {data} = useAlbum({
-    autoUpdate: false,
-    with: 'tracks',
-  });
+  const {data} = useAlbum({loader: 'albumEmbed'});
   return (
-    <div className="rounded border bg-alt p-14 h-384">
-      {!data?.album ? <FullPageLoader /> : <EmbedContent album={data.album} />}
+    <div className="h-384 rounded border bg-alt p-14">
+      {!data?.album ? (
+        <FullPageLoader screen={false} />
+      ) : (
+        <EmbedContent album={data.album} />
+      )}
     </div>
   );
 }
@@ -44,9 +46,10 @@ function EmbedContent({album}: EmbedContentProps) {
   }, [album]);
   return (
     <PlayerContext id="web-player" options={options}>
-      <div className="flex gap-24 items-start h-full">
-        <div className="flex-shrink-0 rounded bg-black overflow-hidden">
-          <PlayerOutlet className="w-144 h-144" />
+      <div className="flex h-full items-start gap-24">
+        <div className="relative h-144 w-144 flex-shrink-0 overflow-hidden rounded bg-black">
+          <PlayerPoster className="absolute inset-0" />
+          <PlayerOutlet className="h-full w-full" />
         </div>
         <AlbumListItem
           album={album}

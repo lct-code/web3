@@ -1,10 +1,8 @@
 <?php
 
-use App\Track;
-use App\User;
-use App\UserProfile;
+use App\Models\User;
+use App\Models\UserProfile;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 

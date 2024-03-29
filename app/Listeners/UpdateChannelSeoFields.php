@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Channel;
+use App\Models\Channel;
 use Common\Admin\Appearance\AppearanceSaver;
 use Common\Admin\Appearance\Events\AppearanceSettingSaved;
 use Str;

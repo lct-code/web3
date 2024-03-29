@@ -10,13 +10,11 @@ import {Trans} from '@common/i18n/trans';
 import {ProfileDescription} from '@app/web-player/user-profile/profile-description';
 import React from 'react';
 import {User} from '@common/auth/user';
-import {userFollowsStore} from '@app/web-player/users/user-follows-store';
-import {useFollowUser} from '@app/web-player/users/use-follow-user';
-import {useUnfollowUser} from '@app/web-player/users/use-unfollow-user';
 import {Button} from '@common/ui/buttons/button';
 import {DialogTrigger} from '@common/ui/overlays/dialog/dialog-trigger';
 import {EditIcon} from '@common/icons/material/Edit';
 import {EditProfileDialog} from '@app/web-player/user-profile/edit-profile-dialog';
+import {FollowButton} from '@common/users/follow-button';
 
 interface ProfileHeaderProps {
   user: User;
@@ -38,7 +36,7 @@ export function ProfileHeader({user, tabLink}: ProfileHeaderProps) {
       }
       title={user.display_name}
       subtitle={
-        <BulletSeparatedItems className="text-sm text-muted z-20 w-max mx-auto">
+        <BulletSeparatedItems className="z-20 mx-auto w-max text-sm text-muted">
           {user.followers_count && user.followers_count > 0 ? (
             <Link to={tabLink('followers')} className="hover:underline">
               <Trans
@@ -59,7 +57,14 @@ export function ProfileHeader({user, tabLink}: ProfileHeaderProps) {
       }
       actionButtons={
         <div className="flex items-center justify-center md:justify-start">
-          <FollowButton user={user} />
+          <FollowButton
+            user={user}
+            variant="flat"
+            color="primary"
+            minWidth={null}
+            className={actionButtonClassName({isFirst: true})}
+            radius="rounded-full"
+          />
           {currentUser?.id === user.id && <EditButton user={user} />}
         </div>
       }
@@ -85,40 +90,5 @@ function EditButton({user}: EditButtonProps) {
       </Button>
       <EditProfileDialog user={user} />
     </DialogTrigger>
-  );
-}
-
-function FollowButton({user}: EditButtonProps) {
-  const {user: currentUser} = useAuth();
-  const isFollowing = userFollowsStore(s => s.isFollowing(user.id));
-  const followUser = useFollowUser();
-  const unfollowUser = useUnfollowUser();
-
-  if (isFollowing) {
-    return (
-      <Button
-        variant="flat"
-        color="primary"
-        className={actionButtonClassName({isFirst: true})}
-        radius="rounded-full"
-        onClick={() => unfollowUser.mutate({user})}
-        disabled={currentUser?.id === user.id || unfollowUser.isLoading}
-      >
-        <Trans message="Unfollow" />
-      </Button>
-    );
-  }
-
-  return (
-    <Button
-      variant="flat"
-      color="primary"
-      className={actionButtonClassName({isFirst: true})}
-      radius="rounded-full"
-      onClick={() => followUser.mutate({user})}
-      disabled={currentUser?.id === user.id || followUser.isLoading}
-    >
-      <Trans message="Follow" />
-    </Button>
   );
 }

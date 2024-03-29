@@ -8,6 +8,8 @@ import {useHtmlMediaApi} from '@common/player/providers/html-media/use-html-medi
 export function HtmlAudioProvider() {
   const ref = useRef<HTMLAudioElement>(null);
 
+  const autoPlay = usePlayerStore(s => s.options.autoPlay);
+  const muted = usePlayerStore(s => s.muted);
   const cuedMedia = usePlayerStore(s => s.cuedMedia);
   const store = useContext(PlayerStoreContext);
 
@@ -21,11 +23,18 @@ export function HtmlAudioProvider() {
     });
   }, [store, providerApi]);
 
+  let src = cuedMedia?.src;
+  if (src && cuedMedia?.initialTime) {
+    src = `${src}#t=${cuedMedia.initialTime}`;
+  }
+
   return (
     <audio
       className="w-full h-full"
       ref={ref}
-      src={cuedMedia?.src}
+      src={src}
+      autoPlay={autoPlay}
+      muted={muted}
       {...events}
     />
   );

@@ -8,6 +8,8 @@ import {useHtmlMediaApi} from '@common/player/providers/html-media/use-html-medi
 export function HtmlVideoProvider() {
   const ref = useRef<HTMLVideoElement>(null);
 
+  const autoPlay = usePlayerStore(s => s.options.autoPlay);
+  const muted = usePlayerStore(s => s.muted);
   const cuedMedia = usePlayerStore(s => s.cuedMedia);
   const store = useContext(PlayerStoreContext);
 
@@ -21,14 +23,32 @@ export function HtmlVideoProvider() {
     });
   }, [store, providerApi]);
 
+  let src = cuedMedia?.src;
+  if (src && cuedMedia?.initialTime) {
+    src = `${src}#t=${cuedMedia.initialTime}`;
+  }
+
   return (
     <video
       className="w-full h-full"
       ref={ref}
-      src={cuedMedia?.src}
+      src={src}
       playsInline
       poster={cuedMedia?.poster}
+      autoPlay={autoPlay}
+      muted={muted}
       {...events}
-    />
+    >
+      {cuedMedia?.captions?.map((caption, index) => (
+        <track
+          key={caption.id}
+          label={caption.label}
+          kind="subtitles"
+          srcLang={caption.language || 'en'}
+          src={caption.src}
+          default={index === 0}
+        />
+      ))}
+    </video>
   );
 }

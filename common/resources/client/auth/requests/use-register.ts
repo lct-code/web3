@@ -24,7 +24,8 @@ export function useRegister(form: UseFormReturn<RegisterPayload>) {
   const {getRedirectUri} = useAuth();
   const {setBootstrapData} = useBootstrapData();
 
-  return useMutation(register, {
+  return useMutation({
+    mutationFn: register,
     onSuccess: response => {
       setBootstrapData(response.bootstrapData!);
       if (response.status === 'needs_email_verification') {

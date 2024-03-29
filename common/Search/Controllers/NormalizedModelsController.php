@@ -30,7 +30,7 @@ class NormalizedModelsController extends BaseController
 
         $model = app($namespace);
         if ($query) {
-            $model = $model->search($query);
+            $model = $model->mysqlSearch($query);
         }
 
         $results = $model

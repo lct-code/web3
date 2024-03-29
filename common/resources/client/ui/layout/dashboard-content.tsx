@@ -3,12 +3,17 @@ import clsx from 'clsx';
 
 interface DashboardContentProps {
   children: ReactElement<{className: string}>;
+  isScrollable?: boolean;
 }
-export function DashboardContent({children}: DashboardContentProps) {
+export function DashboardContent({
+  children,
+  isScrollable = true,
+}: DashboardContentProps) {
   return cloneElement(children, {
     className: clsx(
       children.props.className,
-      'dashboard-grid-content overflow-y-auto'
+      isScrollable && 'overflow-y-auto stable-scrollbar',
+      'dashboard-grid-content'
     ),
   });
 }

@@ -1,16 +1,17 @@
 import {useEffect, useRef, useState} from 'react';
 import {loadStripe, Stripe, StripeElements} from '@stripe/stripe-js';
-import {apiClient} from '../../../http/query-client';
-import {useSelectedLocale} from '../../../i18n/selected-locale';
-import {useAuth} from '../../../auth/use-auth';
-import {useIsDarkMode} from '../../../ui/themes/use-is-dark-mode';
-import {useSettings} from '../../../core/settings/use-settings';
+import {apiClient} from '@common/http/query-client';
+import {useSelectedLocale} from '@common/i18n/selected-locale';
+import {useAuth} from '@common/auth/use-auth';
+import {useIsDarkMode} from '@common/ui/themes/use-is-dark-mode';
+import {useSettings} from '@common/core/settings/use-settings';
 
 interface UseStripeProps {
   type: 'setupIntent' | 'subscription';
   productId?: string | number;
+  priceId?: string | number;
 }
-export function useStripe({type, productId}: UseStripeProps) {
+export function useStripe({type, productId, priceId}: UseStripeProps) {
   const {user} = useAuth();
   const isDarkMode = useIsDarkMode();
   const isInitiatedRef = useRef<boolean>(false);
@@ -38,7 +39,7 @@ export function useStripe({type, productId}: UseStripeProps) {
       // create partial subscription for clientSecret
       type === 'setupIntent'
         ? createSetupIntent()
-        : createSubscription(productId!),
+        : createSubscription(productId!, priceId),
     ]).then(([stripe, {clientSecret}]) => {
       if (stripe && paymentElementRef.current) {
         const elements = stripe.elements({
@@ -52,6 +53,11 @@ export function useStripe({type, productId}: UseStripeProps) {
         const paymentElement = elements.create('payment', {
           business: {name: site_name},
           terms: {card: 'never'},
+          fields: {
+            billingDetails: {
+              address: 'auto',
+            },
+          },
           defaultValues: {
             billingDetails: {
               email: user?.email,
@@ -90,9 +96,13 @@ function createSetupIntent(): Promise<{clientSecret: string}> {
 }
 
 function createSubscription(
-  productId: number | string
+  productId: number | string,
+  priceId?: number | string
 ): Promise<{clientSecret: string}> {
   return apiClient
-    .post('billing/stripe/create-partial-subscription', {product_id: productId})
+    .post('billing/stripe/create-partial-subscription', {
+      product_id: productId,
+      price_id: priceId,
+    })
     .then(r => r.data);
 }

@@ -18,10 +18,13 @@ export interface ImportAlbumPayload {
 
 export function useImportAlbum() {
   const {trans} = useTrans();
-  return useMutation((props: ImportAlbumPayload) => importAlbum(props), {
+  return useMutation({
+    mutationFn: (props: ImportAlbumPayload) => importAlbum(props),
     onSuccess: () => {
       toast(trans(message('Album imported')));
-      queryClient.invalidateQueries(DatatableDataQueryKey('albums'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('albums'),
+      });
     },
     onError: err => showHttpErrorToast(err),
   });

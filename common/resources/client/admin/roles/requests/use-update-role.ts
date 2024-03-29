@@ -22,11 +22,12 @@ const Endpoint = (id: number) => `roles/${id}`;
 export function useUpdateRole() {
   const {trans} = useTrans();
   const navigate = useNavigate();
-  return useMutation((payload: Payload) => updateRole(payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => updateRole(payload),
     onSuccess: response => {
       toast(trans(message('Role updated')));
-      queryClient.invalidateQueries([Endpoint(response.role.id)]);
-      queryClient.invalidateQueries(DatatableDataQueryKey('roles'));
+      queryClient.invalidateQueries({queryKey: [Endpoint(response.role.id)]});
+      queryClient.invalidateQueries({queryKey: DatatableDataQueryKey('roles')});
       navigate('/admin/roles');
     },
     onError: err => showHttpErrorToast(err),

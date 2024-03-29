@@ -6,6 +6,7 @@ import {useHtmlMediaInternalState} from '@common/player/providers/html-media/use
 import {useHtmlMediaEvents} from '@common/player/providers/html-media/use-html-media-events';
 import {useHtmlMediaApi} from '@common/player/providers/html-media/use-html-media-api';
 import {HlsMediaItem} from '@common/player/media-item';
+import {AudioTrack} from '@common/player/state/player-state';
 
 export default function HlsProvider() {
   const store = useContext(PlayerStoreContext);
@@ -31,7 +32,7 @@ export default function HlsProvider() {
 
   const setupHls = useCallback(() => {
     if (!Hls.isSupported()) {
-      store.getState().emit('error');
+      store.getState().emit('error', {fatal: true});
       return;
     }
 
@@ -54,7 +55,7 @@ export default function HlsProvider() {
         }
       }
 
-      store.getState().emit('error', {sourceEvent: event});
+      store.getState().emit('error', {sourceEvent: data, fatal: data.fatal});
     });
 
     hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -65,6 +66,13 @@ export default function HlsProvider() {
       });
 
       store.getState().emit('playbackQualityChange', {quality: 'auto'});
+    });
+
+    hlsInstance.on(Hls.Events.AUDIO_TRACK_SWITCHED, (eventType, data) => {
+      const track = store.getState().audioTracks.find(t => t.id === data.id);
+      if (track) {
+        store.getState().emit('currentAudioTrackChange', {trackId: track.id});
+      }
     });
 
     hlsInstance.on(
@@ -78,9 +86,21 @@ export default function HlsProvider() {
               : 'live'
             : 'on-demand';
           store.getState().emit('streamTypeChange', {
-            streamType: cuedMedia.streamType || inferredStreamType,
+            streamType:
+              (store.getState().cuedMedia as HlsMediaItem)?.streamType ||
+              inferredStreamType,
           });
           store.getState().emit('durationChange', {duration});
+
+          const audioTracks: AudioTrack[] = hlsInstance.audioTracks.map(
+            track => ({
+              id: track.id,
+              label: track.name,
+              language: track.lang || '',
+              kind: 'main',
+            })
+          );
+          store.getState().emit('audioTracks', {tracks: audioTracks});
         }
       }
     );
@@ -116,6 +136,10 @@ export default function HlsProvider() {
     store.setState({
       providerApi: {
         ...htmlMediaApi,
+        setCurrentAudioTrack: (trackId: number) => {
+          if (!hls.current) return;
+          hls.current.audioTrack = trackId;
+        },
         setPlaybackQuality: (quality: string) => {
           if (!hls.current) return;
           hls.current.currentLevel = hls.current.levels.findIndex(
@@ -129,7 +153,7 @@ export default function HlsProvider() {
 
   return (
     <video
-      className="w-full h-full"
+      className="h-full w-full"
       ref={videoRef}
       playsInline
       poster={cuedMedia?.poster}

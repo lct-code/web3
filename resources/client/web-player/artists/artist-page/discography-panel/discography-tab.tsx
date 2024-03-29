@@ -4,42 +4,43 @@ import {SmallArtistImage} from '@app/web-player/artists/artist-image/small-artis
 import {Link} from 'react-router-dom';
 import {getArtistLink} from '@app/web-player/artists/artist-link';
 import {TopTracksTable} from '@app/web-player/artists/artist-page/discography-panel/top-tracks-table';
-import {PaginationResponse} from '@common/http/backend-response/pagination-response';
-import {Album} from '@app/web-player/albums/album';
 import {ArtistAlbumsList} from '@app/web-player/artists/artist-page/discography-panel/artist-albums-list';
 import {IconButton} from '@common/ui/buttons/icon-button';
 import {ViewAgendaIcon} from '@common/icons/material/ViewAgenda';
 import {GridViewIcon} from '@common/icons/material/GridView';
-import {useLocalStorage} from '@common/utils/hooks/local-storage';
 import {ArtistAlbumsGrid} from '@app/web-player/artists/artist-page/discography-panel/artist-albums-grid';
 import {Tooltip} from '@common/ui/tooltip/tooltip';
 import {
   albumGridViewPerPage,
   albumListViewPerPage,
-  AlbumViewMode,
 } from '@app/web-player/artists/requests/use-artist-albums';
-import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 import {useSettings} from '@common/core/settings/use-settings';
 import {AdHost} from '@common/admin/ads/ad-host';
 import React from 'react';
+import {
+  albumLayoutKey,
+  UseArtistResponse,
+} from '@app/web-player/artists/requests/use-artist';
+import {useCookie} from '@common/utils/hooks/use-cookie';
 
 interface DiscographyTabProps {
-  artist: Artist;
-  initialAlbums?: PaginationResponse<Album>;
+  data: UseArtistResponse;
 }
-export function DiscographyTab({artist, initialAlbums}: DiscographyTabProps) {
+export function DiscographyTab({
+  data: {artist, albums, selectedAlbumLayout},
+}: DiscographyTabProps) {
   const {player} = useSettings();
-  const [viewMode, setViewMode] = useLocalStorage<AlbumViewMode>(
-    'artistPage.albumLayout',
-    player?.default_artist_view || 'list'
+  const [viewMode, setViewMode] = useCookie(
+    albumLayoutKey,
+    selectedAlbumLayout || player?.default_artist_view || 'list',
   );
   return (
     <div>
       <Header artist={artist} />
       <AdHost slot="artist_bottom" className="mt-34" />
       <div className="mt-44">
-        <div className="flex items-center border-b pb-4 mb-30 text-muted">
-          <h2 className="text-base mr-auto">
+        <div className="mb-30 flex items-center border-b pb-4 text-muted">
+          <h2 className="mr-auto text-base">
             <Trans message="Albums" />
           </h2>
           <Tooltip label={<Trans message="List view" />}>
@@ -65,18 +66,14 @@ export function DiscographyTab({artist, initialAlbums}: DiscographyTabProps) {
           <ArtistAlbumsList
             artist={artist}
             initialAlbums={
-              initialAlbums?.per_page === albumListViewPerPage
-                ? initialAlbums
-                : null
+              albums?.per_page === albumListViewPerPage ? albums : null
             }
           />
         ) : (
           <ArtistAlbumsGrid
             artist={artist}
             initialAlbums={
-              initialAlbums?.per_page === albumGridViewPerPage
-                ? initialAlbums
-                : null
+              albums?.per_page === albumGridViewPerPage ? albums : null
             }
           />
         )}
@@ -89,16 +86,15 @@ interface HeaderProps {
   artist: Artist;
 }
 function Header({artist}: HeaderProps) {
-  const isMobile = useIsMobileMediaQuery();
   if (!artist.top_tracks?.length) return null;
   const similarArtists = artist.similar?.slice(0, 4) || [];
 
   return (
     <div className="flex items-start gap-30">
       <TopTracksTable tracks={artist.top_tracks} />
-      {!isMobile && (
-        <div className="w-1/3 max-w-320">
-          <h2 className="text-muted text-base my-16">
+      {similarArtists.length ? (
+        <div className="w-1/3 max-w-320 max-md:hidden">
+          <h2 className="my-16 text-base text-muted">
             <Trans message="Similar artists" />
           </h2>
           <div>
@@ -106,18 +102,18 @@ function Header({artist}: HeaderProps) {
               <Link
                 key={similar.id}
                 to={getArtistLink(similar)}
-                className="flex items-center gap-14 block p-4 mb-4 rounded hover:bg-hover cursor-pointer"
+                className="mb-4 flex cursor-pointer items-center gap-14 rounded p-4 hover:bg-hover"
               >
                 <SmallArtistImage
                   artist={similar}
-                  className="w-44 h-44 object-cover rounded-full"
+                  className="h-44 w-44 rounded-full object-cover"
                 />
                 <div className="text-sm">{similar.name}</div>
               </Link>
             ))}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

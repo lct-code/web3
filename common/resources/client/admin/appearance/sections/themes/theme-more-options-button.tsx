@@ -53,10 +53,14 @@ export function ThemeMoreOptionsButton() {
               : appearanceState().defaults!.appearance.themes.light;
 
             Object.entries(defaultColors).forEach(([colorName, themeValue]) => {
-              appearanceState().preview.setThemeColor(colorName, themeValue);
+              appearanceState().preview.setThemeValue(colorName, themeValue);
             });
+            appearanceState().preview.setThemeFont(null);
 
-            setValue(`${path}.colors`, defaultColors, {
+            setValue(`${path}.values`, defaultColors, {
+              shouldDirty: true,
+            });
+            setValue(`${path}.font`, undefined, {
               shouldDirty: true,
             });
           }

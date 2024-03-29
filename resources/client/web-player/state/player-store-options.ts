@@ -61,6 +61,7 @@ function setMediaSessionMetadata(media: MediaItem<Track>) {
 }
 
 export const playerStoreOptions: Partial<PlayerStoreOptions> = {
+  persistQueueInLocalStorage: true,
   defaultVolume: getBootstrapData().settings.player?.default_volume,
   setMediaSessionMetadata,
   youtube: {

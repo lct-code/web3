@@ -1,7 +1,6 @@
 import {create} from 'zustand';
 import {immer} from 'zustand/middleware/immer';
-import {enableMapSet} from 'immer';
-import {WritableDraft} from 'immer/dist/types/types-external';
+import {Draft, enableMapSet} from 'immer';
 import {UploadedFile} from '../uploaded-file';
 import {UploadStrategy, UploadStrategyConfig} from './strategy/upload-strategy';
 import {MessageDescriptor} from '../../i18n/message-descriptor';
@@ -28,30 +27,43 @@ export interface FileUpload {
   meta?: unknown;
 }
 
-export interface FileUploadState {
+interface State {
   concurrency: number;
   fileUploads: Map<string, FileUpload>;
   // uploads with pending and inProgress status
   activeUploadsCount: number;
   completedUploadsCount: number;
+}
+
+const initialState: State = {
+  concurrency: 3,
+  fileUploads: new Map(),
+  activeUploadsCount: 0,
+  completedUploadsCount: 0,
+};
+
+interface Actions {
   uploadMultiple: (
     files: (File | UploadedFile)[] | FileList,
     options?: Omit<
       UploadStrategyConfig,
       // progress would be called for each upload simultaneously
       'onProgress' | 'showToastOnRestrictionFail'
-    >
+    >,
   ) => string[];
   uploadSingle: (
     file: File | UploadedFile,
-    options?: UploadStrategyConfig
+    options?: UploadStrategyConfig,
   ) => string;
   clearInactive: () => void;
   abortUpload: (id: string) => void;
   updateFileUpload: (id: string, state: Partial<FileUpload>) => void;
   getUpload: (id: string) => FileUpload | undefined;
   runQueue: () => void;
+  reset: () => void;
 }
+
+export type FileUploadState = State & Actions;
 
 interface StoreProps {
   settings: Settings;
@@ -60,10 +72,10 @@ export const createFileUploadStore = ({settings}: StoreProps) =>
   create<FileUploadState>()(
     immer((set, get) => {
       return {
-        concurrency: 3,
-        fileUploads: new Map<string, FileUpload>(),
-        activeUploadsCount: 0,
-        completedUploadsCount: 0,
+        ...initialState,
+        reset: () => {
+          set(initialState);
+        },
 
         getUpload: uploadId => {
           return get().fileUploads.get(uploadId);
@@ -154,7 +166,7 @@ export const createFileUploadStore = ({settings}: StoreProps) =>
                 // only allow one tus upload if file is larger than chunk size, tus will have parallel uploads already in that case
                 (activeUpload.request instanceof TusUpload &&
                   settings.uploads.chunk_size &&
-                  activeUpload.file.size > settings.uploads.chunk_size)
+                  activeUpload.file.size > settings.uploads.chunk_size),
             ).length
           ) {
             concurrency = 1;
@@ -170,14 +182,14 @@ export const createFileUploadStore = ({settings}: StoreProps) =>
           }
         },
       };
-    })
+    }),
   );
 
-const updateTotals = (state: WritableDraft<FileUploadState>) => {
+const updateTotals = (state: Draft<FileUploadState>) => {
   state.completedUploadsCount = [...state.fileUploads.values()].filter(
-    u => u.status === 'completed'
+    u => u.status === 'completed',
   ).length;
   state.activeUploadsCount = [...state.fileUploads.values()].filter(
-    u => u.status === 'inProgress' || u.status === 'pending'
+    u => u.status === 'inProgress' || u.status === 'pending',
   ).length;
 };

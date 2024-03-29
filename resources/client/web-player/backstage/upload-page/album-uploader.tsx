@@ -51,7 +51,7 @@ export const AlbumUploader = forwardRef<UploaderActions, UploaderProps>(
             return track.uploadId === file.id
               ? mergeTrackFormValues(newData, track)
               : track;
-          })
+          }),
         );
       },
     });
@@ -63,7 +63,7 @@ export const AlbumUploader = forwardRef<UploaderActions, UploaderProps>(
         uploadTracks,
         validateUploads,
       }),
-      [openFilePicker, uploadTracks, validateUploads]
+      [openFilePicker, uploadTracks, validateUploads],
     );
 
     const createAlbum = useCreateAlbum(form);
@@ -101,12 +101,12 @@ export const AlbumUploader = forwardRef<UploaderActions, UploaderProps>(
             type="submit"
             variant="flat"
             color="primary"
-            disabled={uploadIsInProgress || createAlbum.isLoading}
+            disabled={uploadIsInProgress || createAlbum.isPending}
           >
             <Trans message="Save" />
           </Button>
         </div>
       </Form>
     ) : null;
-  }
+  },
 );

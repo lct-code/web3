@@ -53,6 +53,8 @@ export interface TableProps<T extends TableDataItem>
   hideBorder?: boolean;
   closeOnInteractOutside?: boolean;
   collapseOnMobile?: boolean;
+  cellHeight?: string;
+  headerCellHeight?: string;
 }
 export function Table<T extends TableDataItem>({
   className,
@@ -78,6 +80,8 @@ export function Table<T extends TableDataItem>({
   meta,
   tableRef: propsTableRef,
   closeOnInteractOutside = false,
+  cellHeight,
+  headerCellHeight,
   ...domProps
 }: TableProps<T>) {
   const isMobile = useIsMobileMediaQuery();
@@ -90,13 +94,13 @@ export function Table<T extends TableDataItem>({
   const [selectedRows, onSelectionChange] = useControlledState(
     propsSelectedRows,
     propsDefaultSelectedRows || [],
-    propsOnSelectionChange
+    propsOnSelectionChange,
   );
 
   const [sortDescriptor, onSortChange] = useControlledState(
     propsSortDescriptor,
     undefined,
-    propsOnSortChange
+    propsOnSortChange,
   );
 
   const toggleRow = useCallback(
@@ -110,7 +114,7 @@ export function Table<T extends TableDataItem>({
       }
       onSelectionChange(newValues);
     },
-    [selectedRows, onSelectionChange]
+    [selectedRows, onSelectionChange],
   );
 
   const selectRow = useCallback(
@@ -124,7 +128,7 @@ export function Table<T extends TableDataItem>({
       }
       onSelectionChange(newValues);
     },
-    [selectedRows, onSelectionChange]
+    [selectedRows, onSelectionChange],
   );
 
   // add checkbox columns to config, if selection is enabled
@@ -151,6 +155,8 @@ export function Table<T extends TableDataItem>({
 
   const contextValue: TableContextValue<T> = {
     isCollapsedMode,
+    cellHeight,
+    headerCellHeight,
     hideBorder,
     hideHeaderRow,
     selectedRows,
@@ -218,7 +224,7 @@ export function Table<T extends TableDataItem>({
               e.stopPropagation();
               if (selectedRows?.length) {
                 onDelete?.(
-                  data.filter(item => selectedRows?.includes(item.id))
+                  data.filter(item => selectedRows?.includes(item.id)),
                 );
               }
             } else if (isCtrlKeyPressed(e) && e.key === 'a') {
@@ -239,7 +245,7 @@ export function Table<T extends TableDataItem>({
         aria-labelledby={ariaLabelledBy}
         className={clsx(
           className,
-          'select-none isolate outline-none text-sm focus-visible:ring-2'
+          'isolate select-none text-sm outline-none focus-visible:ring-2',
         )}
       >
         {!hideHeaderRow && <TableHeaderRow />}

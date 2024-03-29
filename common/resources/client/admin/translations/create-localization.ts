@@ -1,8 +1,8 @@
-import {useMutation} from '@tanstack/react-query';
+import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {UseFormReturn} from 'react-hook-form';
 import {toast} from '../../ui/toast/toast';
 import {BackendResponse} from '../../http/backend-response/backend-response';
-import {apiClient, queryClient} from '../../http/query-client';
+import {apiClient} from '../../http/query-client';
 import {message} from '../../i18n/message';
 import {DatatableDataQueryKey} from '../../datatable/requests/paginated-resources';
 import {onFormQueryError} from '../../errors/on-form-query-error';
@@ -18,22 +18,23 @@ export interface CreateLocalizationPayload {
 }
 
 function createLocalization(
-  payload: CreateLocalizationPayload
+  payload: CreateLocalizationPayload,
 ): Promise<Response> {
   return apiClient.post(`localizations`, payload).then(r => r.data);
 }
 
 export function useCreateLocalization(
-  form: UseFormReturn<CreateLocalizationPayload>
+  form: UseFormReturn<CreateLocalizationPayload>,
 ) {
-  return useMutation(
-    (props: CreateLocalizationPayload) => createLocalization(props),
-    {
-      onSuccess: () => {
-        toast(message('Localization created'));
-        queryClient.invalidateQueries(DatatableDataQueryKey('localizations'));
-      },
-      onError: r => onFormQueryError(r, form),
-    }
-  );
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (props: CreateLocalizationPayload) => createLocalization(props),
+    onSuccess: () => {
+      toast(message('Localization created'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('localizations'),
+      });
+    },
+    onError: r => onFormQueryError(r, form),
+  });
 }

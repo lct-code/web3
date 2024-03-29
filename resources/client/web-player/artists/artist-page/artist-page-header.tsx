@@ -17,14 +17,13 @@ import {ArtistContextDialog} from '@app/web-player/artists/artist-context-dialog
 import {ProfileDescription} from '@app/web-player/user-profile/profile-description';
 import {useSettings} from '@common/core/settings/use-settings';
 import {MediaItemStats} from '@app/web-player/tracks/media-item-stats';
-import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
+import clsx from 'clsx';
 
 interface ArtistPageHeaderProps {
   artist: Artist;
 }
 export function ArtistPageHeader({artist}: ArtistPageHeaderProps) {
   const {artistPage} = useSettings();
-  const isMobile = useIsMobileMediaQuery();
   return (
     <MediaPageHeaderLayout
       centerItems
@@ -32,15 +31,15 @@ export function ArtistPageHeader({artist}: ArtistPageHeaderProps) {
         <SmallArtistImage
           showVerifiedBadge
           artist={artist}
-          className="rounded-full shadow-lg object-cover"
+          className="rounded-full object-cover shadow-lg"
         />
       }
       title={artist.name}
       subtitle={<GenreList genres={artist.genres} />}
       actionButtons={
-        <div className="flex items-center gap-24 justify-center md:justify-between">
+        <div className="flex items-center justify-center gap-24 md:justify-between">
           <ActionButtons artist={artist} />
-          {!isMobile && <MediaItemStats item={artist} />}
+          <MediaItemStats className="max-md:hidden" item={artist} />
         </div>
       }
       footer={
@@ -60,12 +59,8 @@ interface GenreListProps {
   genres?: Genre[];
 }
 function GenreList({genres}: GenreListProps) {
-  const isMobile = useIsMobileMediaQuery();
-  if (isMobile) {
-    return null;
-  }
   return (
-    <ul className="flex items-center justify-start gap-14 text-muted text-sm max-w-620 overflow-hidden overflow-ellipsis whitespace-nowrap">
+    <ul className="flex max-w-620 items-center justify-start gap-14 overflow-hidden overflow-ellipsis whitespace-nowrap text-sm text-muted max-md:hidden">
       {genres?.slice(0, 5).map(genre => (
         <li key={genre.id}>
           <GenreLink genre={genre} />
@@ -79,7 +74,6 @@ interface ActionButtonsProps {
   artist: Artist;
 }
 function ActionButtons({artist}: ActionButtonsProps) {
-  const isMobile = useIsMobileMediaQuery();
   return (
     <div>
       <PlaybackToggleButton
@@ -87,10 +81,11 @@ function ActionButtons({artist}: ActionButtonsProps) {
         buttonType="text"
         className={actionButtonClassName({isFirst: true})}
       />
-      {!isMobile && (
-        <LikeButton likeable={artist} className={actionButtonClassName()} />
-      )}
-      <DialogTrigger type="popover">
+      <LikeButton
+        likeable={artist}
+        className={clsx(actionButtonClassName(), 'max-md:hidden')}
+      />
+      <DialogTrigger type="popover" mobileType="tray">
         <Button
           variant="outline"
           radius="rounded-full"

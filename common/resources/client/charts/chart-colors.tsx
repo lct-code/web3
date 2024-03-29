@@ -1,6 +1,6 @@
 import {getBootstrapData} from '@common/core/bootstrap-data/use-backend-bootstrap-data';
 
-const primaryColor = getBootstrapData().themes.all[0].colors['--be-primary'];
+const primaryColor = getBootstrapData().themes.all[0].values['--be-primary'];
 export const ChartColors = [
   [
     `rgb(${primaryColor.replaceAll(' ', ',')})`,

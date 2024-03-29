@@ -10,14 +10,16 @@ interface Response extends BackendResponse {
 }
 
 interface Payload {
-  ids: string[];
+  ids?: string[];
+  markAllAsUnread?: boolean;
 }
 
 export function useMarkNotificationsAsRead() {
   const {data, mergeBootstrapData} = useBootstrapData();
-  return useMutation((props: Payload) => UseMarkNotificationsAsRead(props), {
+  return useMutation({
+    mutationFn: (props: Payload) => UseMarkNotificationsAsRead(props),
     onSuccess: response => {
-      queryClient.invalidateQueries(useUserNotifications.key);
+      queryClient.invalidateQueries({queryKey: useUserNotifications.key});
       if (response.unreadCount === 0) {
         mergeBootstrapData({
           user: {...data.user!, unread_notifications_count: 0},

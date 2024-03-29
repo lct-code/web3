@@ -17,7 +17,8 @@ interface Payload {
 
 export function useResumeSubscription() {
   const {trans} = useTrans();
-  return useMutation((props: Payload) => resumeSubscription(props), {
+  return useMutation({
+    mutationFn: (props: Payload) => resumeSubscription(props),
     onSuccess: () => {
       toast(trans(message('Subscription renewed.')));
     },

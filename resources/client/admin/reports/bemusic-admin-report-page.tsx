@@ -31,12 +31,12 @@ export function BemusicAdminReportPage() {
     );
 
   return (
-    <div className="min-h-full p-12 md:p-24 overflow-x-hidden">
-      <div className="md:flex items-center justify-between gap-24 mb-24">
+    <div className="min-h-full overflow-x-hidden p-12 md:p-24">
+      <div className="mb-24 items-center justify-between gap-24 md:flex">
         <StaticPageTitle>{title}</StaticPageTitle>
-        <h1 className="mb-24 md:mb-0 text-3xl font-light">{title}</h1>
-        <div className="flex-shrink-0 flex items-center justify-between gap-10 md:gap-24">
-          <ButtonGroup variant="outline" radius="rounded" value={channel}>
+        <h1 className="mb-24 text-3xl font-light md:mb-0">{title}</h1>
+        <div className="flex flex-shrink-0 items-center justify-between gap-10 md:gap-24">
+          <ButtonGroup variant="outline" value={channel}>
             <Button value="plays" elementType={Link} to="plays">
               <Trans message="Plays" />
             </Button>
@@ -58,7 +58,5 @@ interface HeaderProps {
 }
 function Header({dateRange}: HeaderProps) {
   const {data} = useAdminReport({types: ['header'], dateRange});
-  return (
-    <AdminHeaderReport report={data?.headerReport} dateRange={dateRange} />
-  );
+  return <AdminHeaderReport report={data?.headerReport} />;
 }

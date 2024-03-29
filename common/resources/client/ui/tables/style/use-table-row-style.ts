@@ -12,11 +12,12 @@ interface Props {
 export function useTableRowStyle({index, isSelected, isHeader}: Props) {
   const isDarkMode = useIsDarkMode();
   const isMobile = useIsMobileMediaQuery();
-  const {hideBorder, enableSelection, collapseOnMobile} =
+  const {hideBorder, enableSelection, collapseOnMobile, onAction} =
     useContext(TableContext);
   const isFirst = index === 0;
   return clsx(
     'flex gap-x-16 break-inside-avoid outline-none border border-transparent',
+    onAction && 'cursor-pointer',
     isMobile && collapseOnMobile && hideBorder
       ? 'mb-8 pl-8 pr-0 rounded'
       : 'px-16',
@@ -30,7 +31,7 @@ export function useTableRowStyle({index, isSelected, isHeader}: Props) {
       'bg-selected hover:bg-focus focus-visible:bg-focus',
     !isSelected &&
       !isHeader &&
-      enableSelection &&
+      (enableSelection || onAction) &&
       'focus-visible:bg-focus hover:bg-hover'
   );
 }

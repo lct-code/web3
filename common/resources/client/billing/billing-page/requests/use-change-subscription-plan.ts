@@ -22,7 +22,8 @@ interface Payload {
 export function useChangeSubscriptionPlan() {
   const {trans} = useTrans();
   const navigate = useNavigate();
-  return useMutation((props: Payload) => changePlan(props), {
+  return useMutation({
+    mutationFn: (props: Payload) => changePlan(props),
     onSuccess: () => {
       toast(trans(message('Plan changed.')));
       invalidateBillingUserQuery();

@@ -1,28 +1,33 @@
-import {UploadedFile} from '../../../uploads/uploaded-file';
+import {UploadedFile} from '@common/uploads/uploaded-file';
 
 export async function* readFilesFromDataTransfer(dataTransfer: DataTransfer) {
+  const entries: FileSystemEntry[] = [];
+
+  // Pull out all entries before reading them, otherwise
+  // some entries will be lost due to recursion with promises
   for (const item of dataTransfer.items) {
     if (item.kind === 'file') {
-      if (typeof item.webkitGetAsEntry === 'function') {
-        const entry: FileSystemEntry | null = item.webkitGetAsEntry();
-        if (!entry) continue;
-
-        if (entry.isFile) {
-          if (entry.name === '.DS_Store') continue;
-          yield new UploadedFile(item.getAsFile()!, entry.fullPath);
-        } else if (entry.isDirectory) {
-          yield* getEntries(entry as FileSystemDirectoryEntry);
-        }
-      } else {
-        const file = item.getAsFile();
-        if (!file || file.name === '.DS_Store') continue;
-        yield new UploadedFile(file, (item as any).fullPath);
+      const entry = item.webkitGetAsEntry();
+      if (entry) {
+        entries.push(entry);
       }
+    }
+  }
+
+  for (const entry of entries) {
+    if (entry.isFile) {
+      if (entry.name === '.DS_Store') continue;
+      const file = await getEntryFile(entry as FileSystemFileEntry);
+      yield new UploadedFile(file, entry.fullPath);
+    } else if (entry.isDirectory) {
+      yield* getEntriesFromDirectory(entry as FileSystemDirectoryEntry);
     }
   }
 }
 
-async function* getEntries(item: FileSystemDirectoryEntry): AsyncIterable<any> {
+async function* getEntriesFromDirectory(
+  item: FileSystemDirectoryEntry
+): AsyncIterable<any> {
   const reader = item.createReader();
 
   // We must call readEntries repeatedly because there may be a limit to the
@@ -39,7 +44,7 @@ async function* getEntries(item: FileSystemDirectoryEntry): AsyncIterable<any> {
         const file = await getEntryFile(entry as FileSystemFileEntry);
         yield new UploadedFile(file, entry.fullPath);
       } else if (entry.isDirectory) {
-        yield* getEntries(entry as FileSystemDirectoryEntry);
+        yield* getEntriesFromDirectory(entry as FileSystemDirectoryEntry);
       }
     }
   } while (entries.length > 0);

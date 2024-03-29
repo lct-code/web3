@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Album;
-use App\Artist;
-use App\Playlist;
+use App\Models\Album;
+use App\Models\Artist;
+use App\Models\Playlist;
+use App\Models\User;
 use App\Services\Tracks\Queries\AlbumTrackQuery;
 use App\Services\Tracks\Queries\ArtistTrackQuery;
 use App\Services\Tracks\Queries\BaseTrackQuery;
 use App\Services\Tracks\Queries\HistoryTrackQuery;
 use App\Services\Tracks\Queries\LibraryTracksQuery;
 use App\Services\Tracks\Queries\PlaylistTrackQuery;
-use App\User;
 use Common\Core\BaseController;
 use Illuminate\Database\Eloquent\Builder;
 

@@ -79,7 +79,7 @@ export function ConfirmPlanChangePage() {
                     newPriceId: newPrice.id,
                   });
                 }}
-                disabled={changePlan.isLoading}
+                disabled={changePlan.isPending}
               >
                 <Trans message="Confirm" />
               </Button>

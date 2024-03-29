@@ -40,7 +40,7 @@ interface RequestDetailsProps {
 function RequestDetails({request}: RequestDetailsProps) {
   return (
     <div className="mt-60">
-      <div className="text-2xl mb-14 mt-24">
+      <div className="mb-14 mt-24 text-2xl">
         <Trans message="Request details" />
       </div>
       <div>
@@ -73,7 +73,7 @@ function RequestDetails({request}: RequestDetailsProps) {
           <Detail
             name={<Trans message="Artist" />}
             value={
-              <div className="flex items-center gap-12 w-max">
+              <div className="flex w-max items-center gap-12">
                 <SmallArtistImage
                   artist={request.artist}
                   className="flex-shrink-0 rounded"
@@ -119,8 +119,8 @@ interface DetailProps {
 }
 function Detail({name, value}: DetailProps) {
   return (
-    <div className="md:flex items-center gap-24 border-b py-12 md:py-18 text-sm">
-      <div className="min-w-200 mb-8 md:mb-0">{name}</div>
+    <div className="items-center gap-24 border-b py-12 text-sm md:flex md:py-18">
+      <div className="mb-8 min-w-200 md:mb-0">{name}</div>
       <div>{value}</div>
     </div>
   );
@@ -129,7 +129,7 @@ function Detail({name, value}: DetailProps) {
 function VerificationList({request}: RequestDetailsProps) {
   return (
     <div className="mt-60">
-      <div className="text-2xl mb-14 mt-24">
+      <div className="mb-14 mt-24 text-2xl">
         <Trans message="Attached verification" />
       </div>
       <div>
@@ -166,7 +166,7 @@ function SocialServiceVerification({
   request,
 }: SocialServiceVerificationProps) {
   const account = request.user.social_profiles.find(
-    s => s.service_name === service
+    s => s.service_name === service,
   );
   if (!account) return null;
 
@@ -193,7 +193,7 @@ function SocialServiceVerification({
           size="xs"
           href={
             service === 'twitter'
-              ? `https://twitter.com/@${account.username}`
+              ? `https://twitter.com/${account.username}`
               : `https://facebook.com/${account.username}`
           }
           target="_blank"
@@ -219,15 +219,15 @@ function VerificationListItem({
   action,
 }: AttachmentLayoutProps) {
   return (
-    <div className="flex items-center gap-8 border rounded px-14 py-8 mb-8">
+    <div className="mb-8 flex items-center gap-8 rounded border px-14 py-8">
       <div className="flex-shrink-0 text-muted">
         {cloneElement(icon, {size: 'lg'})}
       </div>
-      <div className="mr-auto whitespace-nowrap overflow-hidden">
-        <div className="text-xs text-muted overflow-hidden overflow-ellipsis">
+      <div className="mr-auto overflow-hidden whitespace-nowrap">
+        <div className="overflow-hidden overflow-ellipsis text-xs text-muted">
           {title}
         </div>
-        <div className="text-sm overflow-hidden overflow-ellipsis">
+        <div className="overflow-hidden overflow-ellipsis text-sm">
           {description}
         </div>
       </div>

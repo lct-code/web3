@@ -32,7 +32,9 @@ export function YoutubeProvider() {
 
   const loadVideoById = useCallback(
     (videoId: string) => {
-      youtubeApi(YoutubeCommand.Load, videoId);
+      // using "YoutubeCommand.Cue" does not play video when changing sources,
+      // it requires double click on play button without this
+      youtubeApi(YoutubeCommand.CueAndPlay, videoId);
     },
     [youtubeApi]
   );
@@ -47,6 +49,8 @@ export function YoutubeProvider() {
     playbackRate: 1,
     state: -1,
     playbackReady: false,
+    buffered: 0,
+    firedPlaybackEnd: false,
   });
 
   const registerApi = useCallback(() => {

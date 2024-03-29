@@ -37,7 +37,8 @@ interface Payload {
 }
 
 export function useExtractTackFileMetadata() {
-  return useMutation((payload: Payload) => extractMeta(payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => extractMeta(payload),
     onError: err => showHttpErrorToast(err),
   });
 }
@@ -72,7 +73,7 @@ function metadataToFormValues(response: Response): ExtractedTrackMetadata {
 
 export function hydrateAlbumForm(
   form: UseFormReturn<CreateAlbumPayload>,
-  data: ExtractedTrackMetadata
+  data: ExtractedTrackMetadata,
 ) {
   if (!form.getValues('artists')?.length && data.artists) {
     form.setValue('artists', data.artists);
@@ -87,7 +88,7 @@ export function hydrateAlbumForm(
     form.setValue(
       'genres',
       // @ts-ignore
-      mergeArraysWithoutDuplicates(form.getValues('genres'), data.genres)
+      mergeArraysWithoutDuplicates(form.getValues('genres'), data.genres),
     );
   }
   if (!form.getValues('name') && data.album_name) {
@@ -98,7 +99,7 @@ export function hydrateAlbumForm(
 type Values = Partial<CreateTrackPayload>;
 export function mergeTrackFormValues<
   T extends Values = Values,
-  E extends Values = Values
+  E extends Values = Values,
 >(newValues: T, oldValues: E): T & E {
   return {
     ...oldValues,
@@ -107,7 +108,7 @@ export function mergeTrackFormValues<
     genres: mergeArraysWithoutDuplicates(
       oldValues.genres as NormalizedModel[],
       newValues.genres as NormalizedModel[],
-      'name'
+      'name',
     ),
     tags: mergeArraysWithoutDuplicates(oldValues.tags, newValues.tags, 'name'),
   };
@@ -116,10 +117,10 @@ export function mergeTrackFormValues<
 function mergeArraysWithoutDuplicates(
   oldValues: NormalizedModel[] = [],
   newValues: NormalizedModel[] = [],
-  key: keyof NormalizedModel = 'id'
+  key: keyof NormalizedModel = 'id',
 ) {
   newValues = newValues.filter(
-    nv => !oldValues.find(ov => ov[key] === nv[key])
+    nv => !oldValues.find(ov => ov[key] === nv[key]),
   );
   return [...oldValues, ...newValues];
 }

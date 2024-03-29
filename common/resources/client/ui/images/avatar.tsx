@@ -8,7 +8,7 @@ import {Link} from 'react-router-dom';
 import {Tooltip} from '@common/ui/tooltip/tooltip';
 import {AvatarPlaceholderIcon} from '@common/auth/ui/account-settings/avatar/avatar-placeholder-icon';
 
-type Size = 'xs' | 'sm' | 'md' | 'lg';
+type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | string;
 
 export interface AvatarProps extends ComponentPropsWithoutRef<any> {
   className?: string;
@@ -18,6 +18,7 @@ export interface AvatarProps extends ComponentPropsWithoutRef<any> {
   size?: Size;
   link?: string;
   fallback?: 'initials' | 'generic';
+  lazy?: boolean;
 }
 export const Avatar = forwardRef<HTMLImageElement, AvatarProps>(
   (
@@ -29,22 +30,24 @@ export const Avatar = forwardRef<HTMLImageElement, AvatarProps>(
       link,
       label,
       fallback = 'generic',
+      lazy = true,
       ...domProps
     },
-    ref
+    ref,
   ) => {
     let renderedAvatar = src ? (
       <img
         ref={ref}
         src={src}
         alt={label}
-        className="block object-cover w-full h-full"
+        loading={lazy ? 'lazy' : undefined}
+        className="block h-full w-full object-cover"
       />
     ) : (
-      <div className="bg-alt dark:bg-chip w-full h-full">
+      <div className="h-full w-full bg-alt dark:bg-chip">
         <AvatarPlaceholderIcon
           viewBox="0 0 48 48"
-          className="w-full h-full text-muted"
+          className="h-full w-full text-muted"
         />
       </div>
     );
@@ -57,9 +60,9 @@ export const Avatar = forwardRef<HTMLImageElement, AvatarProps>(
       ...domProps,
       className: clsx(
         className,
-        'relative block overflow-hidden select-none',
+        'relative block overflow-hidden select-none flex-shrink-0',
         getSizeClassName(size),
-        circle ? 'rounded-full' : 'rounded'
+        circle ? 'rounded-full' : 'rounded',
       ),
     };
 
@@ -70,7 +73,7 @@ export const Avatar = forwardRef<HTMLImageElement, AvatarProps>(
     ) : (
       <div {...wrapperProps}>{renderedAvatar}</div>
     );
-  }
+  },
 );
 
 function getSizeClassName(size: Size) {
@@ -83,6 +86,8 @@ function getSizeClassName(size: Size) {
       return 'w-32 h-32';
     case 'lg':
       return 'w-40 h-40';
+    case 'xl':
+      return 'w-60 h-60';
     // allow overriding with custom classNames
     default:
       return size;

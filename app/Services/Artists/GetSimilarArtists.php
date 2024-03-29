@@ -2,10 +2,10 @@
 
 namespace App\Services\Artists;
 
-use App\Artist;
-use Arr;
-use DB;
+use App\Models\Artist;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class GetSimilarArtists
 {
@@ -20,12 +20,18 @@ class GetSimilarArtists
         return collect();
     }
 
-    private function getByGenres(Collection $genreIds, $artistId, $params): Collection
-    {
-        return Artist::select(DB::raw('artists.*, COUNT(*) AS tag_count'))
+    private function getByGenres(
+        Collection $genreIds,
+        $artistId,
+        $params,
+    ): Collection {
+        $prefix = DB::getTablePrefix();
+        return Artist::select(
+            DB::raw("{$prefix}artists.*, COUNT(*) AS tag_count"),
+        )
             ->join('genreables', 'genreable_id', '=', 'artists.id')
             ->whereIn('genreables.genre_id', $genreIds)
-            ->where('genreables.genreable_type', Artist::class)
+            ->where('genreables.genreable_type', Artist::MODEL_TYPE)
             ->where('artists.id', '!=', $artistId)
             ->groupBy('artists.id')
             ->orderBy('tag_count', 'desc')

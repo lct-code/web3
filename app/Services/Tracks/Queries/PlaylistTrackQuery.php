@@ -2,10 +2,7 @@
 
 namespace App\Services\Tracks\Queries;
 
-use App\Track;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Arr;
 
 class PlaylistTrackQuery extends BaseTrackQuery
 {

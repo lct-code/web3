@@ -13,6 +13,7 @@ import {
 } from '@app/admin/artist-datatable-page/requests/use-update-artist';
 import {CrupdateArtistForm} from '@app/admin/artist-datatable-page/artist-form/crupdate-artist-form';
 import {useArtistPermissions} from '@app/web-player/artists/use-artist-permissions';
+import {Navigate} from 'react-router-dom';
 
 interface Props {
   wrapInContainer?: boolean;
@@ -20,9 +21,7 @@ interface Props {
 }
 export function UpdateArtistPage({wrapInContainer, showExternalFields}: Props) {
   const query = useArtist({
-    forEditing: true,
-    with: 'albums,genres,profile',
-    albumsPerPage: 50,
+    loader: 'editArtistPage',
   });
 
   if (query.data) {
@@ -64,9 +63,9 @@ function PageContent({
   });
   const updateArtist = useUpdateArtist(form);
 
-  // if (!canEdit) {
-  //   return <Navigate to="/" replace />;
-  // }
+  if (!canEdit) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <CrupdateResourceLayout
@@ -80,7 +79,7 @@ function PageContent({
           values={{name: response.artist.name}}
         />
       }
-      isLoading={updateArtist.isLoading}
+      isLoading={updateArtist.isPending}
       disableSaveWhenNotDirty
       wrapInContainer={wrapInContainer}
     >

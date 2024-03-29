@@ -31,7 +31,7 @@ interface Options {
   onUploadStart?: (data: TrackUploadPayload) => void;
   onMetadataChange: (
     file: UploadedFile,
-    newData: ExtractedTrackMetadata & {waveData?: number[][]}
+    newData: ExtractedTrackMetadata & {waveData?: number[][]},
   ) => void;
 }
 export function useTrackUploader(options: Options) {
@@ -41,7 +41,7 @@ export function useTrackUploader(options: Options) {
       allowedFileTypes: [UploadInputType.audio, UploadInputType.video],
       maxFileSize: uploads.max_size || FiftyMB,
     }),
-    [uploads.max_size]
+    [uploads.max_size],
   );
 
   const extractMetadata = useExtractTackFileMetadata();
@@ -61,9 +61,10 @@ export function useTrackUploader(options: Options) {
         },
       });
     },
-    [updateFileUpload, getUpload]
+    [updateFileUpload, getUpload],
   );
 
+  // todo: playback source is not set if extract metadata request errors out
   const uploadOptions: UploadStrategyConfig = useMemo(() => {
     return {
       metadata: {
@@ -90,7 +91,7 @@ export function useTrackUploader(options: Options) {
             onError: () => {
               updateUpload(file.id, {isExtractingMetadata: false});
             },
-          }
+          },
         );
       },
       onError: message => {
@@ -104,19 +105,19 @@ export function useTrackUploader(options: Options) {
   const validateUploads = useCallback(
     (files: UploadedFile[]) => {
       const validFiles = files.filter(
-        file => !validateUpload(file, restrictions)
+        file => !validateUpload(file, restrictions),
       );
       // show error message, if some files did not pass validation
       if (files.length !== validFiles.length) {
         toast.danger(
           message(':count of your files is not supported.', {
             values: {count: files.length - validFiles.length},
-          })
+          }),
         );
       }
       return validFiles;
     },
-    [restrictions]
+    [restrictions],
   );
 
   const uploadTracks = useCallback(
@@ -139,7 +140,7 @@ export function useTrackUploader(options: Options) {
         updateUpload(file.id, {isGeneratingWave: false});
       }
     },
-    [uploadOptions, uploadMultiple, updateUpload, validateUploads]
+    [uploadOptions, uploadMultiple, updateUpload, validateUploads],
   );
 
   const openFilePicker = useCallback(async () => {

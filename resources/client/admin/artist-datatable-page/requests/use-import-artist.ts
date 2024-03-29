@@ -20,10 +20,13 @@ export interface ImportArtistPayload {
 
 export function useImportArtist() {
   const {trans} = useTrans();
-  return useMutation((props: ImportArtistPayload) => importArtists(props), {
+  return useMutation({
+    mutationFn: (props: ImportArtistPayload) => importArtists(props),
     onSuccess: () => {
       toast(trans(message('Artist imported')));
-      queryClient.invalidateQueries(DatatableDataQueryKey('artists'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('artists'),
+      });
     },
     onError: err => showHttpErrorToast(err),
   });

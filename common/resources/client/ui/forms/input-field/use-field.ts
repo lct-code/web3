@@ -17,6 +17,7 @@ export function useField<T>(props: Props<T>): UseFieldReturn<T> {
     labelElementType = 'label',
     label,
     labelSuffix,
+    labelSuffixPosition,
     autoFocus,
     autoSelectText,
     labelPosition,
@@ -41,6 +42,8 @@ export function useField<T>(props: Props<T>): UseFieldReturn<T> {
     inputRadius,
     inputBorder,
     inputShadow,
+    inputRing,
+    inputFontSize,
     ...inputDomProps
   } = props;
 
@@ -109,6 +112,7 @@ export function useField<T>(props: Props<T>): UseFieldReturn<T> {
       disabled,
       label,
       labelSuffix,
+      labelSuffixPosition,
       autoFocus,
       autoSelectText,
       labelPosition,

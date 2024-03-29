@@ -18,6 +18,7 @@ export interface ButtonBaseProps
   variant?: ButtonVariant;
   value?: any;
   justify?: string;
+  display?: string;
   radius?: string;
   shadow?: string;
   border?: string;
@@ -31,6 +32,7 @@ export interface ButtonBaseProps
   replace?: boolean;
   end?: boolean;
   elementType?: 'button' | 'a' | JSXElementConstructor<any>;
+  download?: boolean;
 }
 
 export const ButtonBase = forwardRef<
@@ -54,6 +56,7 @@ export const ButtonBase = forwardRef<
     relative,
     replace,
     end,
+    display,
     type = 'button',
     onClick,
     onPointerDown,
@@ -80,7 +83,7 @@ export const ButtonBase = forwardRef<
       onKeyDown={createEventHandler(onKeyDown)}
       className={clsx(
         'focus-visible:ring',
-        getSharedButtonStyle({variant, color, border, whitespace}),
+        getSharedButtonStyle({variant, color, border, whitespace, display}),
         radius,
         justify,
         className

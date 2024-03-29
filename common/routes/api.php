@@ -1,27 +1,21 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
-
 use Common\Admin\Analytics\AnalyticsController;
 use Common\Admin\Appearance\Controllers\AppearanceController;
+use Common\Admin\Appearance\Controllers\SeoTagsController;
 use Common\Admin\CacheController;
 use Common\Admin\ImpersonateUserController;
 use Common\Admin\Sitemap\SitemapController;
 use Common\Auth\Controllers\AccessTokenController;
-use Common\Auth\Controllers\ChangePasswordController;
+use Common\Auth\Controllers\BanController;
 use Common\Auth\Controllers\MobileAuthController;
 use Common\Auth\Controllers\SocialAuthController;
 use Common\Auth\Controllers\UserAvatarController;
 use Common\Auth\Controllers\UserController;
+use Common\Auth\Controllers\UserFollowedUsersController;
+use Common\Auth\Controllers\UserFollowersController;
+use Common\Auth\Controllers\UserSessionsController;
+use Common\Auth\Middleware\VerifyApiAccessMiddleware;
 use Common\Auth\Roles\RolesController;
 use Common\Billing\Gateways\Paypal\PaypalController;
 use Common\Billing\Gateways\Stripe\StripeController;
@@ -52,12 +46,14 @@ use Common\Notifications\NotificationController;
 use Common\Notifications\NotificationSubscriptionsController;
 use Common\Pages\ContactPageController;
 use Common\Pages\CustomPageController;
+use Common\Reports\ReportController;
 use Common\Search\Controllers\NormalizedModelsController;
 use Common\Search\Controllers\SearchSettingsController;
 use Common\Settings\SettingsController;
 use Common\Settings\Uploading\DropboxRefreshTokenController;
 use Common\Tags\TagController;
 use Common\Validation\RecaptchaController;
+use Common\Votes\VoteController;
 use Common\Workspaces\Controllers\WorkspaceController;
 use Common\Workspaces\Controllers\WorkspaceInvitesController;
 use Common\Workspaces\Controllers\WorkspaceMembersController;
@@ -67,9 +63,11 @@ use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
 
 // prettier-ignore
 Route::group(['prefix' => 'v1'], function () {
-    Route::group(['middleware' => ['optionalAuth:sanctum', 'verified']], function () {
+    Route::group(['middleware' => ['optionalAuth:sanctum', 'verified', 'verifyApiAccess']], function () {
         // FILE ENTRIES
-        Route::get('file-entries/{fileEntry}', [FileEntriesController::class, 'show']);
+        Route::get('file-entries/{fileEntry}/model', [FileEntriesController::class, 'showModel']);
+        Route::get('file-entries/{fileEntry}', [FileEntriesController::class, 'show'])
+          ->withoutMiddleware(VerifyApiAccessMiddleware::class);
         Route::get('file-entries', [FileEntriesController::class, 'index']);
         Route::post('file-entries/delete', [FileEntriesController::class, 'destroy']);
         Route::delete('file-entries/{entryIds}', [FileEntriesController::class, 'destroy']);
@@ -122,14 +120,25 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('access-tokens', [AccessTokenController::class, 'store']);
         Route::delete('access-tokens/{tokenId}', [AccessTokenController::class, 'destroy']);
         Route::post('users/csv/export', [CommonCsvExportController::class, 'exportUsers']);
-
-        //USER PASSWORD
-        Route::post('users/{user}/password/change', [ChangePasswordController::class, 'change']);
+        Route::get('users/{user}/followers', [UserFollowersController::class, 'index']);
+        Route::post('users/{user}/follow', [UserFollowersController::class, 'follow']);
+        Route::post('users/{user}/unfollow', [UserFollowersController::class, 'unfollow']);
+        Route::get('users/{user}/followed-users', [UserFollowedUsersController::class, 'index']);
+        Route::get('users/{user}/followed-users/ids', [UserFollowedUsersController::class, 'ids']);
 
         //USER AVATAR
         Route::post('users/{user}/avatar', [UserAvatarController::class, 'store']);
         Route::delete('users/{user}/avatar', [UserAvatarController::class, 'destroy']);
 
+        //USER BANS
+        Route::post('users/{user}/ban', [BanController::class, 'store']);
+        Route::delete('users/{user}/unban', [BanController::class, 'destroy']);
+
+        // USER SESSIONS
+        Route::get('user-sessions', [UserSessionsController::class, 'index'])->middleware('auth');
+        Route::post('user-sessions/logout-other', [UserSessionsController::class, 'LogoutOtherSessions'])->middleware(['auth', 'password.confirm']);
+
+        // TAGS
         Route::get('tags', [TagController::class, 'index']);
         Route::post('tags', [TagController::class, 'store']);
         Route::put('tags/{id}', [TagController::class, 'update']);
@@ -151,13 +160,14 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('settings', [SettingsController::class, 'persist']);
         Route::post('settings/uploading/dropbox-refresh-token', [DropboxRefreshTokenController::class, 'generate']);
 
-
         // SITEMAP
         Route::post('sitemap/generate', [SitemapController::class, 'generate']);
 
         // APPEARANCE EDITOR
         Route::post('admin/appearance', [AppearanceController::class, 'save']);
         Route::get('admin/appearance/values', [AppearanceController::class, 'getValues']);
+        Route::get('admin/appearance/seo-tags/{name}', [SeoTagsController::class, 'show']);
+        Route::put('admin/appearance/seo-tags/{name}', [SeoTagsController::class, 'update']);
 
         // CUSTOM PAGES
         Route::apiResource('custom-pages', CustomPageController::class);
@@ -166,6 +176,13 @@ Route::group(['prefix' => 'v1'], function () {
         Route::apiResource('comment', CommentController::class);
         Route::post('comment/restore', [CommentController::class, 'restore']);
         Route::get('commentable/comments', [CommentableController::class, 'index']);
+
+        // VOTES
+        Route::post('vote', [VoteController::class, 'store']);
+
+        // REPORTS
+        Route::post('report', [ReportController::class, 'store']);
+        Route::delete('report/{modelType}/{modelId}', [ReportController::class, 'destroy']);
 
         // CONTACT PAGE
         Route::post('contact-page', [ContactPageController::class, 'sendMessage']);
@@ -203,7 +220,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('admin/reports/header', [AnalyticsController::class, 'headerReport']);
         Route::get('admin/reports/sessions', [AnalyticsController::class, 'sessionsReport']);
         Route::post('cache/flush', [CacheController::class, 'flush']);
-        Route::post('admin/users/impersonate/{id}', [ImpersonateUserController::class, 'impersonate']);
+        Route::post('admin/users/impersonate/{userId}', [ImpersonateUserController::class, 'impersonate']);
         Route::get('admin/search/models', [SearchSettingsController::class, 'getSearchableModels']);
         Route::post('admin/search/import', [SearchSettingsController::class, 'import']);
 
@@ -230,8 +247,8 @@ Route::group(['prefix' => 'v1'], function () {
     $limiter = config('fortify.limiters.login');
     Route::post('auth/login', [MobileAuthController::class, 'login'])->middleware(array_filter([
         $limiter ? 'throttle:'.$limiter : null,
-    ]));
-    Route::post('auth/register', [MobileAuthController::class, 'register']);
+    ]))->withoutMiddleware('verifyApiAccess');
+    Route::post('auth/register', [MobileAuthController::class, 'register'])->withoutMiddleware('verifyApiAccess');
     Route::get('auth/social/{provider}/callback', [SocialAuthController::class, 'loginCallback']);
     Route::post('auth/password/email', [PasswordResetLinkController::class, 'store']);
 });

@@ -1,7 +1,7 @@
 <?php
 
-use App\Album;
-use App\Artist;
+use App\Models\Album;
+use App\Models\Artist;
 use App\Services\Providers\SaveOrUpdate;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Collection;

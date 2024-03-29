@@ -2,7 +2,7 @@
 
 namespace App\Services\Playlists;
 
-use App\Playlist;
+use App\Models\Playlist;
 use Arr;
 use Common\Database\Datasource\Datasource;
 use Illuminate\Database\Eloquent\Builder;

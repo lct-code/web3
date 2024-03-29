@@ -1,9 +1,13 @@
 <?php
 
 use Cocur\Slugify\Slugify;
+use Common\Comments\Comment;
+use Common\Core\Contracts\AppUrlGenerator;
 use Common\Core\Middleware\EnsureFrontendRequestsAreStateful;
+use Common\Settings\Settings;
 use Common\Tags\Tag;
 use Common\Workspaces\Workspace;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 
 if (!function_exists('slugify')) {
@@ -45,9 +49,15 @@ if (!function_exists('modelTypeToNamespace')) {
         if ($modelType === 'workspace') {
             return Workspace::class;
         }
-
-        if ($modelType === 'tag' && !class_exists('App\Tag')) {
+        if ($modelType === 'comment') {
+            return Comment::class;
+        }
+        if ($modelType === 'tag' && !class_exists('App\Models\Tag')) {
             return Tag::class;
+        }
+
+        if ($namespace = Relation::getMorphedModel($modelType)) {
+            return $namespace;
         }
 
         $modelName = Str::of($modelType)
@@ -55,7 +65,7 @@ if (!function_exists('modelTypeToNamespace')) {
             ->singular()
             ->ucfirst();
 
-        return "App\\$modelName";
+        return "App\\Models\\$modelName";
     }
 }
 
@@ -97,6 +107,33 @@ if (!function_exists('getIp')) {
 if (!function_exists('requestIsFromFrontend')) {
     function requestIsFromFrontend(): bool
     {
-        return EnsureFrontendRequestsAreStateful::fromFrontend(request());
+        return EnsureFrontendRequestsAreStateful::fromFrontend(request()) ||
+            !isApiRequest();
+    }
+}
+
+if (!function_exists('settings')) {
+    function settings(string|null $key = null, mixed $default = null)
+    {
+        if (empty(func_get_args())) {
+            return app(Settings::class);
+        }
+
+        return app(Settings::class)->get($key, $default);
+    }
+}
+
+if (!function_exists('urls')) {
+    function urls()
+    {
+        return app(AppUrlGenerator::class);
+    }
+}
+
+if (!function_exists('isApiRequest')) {
+    function isApiRequest(): bool
+    {
+        return request()->route() &&
+            in_array('api', request()->route()->computedMiddleware);
     }
 }

@@ -11,18 +11,16 @@ interface GetAuthUserPlaylistsResponse extends BackendResponse {
 
 export function useAuthUserPlaylists() {
   const {isLoggedIn, user} = useAuth();
-  return useQuery(
-    ['playlists', 'library', user?.id, 'compact'],
-    () => fetchPlaylists(),
-    {
-      enabled: isLoggedIn,
-      initialData: () => {
-        return {
-          playlists: getBootstrapData().playlists || [],
-        };
-      },
-    }
-  );
+  return useQuery({
+    queryKey: ['playlists', 'library', user?.id, 'compact'],
+    queryFn: () => fetchPlaylists(),
+    enabled: isLoggedIn,
+    initialData: () => {
+      return {
+        playlists: getBootstrapData().playlists || [],
+      };
+    },
+  });
 }
 
 function fetchPlaylists(): Promise<GetAuthUserPlaylistsResponse> {

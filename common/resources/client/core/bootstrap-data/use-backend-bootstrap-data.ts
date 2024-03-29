@@ -1,6 +1,6 @@
 import {apiClient, queryClient} from '../../http/query-client';
 import {BootstrapData} from './bootstrap-data';
-import {useQuery} from '@tanstack/react-query';
+import {keepPreviousData, useQuery} from '@tanstack/react-query';
 
 const queryKey = ['bootstrapData'];
 
@@ -9,13 +9,13 @@ export function getBootstrapData(): BootstrapData {
 }
 
 export function invalidateBootstrapData() {
-  queryClient.invalidateQueries(queryKey);
+  queryClient.invalidateQueries({queryKey});
 }
 
 export function setBootstrapData(data: string | BootstrapData) {
   queryClient.setQueryData<BootstrapData>(
     queryKey,
-    typeof data === 'string' ? decodeBootstrapData(data) : data
+    typeof data === 'string' ? decodeBootstrapData(data) : data,
   );
 }
 
@@ -29,27 +29,31 @@ export function mergeBootstrapData(partialData: Partial<BootstrapData>) {
 // set bootstrap data that was provided with initial request from backend
 const initialBootstrapData = (
   typeof window !== 'undefined' && window.bootstrapData
-    ? JSON.parse(atob(window.bootstrapData))
-    : {}
+    ? decodeBootstrapData(window.bootstrapData)
+    : undefined
 ) as BootstrapData;
+
 // make sure initial data is available right away when accessing it via "getBootstrapData()"
 queryClient.setQueryData(queryKey, initialBootstrapData);
 
 export function useBackendBootstrapData() {
-  const {data} = useQuery(queryKey, fetchBootstrapData, {
+  return useQuery({
+    queryKey: queryKey,
+    queryFn: () => fetchBootstrapData(),
     staleTime: Infinity,
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
     initialData: initialBootstrapData,
   });
-  return data;
 }
 
 const fetchBootstrapData = async (): Promise<BootstrapData> => {
-  return apiClient.get('bootstrap-data').then(response => {
-    return decodeBootstrapData(response.data.data);
-  });
+  return apiClient
+    .get('http://bedesk.test/api/v1/bootstrap-data')
+    .then(response => {
+      return decodeBootstrapData(response.data.data);
+    });
 };
 
 function decodeBootstrapData(data: string | BootstrapData): BootstrapData {
-  return typeof data === 'string' ? JSON.parse(atob(data)) : data;
+  return typeof data === 'string' ? JSON.parse(data) : data;
 }

@@ -1,6 +1,6 @@
 <?php namespace Common\Pages;
 
-use App\User;
+use App\Models\User;
 use Common\Core\BaseController;
 use Common\Notifications\ContactPageMessage;
 use Common\Settings\Settings;

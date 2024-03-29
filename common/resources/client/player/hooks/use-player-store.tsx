@@ -1,9 +1,10 @@
-import {StoreApi, useStore} from 'zustand';
+import {StoreApi} from 'zustand';
 import {useContext} from 'react';
 import {PlayerStoreContext} from '@common/player/player-context';
 import {PlayerState} from '@common/player/state/player-state';
 import {FullscreenSlice} from '@common/player/state/fullscreen/fullscreen-slice';
 import {PipSlice} from '@common/player/state/pip/pip-slice';
+import {useStoreWithEqualityFn} from 'zustand/traditional';
 
 type ExtractState<S> = S extends {
   getState: () => infer T;
@@ -24,5 +25,5 @@ type UsePlayerStore = {
 // @ts-ignore
 export const usePlayerStore: UsePlayerStore = (selector, equalityFn) => {
   const store = useContext(PlayerStoreContext);
-  return useStore(store, selector, equalityFn);
+  return useStoreWithEqualityFn(store, selector, equalityFn);
 };

@@ -6,7 +6,6 @@ use Common\Files\Events\FileEntriesDeleted;
 use Common\Files\FileEntry;
 use DB;
 use Illuminate\Support\Collection;
-use League\Flysystem\FileNotFoundException;
 
 class PermanentlyDeleteEntries extends SoftDeleteEntries
 {
@@ -24,7 +23,7 @@ class PermanentlyDeleteEntries extends SoftDeleteEntries
     /**
      * Delete file entries from database.
      */
-    private function deleteEntries(Collection|array $entries): void
+    private function deleteEntries(Collection $entries): void
     {
         $entryIds = $entries->pluck('id');
 
@@ -35,7 +34,7 @@ class PermanentlyDeleteEntries extends SoftDeleteEntries
 
         // detach tags
         DB::table('taggables')
-            ->where('taggable_type', FileEntry::class)
+            ->where('taggable_type', FileEntry::MODEL_TYPE)
             ->whereIn('taggable_id', $entryIds)
             ->delete();
 

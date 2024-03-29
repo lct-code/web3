@@ -11,7 +11,9 @@ interface Payload {
 }
 
 export function useValidateDomainDns() {
-  return useMutation((props: Payload) => authorize(props));
+  return useMutation({
+    mutationFn: (props: Payload) => authorize(props),
+  });
 }
 
 function authorize(payload: Payload): Promise<Response> {

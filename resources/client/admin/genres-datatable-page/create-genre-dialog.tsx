@@ -39,7 +39,7 @@ export function CreateGenreDialog() {
         </Button>
         <Button
           form={formId}
-          disabled={createGenre.isLoading}
+          disabled={createGenre.isPending}
           variant="flat"
           color="primary"
           type="submit"

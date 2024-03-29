@@ -17,21 +17,19 @@ export interface CreateAccessTokenPayload {
 }
 
 function createAccessToken(
-  payload: CreateAccessTokenPayload
+  payload: CreateAccessTokenPayload,
 ): Promise<Response> {
   return apiClient.post(`access-tokens`, payload).then(r => r.data);
 }
 
 export function useCreateAccessToken(
-  form: UseFormReturn<CreateAccessTokenPayload>
+  form: UseFormReturn<CreateAccessTokenPayload>,
 ) {
-  return useMutation(
-    (props: CreateAccessTokenPayload) => createAccessToken(props),
-    {
-      onSuccess: () => {
-        toast(message('Token create'));
-      },
-      onError: r => onFormQueryError(r, form),
-    }
-  );
+  return useMutation({
+    mutationFn: (props: CreateAccessTokenPayload) => createAccessToken(props),
+    onSuccess: () => {
+      toast(message('Token create'));
+    },
+    onError: r => onFormQueryError(r, form),
+  });
 }

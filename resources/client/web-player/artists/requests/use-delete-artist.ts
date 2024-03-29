@@ -15,16 +15,17 @@ export function useDeleteArtist(artistId: number | string) {
   const navigate = useNavigate();
   const {getRedirectUri} = useAuth();
 
-  return useMutation(() => deleteArtist(artistId), {
+  return useMutation({
+    mutationFn: () => deleteArtist(artistId),
     onSuccess: () => {
       toast(message('Artist deleted'));
       // navigate to homepage if we are on this artist page currently
       if (pathname.startsWith(`/artist/${artistId}`)) {
         navigate(getRedirectUri());
       }
-      queryClient.invalidateQueries(['tracks']);
-      queryClient.invalidateQueries(['albums']);
-      queryClient.invalidateQueries(['artists']);
+      queryClient.invalidateQueries({queryKey: ['tracks']});
+      queryClient.invalidateQueries({queryKey: ['albums']});
+      queryClient.invalidateQueries({queryKey: ['artists']});
     },
     onError: r => showHttpErrorToast(r),
   });

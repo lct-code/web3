@@ -1,8 +1,7 @@
 <?php namespace App\Services\Providers\Youtube;
 
-use App;
+use App\Models\Track;
 use App\Services\HttpClient;
-use App\Track;
 use Common\Settings\Settings;
 use GuzzleHttp\Exception\ConnectException;
 use Illuminate\Support\Arr;
@@ -57,37 +56,43 @@ class YoutubeAudioSearch
 
         // YouTube search results page was not rendered yet, need to extract json
         if (Str::contains($html, 'ytInitialData')) {
-            preg_match(
-                '/ytInitialData"?]? = (.+?);\s?(\n|<\/script>)/ms',
-                $html,
-                $matches,
-            );
-            $json = $matches[1];
-            $json = json_decode($json, true);
-            $contents = Arr::first(
-                $json['contents']['twoColumnSearchResultsRenderer'][
-                    'primaryContents'
-                ],
-            )['contents'];
-            $results = Arr::first($contents, function ($content) {
-                return !array_key_exists(
-                    'carouselAdRenderer',
-                    Arr::first(Arr::first(Arr::first($content))),
-                );
-            });
-            $results = Arr::first(Arr::first($results));
+            $crawler = new Crawler($html);
+            foreach ($crawler->filter('script')->getIterator() as $node) {
+                $html = $node->textContent;
+                if (Str::contains($html, 'ytInitialData')) {
+                    //remove whitespace
+                    $html = preg_replace('/\s+/', '', $html);
+                    $html = Str::after($html, 'ytInitialData=');
+                    $html = trim($html, ';');
+                    $json = json_decode($html, true);
+                    $contents = Arr::first(
+                        $json['contents']['twoColumnSearchResultsRenderer'][
+                            'primaryContents'
+                        ],
+                    )['contents'];
+                    $results = Arr::first($contents, function ($content) {
+                        return !array_key_exists(
+                            'carouselAdRenderer',
+                            Arr::first(Arr::first(Arr::first($content))),
+                        );
+                    });
+                    $results = Arr::first(Arr::first($results));
 
-            $results = array_filter($results, function ($result) {
-                return isset($result['videoRenderer']);
-            });
-            $results = array_slice($results, 0, 3);
-            $results = array_map(function ($result) use ($json) {
-                $result = $result['videoRenderer'];
-                return [
-                    'title' => $result['title']['runs'][0]['text'],
-                    'id' => $result['videoId'],
-                ];
-            }, $results);
+                    $results = array_filter($results, function ($result) {
+                        return isset($result['videoRenderer']);
+                    });
+                    $results = array_slice($results, 0, 3);
+                    $results = array_map(function ($result) use ($json) {
+                        $result = $result['videoRenderer'];
+                        return [
+                            'title' => $result['title']['runs'][0]['text'],
+                            'id' => $result['videoId'],
+                        ];
+                    }, $results);
+                    break;
+                }
+            }
+
             // YouTube search results page was rendered, can crawl html
         } else {
             $results = [];
@@ -103,6 +108,14 @@ class YoutubeAudioSearch
                     $results[] = ['title' => $title, 'id' => $videoId];
                 });
         }
+
+        // sort the array so that videos that are likely for full album or playlist are at the end
+        $barWords = ['full album', 'album playlist'];
+        usort($results, function ($a, $b) use ($barWords) {
+            $aContainsFullAlbum = Str::contains($a['title'], $barWords, true);
+            $bContainsFullAlbum = Str::contains($b['title'], $barWords, true);
+            return $aContainsFullAlbum <=> $bContainsFullAlbum;
+        });
 
         return $results;
     }

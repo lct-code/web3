@@ -9,7 +9,6 @@ interface SliderProps extends UseSliderProps<number> {
   inputRef?: Ref<HTMLInputElement>;
   onBlur?: React.FocusEventHandler;
 }
-
 export function Slider({inputRef, onBlur, ...props}: SliderProps) {
   const {onChange, onChangeEnd, value, defaultValue, ...otherProps} = props;
 

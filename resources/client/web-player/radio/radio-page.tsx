@@ -1,4 +1,4 @@
-import React, {Fragment, useMemo} from 'react';
+import React, {useMemo} from 'react';
 import {PageMetaTags} from '@common/http/page-meta-tags';
 import {PageStatus} from '@common/http/page-status';
 import {
@@ -29,7 +29,7 @@ export function RadioPage() {
   const {seedType} = useParams();
   const query = useRadioRecommendations();
   const {data, onSortChange, sortDescriptor} = useSortableTableData(
-    query.data?.recommendations
+    query.data?.recommendations,
   );
 
   const totalDuration = useMemo(() => {
@@ -46,7 +46,7 @@ export function RadioPage() {
     const seed = query.data.seed;
     const queueId = queueGroupId(seed, 'radio');
     return (
-      <Fragment>
+      <div>
         <PageMetaTags query={query} />
         <AdHost slot="general_top" className="mb-44" />
         <MediaPageHeaderLayout
@@ -63,7 +63,7 @@ export function RadioPage() {
             />
           }
           subtitle={
-            <BulletSeparatedItems className="text-sm text-muted justify-center md:justify-start">
+            <BulletSeparatedItems className="justify-center text-sm text-muted md:justify-start">
               <RadioType seed={seed} />
               <Trans
                 message="[one 1 song|other :count songs]"
@@ -92,11 +92,17 @@ export function RadioPage() {
           sortDescriptor={sortDescriptor}
         />
         <AdHost slot="general_bottom" className="mt-44" />
-      </Fragment>
+      </div>
     );
   }
 
-  return <PageStatus query={query} loaderClassName="absolute inset-0 m-auto" />;
+  return (
+    <PageStatus
+      query={query}
+      loaderIsScreen={false}
+      loaderClassName="absolute inset-0 m-auto"
+    />
+  );
 }
 
 interface SeedImageProps {
@@ -118,7 +124,7 @@ function Image({seed}: SeedImageProps) {
         <GenreImage
           genre={seed}
           size="w-240 h-240"
-          className="rounded mx-auto"
+          className="mx-auto rounded"
         />
       );
     default:
@@ -126,7 +132,7 @@ function Image({seed}: SeedImageProps) {
         <TrackImage
           track={seed}
           size="w-240 h-240"
-          className="rounded mx-auto"
+          className="mx-auto rounded"
         />
       );
   }

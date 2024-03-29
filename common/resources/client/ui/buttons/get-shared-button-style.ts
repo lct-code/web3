@@ -9,6 +9,7 @@ export type ButtonColor =
   | null
   | 'primary'
   | 'danger'
+  | 'positive'
   | 'paper'
   | 'chip'
   | 'white';
@@ -19,11 +20,17 @@ interface SharedButtonStyleProps {
   border?: string;
   shadow?: string;
   whitespace?: string;
+  display?: string;
 }
 export function getSharedButtonStyle(
-  props: SharedButtonStyleProps
+  props: SharedButtonStyleProps,
 ): (string | boolean | null | undefined)[] {
-  const {variant, shadow, whitespace = 'whitespace-nowrap'} = props;
+  const {
+    variant,
+    shadow,
+    whitespace = 'whitespace-nowrap',
+    display = 'inline-flex',
+  } = props;
   const variantProps = {...props, border: props.border || 'border'};
   let style: string[] = [];
   if (variant === 'outline') {
@@ -40,8 +47,9 @@ export function getSharedButtonStyle(
     ...style,
     shadow || (variant === 'raised' && 'shadow-md'),
     whitespace,
+    display,
     variant &&
-      'align-middle inline-flex flex-shrink-0 items-center transition-button duration-200',
+      'align-middle flex-shrink-0 items-center transition-button duration-200',
     'select-none appearance-none no-underline outline-none disabled:pointer-events-none disabled:cursor-default',
   ];
 }
@@ -62,8 +70,20 @@ function outline({color, border}: SharedButtonStyleProps) {
         'hover:bg-danger/4 hover:border-danger',
         disabled,
       ];
+    case 'positive':
+      return [
+        `text-positive bg-transparent ${border} border-positive/50`,
+        'hover:bg-positive/4 hover:border-positive',
+        disabled,
+      ];
     case 'paper':
       return [`text bg-paper ${border}`, 'hover:bg-hover', disabled];
+    case 'white':
+      return [
+        'text-white bg-transparent border border-white',
+        'hover:bg-white/20',
+        'disabled:text-white/70 disabled:border-white/70 disabled:bg-transparent',
+      ];
     default:
       return [`bg-transparent ${border}`, 'hover:bg-hover', disabled];
   }
@@ -82,6 +102,12 @@ function text({color}: SharedButtonStyleProps) {
       return [
         'text-danger bg-transparent border-transparent',
         'hover:bg-danger/4',
+        disabled,
+      ];
+    case 'positive':
+      return [
+        'text-positive bg-transparent border-transparent',
+        'hover:bg-positive/4',
         disabled,
       ];
     case 'white':

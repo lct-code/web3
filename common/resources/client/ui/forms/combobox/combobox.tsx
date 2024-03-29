@@ -1,19 +1,16 @@
-import React, {ReactElement, Ref, useEffect, useRef, useState} from 'react';
+import React, {ReactElement, Ref} from 'react';
 import {BaseFieldPropsWithDom} from '../input-field/base-field-props';
-import {useListboxContext} from '../listbox/listbox-context';
 import {Item} from '../listbox/item';
 import {useListbox} from '../listbox/use-listbox';
-import {ProgressCircle} from '../../progress/progress-circle';
 import {IconButton} from '../../buttons/icon-button';
-import {KeyboardArrowDownIcon} from '@common/icons/material/KeyboardArrowDown';
 import {TextField} from '../input-field/text-field/text-field';
 import {Listbox} from '../listbox/listbox';
 import {SvgIconProps} from '@common/icons/svg-icon';
-import {useTrans} from '@common/i18n/use-trans';
 import {useListboxKeyboardNavigation} from '@common/ui/forms/listbox/use-listbox-keyboard-navigation';
 import {createEventHandler} from '@common/utils/dom/create-event-handler';
 import {ListBoxChildren, ListboxProps} from '../listbox/types';
 import {Popover} from '../../overlays/popover';
+import {ComboboxEndAdornment} from '@common/ui/forms/combobox/combobox-end-adornment';
 
 export {Item as Option};
 
@@ -24,18 +21,20 @@ export type ComboboxProps<T extends object> = Omit<
   ListBoxChildren<T> &
   ListboxProps & {
     selectionMode?: 'single' | 'none';
-    allowCustomValue?: boolean;
     isAsync?: boolean;
     isLoading?: boolean;
     openMenuOnFocus?: boolean;
     endAdornmentIcon?: ReactElement<SvgIconProps>;
     useOptionLabelAsInputValue?: boolean;
     hideEndAdornment?: boolean;
+    onEndAdornmentClick?: () => void;
+    prependListbox?: boolean;
+    listboxClassName?: string;
   };
 
 function ComboBox<T extends object>(
   props: ComboboxProps<T> & {selectionMode: 'single'},
-  ref: Ref<HTMLInputElement>
+  ref: Ref<HTMLInputElement>,
 ) {
   const {
     children,
@@ -61,6 +60,10 @@ function ComboBox<T extends object>(
     blurReferenceOnItemSelection,
     isOpen: propsIsOpen,
     onOpenChange: propsOnOpenChange,
+    prependListbox,
+    listboxClassName,
+    onEndAdornmentClick,
+    autoFocusFirstItem = true,
     ...textFieldProps
   } = props;
 
@@ -72,23 +75,23 @@ function ComboBox<T extends object>(
       selectionMode,
       role: 'listbox',
       virtualFocus: true,
+      clearSelectionOnInputClear: true,
     },
-    ref
+    ref,
   );
 
   const {
-    handleItemSelection,
     reference,
     listboxId,
     onInputChange,
     state: {
       isOpen,
-      activeIndex,
       setIsOpen,
       inputValue,
       setInputValue,
       selectValues,
       selectedValues,
+      setActiveCollection,
     },
     collection,
   } = listbox;
@@ -97,7 +100,7 @@ function ComboBox<T extends object>(
     ? collection.get(selectedValues[0])?.textLabel
     : undefined;
 
-  const {handleTriggerKeyDown, handleListboxKeyboardNavigation} =
+  const {handleListboxSearchFieldKeydown} =
     useListboxKeyboardNavigation(listbox);
 
   const handleFocusAndClick = createEventHandler(
@@ -106,13 +109,16 @@ function ComboBox<T extends object>(
         setIsOpen(true);
       }
       e.target.select();
-    }
+    },
   );
 
   return (
     <Listbox
+      prepend={prependListbox}
+      className={listboxClassName}
       listbox={listbox}
       mobileOverlay={Popover}
+      isLoading={isLoading}
       onPointerDown={e => {
         // prevent focus from leaving input when scrolling listbox via mouse
         e.preventDefault();
@@ -123,11 +129,27 @@ function ComboBox<T extends object>(
         {...textFieldProps}
         endAdornment={
           !hideEndAdornment ? (
-            <EndAdornment
-              icon={endAdornmentIcon}
-              isLoading={isLoading}
-              isDisabled={textFieldProps.disabled}
-            />
+            <IconButton
+              size="md"
+              tabIndex={-1}
+              disabled={textFieldProps.disabled}
+              className="pointer-events-auto"
+              onPointerDown={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (onEndAdornmentClick) {
+                  onEndAdornmentClick();
+                } else {
+                  setActiveCollection('all');
+                  setIsOpen(!isOpen);
+                }
+              }}
+            >
+              <ComboboxEndAdornment
+                isLoading={isLoading}
+                icon={endAdornmentIcon}
+              />
+            </IconButton>
           ) : null
         }
         aria-expanded={isOpen ? 'true' : 'false'}
@@ -149,110 +171,13 @@ function ComboBox<T extends object>(
         }}
         onFocus={handleFocusAndClick}
         onClick={handleFocusAndClick}
-        onKeyDown={e => {
-          if (e.key === 'Enter' && activeIndex != null && collection.size) {
-            // prevent form submit when selecting item in combobox via "enter"
-            e.preventDefault();
-            const [value, obj] = [...collection.entries()][activeIndex];
-            if (value) {
-              handleItemSelection(value);
-              // "onSelected" will not be called for dropdown items, because keydown
-              // event will never be triggered for them in "virtualFocus" mode
-              obj.element.props.onSelected?.();
-            }
-            return;
-          }
-
-          // on escape, clear input and close dropdown
-          if (e.key === 'Escape' && isOpen) {
-            setIsOpen(false);
-            if (!allowCustomValue) {
-              setInputValue('');
-            }
-          }
-
-          const handled = handleTriggerKeyDown(e);
-          if (!handled) {
-            handleListboxKeyboardNavigation(e);
-          }
-        }}
+        onKeyDown={e => handleListboxSearchFieldKeydown(e)}
       />
     </Listbox>
   );
 }
 
-interface EndAdornmentProps {
-  isLoading?: boolean;
-  icon?: ReactElement<SvgIconProps>;
-  isDisabled?: boolean;
-}
-function EndAdornment({isLoading, icon, isDisabled}: EndAdornmentProps) {
-  const timeout = useRef<any>(null);
-  const {trans} = useTrans();
-  const [showLoading, setShowLoading] = useState(false);
-
-  const {
-    state: {setIsOpen, isOpen, inputValue, setActiveCollection},
-  } = useListboxContext();
-
-  const lastInputValue = useRef(inputValue);
-  useEffect(() => {
-    if (isLoading && !showLoading) {
-      if (timeout.current === null) {
-        timeout.current = setTimeout(() => {
-          setShowLoading(true);
-        }, 500);
-      }
-
-      // If user is typing, clear the timer and restart since it is a new request
-      if (inputValue !== lastInputValue.current) {
-        clearTimeout(timeout.current);
-        timeout.current = setTimeout(() => {
-          setShowLoading(true);
-        }, 500);
-      }
-    } else if (!isLoading) {
-      // If loading is no longer happening, clear any timers and hide the loading circle
-      setShowLoading(false);
-      clearTimeout(timeout.current);
-      timeout.current = null;
-    }
-
-    lastInputValue.current = inputValue;
-  }, [isLoading, showLoading, inputValue]);
-
-  // loading circle should only be displayed if menu is open, if menuTrigger is "manual", or first time load (to stop circle from showing up when user selects an option)
-  const showLoadingIndicator = showLoading && (isOpen || isLoading);
-
-  if (showLoadingIndicator) {
-    return (
-      <ProgressCircle
-        aria-label={trans({message: 'Loading'})}
-        size="sm"
-        isIndeterminate
-      />
-    );
-  }
-
-  return (
-    <IconButton
-      radius="rounded"
-      size="md"
-      tabIndex={-1}
-      disabled={isDisabled}
-      onPointerDown={e => {
-        e.preventDefault();
-        e.stopPropagation();
-        setActiveCollection('all');
-        setIsOpen(!isOpen);
-      }}
-    >
-      {icon || <KeyboardArrowDownIcon />}
-    </IconButton>
-  );
-}
-
 const ComboBoxForwardRef = React.forwardRef(ComboBox) as <T extends object>(
-  props: ComboboxProps<T> & {ref?: Ref<HTMLInputElement>}
+  props: ComboboxProps<T> & {ref?: Ref<HTMLInputElement>},
 ) => ReactElement;
 export {ComboBoxForwardRef as ComboBox};

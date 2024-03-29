@@ -30,7 +30,7 @@ export function useFontSelectorState({
 
   const [filters, setFilterState] = useState<FontSelectorFilterValue>({
     query: '',
-    category: '',
+    category: value?.category ?? '',
   });
   const {contains} = useFilter({
     sensitivity: 'base',

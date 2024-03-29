@@ -1,6 +1,6 @@
 <?php namespace App\Services\Providers\Spotify;
 
-use App\Genre;
+use App\Models\Genre;
 use Illuminate\Database\Eloquent\Model;
 
 class SpotifyRadio {

@@ -4,7 +4,6 @@ import {readFilesFromDataTransfer} from './read-files-from-data-transfer';
 import {asyncIterableToArray} from '@common/utils/array/async-iterable-to-array';
 import {InteractableRect} from '../interactable-event';
 import {DraggableId, MixedDraggable} from './use-draggable';
-import {Simulate} from 'react-dom/test-utils';
 import {UploadedFile} from '@common/uploads/uploaded-file';
 
 export interface ConnectedDroppable {

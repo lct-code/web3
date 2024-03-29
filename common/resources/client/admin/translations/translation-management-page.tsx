@@ -56,7 +56,7 @@ function Form({localization}: FormProps) {
             onSuccess: () => {
               navigate('/admin/localizations');
             },
-          }
+          },
         );
       }}
     >
@@ -66,7 +66,7 @@ function Form({localization}: FormProps) {
         lines={lines}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        isLoading={updateLocalization.isLoading}
+        isLoading={updateLocalization.isPending}
       />
       <LinesList lines={lines} setLines={setLines} searchQuery={searchQuery} />
     </form>

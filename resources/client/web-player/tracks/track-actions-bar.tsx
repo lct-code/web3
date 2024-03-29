@@ -1,4 +1,4 @@
-import React, {Fragment, ReactNode} from 'react';
+import React, {ReactNode} from 'react';
 import {LikeButton} from '@app/web-player/library/like-button';
 import {RepostButton} from '@app/web-player/reposts/repost-button';
 import {DialogTrigger} from '@common/ui/overlays/dialog/dialog-trigger';
@@ -13,7 +13,6 @@ import {Album} from '@app/web-player/albums/album';
 import {AlbumContextDialog} from '@app/web-player/albums/album-context-dialog';
 import clsx from 'clsx';
 import {ButtonSize} from '@common/ui/buttons/button-size';
-import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 import {ShareMediaDialog} from '@app/web-player/sharing/share-media-dialog';
 
 interface Props {
@@ -36,57 +35,50 @@ export function TrackActionsBar({
   children,
   className,
 }: Props) {
-  const isMobile = useIsMobileMediaQuery();
   return (
     <div
       className={clsx(
-        'flex items-center gap-24 justify-center md:justify-between overflow-hidden @container',
-        className
+        'flex items-center justify-center gap-24 overflow-hidden @container md:justify-between',
+        className,
       )}
     >
       <div>
         {children}
-        {!isMobile && (
-          <Fragment>
-            <LikeButton
-              size={buttonSize}
-              likeable={item}
-              className={clsx(buttonGap, buttonClassName)}
-              radius={buttonRadius}
-              disabled={managesItem}
-            />
-            <RepostButton
-              item={item}
-              size={buttonSize}
-              radius={buttonRadius}
-              disabled={managesItem}
-              className={clsx(
-                buttonGap,
-                buttonClassName,
-                'hidden @[840px]:inline-flex'
-              )}
-            />
-          </Fragment>
-        )}
-        {!isMobile && (
-          <DialogTrigger type="modal">
-            <Button
-              size={buttonSize}
-              variant="outline"
-              startIcon={<ShareIcon />}
-              className={clsx(
-                buttonGap,
-                buttonClassName,
-                'hidden @[660px]:inline-flex'
-              )}
-              radius={buttonRadius}
-            >
-              <Trans message="Share" />
-            </Button>
-            <ShareMediaDialog item={item} />
-          </DialogTrigger>
-        )}
-        <DialogTrigger type="popover">
+        <LikeButton
+          size={buttonSize}
+          likeable={item}
+          className={clsx(buttonGap, buttonClassName, 'max-md:hidden')}
+          radius={buttonRadius}
+          disabled={managesItem}
+        />
+        <RepostButton
+          item={item}
+          size={buttonSize}
+          radius={buttonRadius}
+          disabled={managesItem}
+          className={clsx(
+            buttonGap,
+            buttonClassName,
+            'hidden @[840px]:inline-flex',
+          )}
+        />
+        <DialogTrigger type="modal">
+          <Button
+            size={buttonSize}
+            variant="outline"
+            startIcon={<ShareIcon />}
+            className={clsx(
+              buttonGap,
+              buttonClassName,
+              'hidden @[660px]:inline-flex',
+            )}
+            radius={buttonRadius}
+          >
+            <Trans message="Share" />
+          </Button>
+          <ShareMediaDialog item={item} />
+        </DialogTrigger>
+        <DialogTrigger type="popover" mobileType="tray">
           <Button
             variant="outline"
             size={buttonSize}
@@ -99,7 +91,7 @@ export function TrackActionsBar({
           <MoreDialog item={item} />
         </DialogTrigger>
       </div>
-      {!isMobile && <MediaItemStats item={item} />}
+      <MediaItemStats item={item} className="max-xl:hidden" />
     </div>
   );
 }

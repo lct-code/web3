@@ -16,7 +16,6 @@ trait LoadsAllChildEntries
      */
     protected function loadChildEntries($entries, $withTrashed = false)
     {
-        /** @var FileEntry $builder */
         $builder = FileEntry::select(['id', 'file_name', 'type']);
 
         if (is_array($entries)) {
@@ -42,7 +41,7 @@ trait LoadsAllChildEntries
         //only fetch children if any "where" constraints were applied
         if (count($builder->getQuery()->wheres)) {
             $children = $builder->get();
-            $entries =  $entries->merge($children);
+            $entries = $entries->merge($children);
         }
 
         return $entries;

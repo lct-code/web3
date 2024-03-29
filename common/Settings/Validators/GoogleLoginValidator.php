@@ -31,9 +31,9 @@ class GoogleLoginValidator implements SettingsValidator
         ]);
     }
 
-    public function fails($settings)
+    public function fails($values)
     {
-        $this->setConfigDynamically($settings);
+        $this->setConfigDynamically($values);
 
         try {
             Socialite::driver('google')->getAccessTokenResponse('foo-bar');

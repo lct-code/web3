@@ -2,18 +2,19 @@
 
 namespace Common\Comments;
 
-use App\User;
+use App\Models\User;
+use Common\Core\BaseModel;
 use Common\Files\Traits\HandlesEntryPaths;
-use Common\Search\Searchable;
+use Common\Votes\OrdersByWeightedScore;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class Comment extends Model
+class Comment extends BaseModel
 {
-    use HandlesEntryPaths, HasFactory, Searchable;
+    use HandlesEntryPaths, HasFactory, OrdersByWeightedScore;
 
     const MODEL_TYPE = 'comment';
 
@@ -27,7 +28,17 @@ class Comment extends Model
         'deleted' => 'boolean',
     ];
 
-    protected $appends = ['depth'];
+    protected $appends = ['depth', 'model_type'];
+
+    public function votes(): HasMany
+    {
+        return $this->hasMany(CommentVote::class);
+    }
+
+    public function reports(): HasMany
+    {
+        return $this->hasMany(CommentReport::class);
+    }
 
     public function user(): BelongsTo
     {
@@ -39,12 +50,12 @@ class Comment extends Model
         return $this->morphTo();
     }
 
-    public function scopeRootOnly(Builder $builder)
+    public function scopeRootOnly(Builder $builder): Builder
     {
         return $builder->whereNull('parent_id');
     }
 
-    public function scopeChildrenOnly(Builder $builder)
+    public function scopeChildrenOnly(Builder $builder): Builder
     {
         return $builder->whereNotNull('parent_id');
     }
@@ -55,6 +66,15 @@ class Comment extends Model
             return 0;
         }
         return count(explode('/', $this->getRawOriginal('path')));
+    }
+
+    public function toNormalizedArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->content,
+            'model_type' => self::MODEL_TYPE,
+        ];
     }
 
     public function toSearchableArray(): array
@@ -89,5 +109,10 @@ class Comment extends Model
     protected static function newFactory()
     {
         return CommentFactory::new();
+    }
+
+    public static function getModelTypeAttribute(): string
+    {
+        return self::MODEL_TYPE;
     }
 }

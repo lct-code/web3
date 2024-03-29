@@ -22,14 +22,14 @@ export function NameWithAvatar({
       {image && (
         <Avatar size={avatarSize} className="flex-shrink-0" src={image} />
       )}
-      <div className="overflow-hidden min-w-0">
+      <div className="min-w-0 overflow-hidden">
         <div
           className={clsx(labelClassName, 'overflow-hidden overflow-ellipsis')}
         >
           {label}
         </div>
         {description && (
-          <div className="text-muted text-xs overflow-hidden overflow-ellipsis">
+          <div className="overflow-hidden overflow-ellipsis text-xs text-muted">
             {description}
           </div>
         )}
@@ -45,14 +45,14 @@ export function NameWithAvatarPlaceholder({
   showDescription?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-12 w-full max-w-4/5">
-      <Skeleton size="w-32 h-32" />
+    <div className="flex w-full max-w-4/5 items-center gap-12">
+      <Skeleton size="w-40 h-40 md:w-32 md:h-32" variant="rect" />
       <div className="flex-auto">
         <div className={clsx(labelClassName, 'leading-3')}>
           <Skeleton />
         </div>
         {showDescription && (
-          <div className="text-muted leading-3 mt-4">{<Skeleton />}</div>
+          <div className="mt-4 leading-3 text-muted">{<Skeleton />}</div>
         )}
       </div>
     </div>

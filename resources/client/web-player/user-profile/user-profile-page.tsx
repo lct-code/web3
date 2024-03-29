@@ -34,13 +34,19 @@ if (!getBootstrapData().settings.player?.enable_repost) {
 }
 
 export function UserProfilePage() {
-  const query = useUserProfile();
+  const query = useUserProfile({loader: 'userProfilePage'});
 
   if (query.data) {
     return <PageContent user={query.data.user} />;
   }
 
-  return <PageStatus query={query} loaderClassName="absolute inset-0 m-auto" />;
+  return (
+    <PageStatus
+      query={query}
+      loaderIsScreen={false}
+      loaderClassName="absolute inset-0 m-auto"
+    />
+  );
 }
 
 export interface ProfileContentProps {
@@ -56,7 +62,7 @@ function PageContent({user}: ProfileContentProps) {
     (tabName: string) => {
       return `/user/${user.id}/${user.display_name}/${tabName}`;
     },
-    [user]
+    [user],
   );
 
   return (

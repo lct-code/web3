@@ -16,15 +16,22 @@ interface Response extends BackendResponse {
 export interface CreateLyricPayload {
   track_id: number;
   text: string;
+  is_synced: boolean;
+  duration: number | null;
 }
 
 export function useCreateLyric(form: UseFormReturn<CreateLyricPayload>) {
   const {trans} = useTrans();
-  return useMutation((props: CreateLyricPayload) => createNewTag(props), {
+  return useMutation({
+    mutationFn: (props: CreateLyricPayload) => createNewTag(props),
     onSuccess: () => {
       toast(trans(message('Lyric created')));
-      queryClient.invalidateQueries(DatatableDataQueryKey('lyrics'));
-      queryClient.invalidateQueries(DatatableDataQueryKey('tracks'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('lyrics'),
+      });
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('tracks'),
+      });
     },
     onError: err => onFormQueryError(err, form),
   });

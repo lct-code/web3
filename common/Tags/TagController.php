@@ -2,36 +2,31 @@
 
 namespace Common\Tags;
 
-use App\Tag as AppTag;
+use App\Models\Tag as AppTag;
 use Common\Core\BaseController;
 use Common\Database\Datasource\Datasource;
 use DB;
-use Illuminate\Http\Request;
 
 class TagController extends BaseController
 {
-    public function __construct(protected Request $request)
-    {
-    }
-
     public function index()
     {
         $this->authorize('index', Tag::class);
 
         $builder = $this->getModel()->newQuery();
 
-        if ($type = $this->request->get('type')) {
+        if ($type = request('type')) {
             $builder->where('type', $type);
         }
 
-        if ($notType = $this->request->get('notType')) {
+        if ($notType = request('notType')) {
             $builder->where('type', '!=', $notType);
         }
 
         // don't show "label" tags in bedrive
         $builder->where('type', '!=', 'label');
 
-        $dataSource = new Datasource($builder, $this->request->all());
+        $dataSource = new Datasource($builder, request()->all());
 
         $pagination = $dataSource->paginate();
 
@@ -42,16 +37,16 @@ class TagController extends BaseController
     {
         $this->authorize('store', Tag::class);
 
-        $this->validate($this->request, [
+        $this->validate(request(), [
             'name' => 'required|string|min:2|unique:tags',
             'display_name' => 'string|min:2',
             'type' => 'required|string|min:2',
         ]);
 
         $tag = $this->getModel()->create([
-            'name' => $this->request->get('name'),
-            'display_name' => $this->request->get('display_name'),
-            'type' => $this->request->get('type'),
+            'name' => request('name'),
+            'display_name' => request('display_name'),
+            'type' => request('type'),
         ]);
 
         return $this->success(['tag' => $tag]);
@@ -61,7 +56,7 @@ class TagController extends BaseController
     {
         $this->authorize('update', Tag::class);
 
-        $this->validate($this->request, [
+        $this->validate(request(), [
             'name' => "string|min:2|unique:tags,name,$tagId",
             'display_name' => 'string|min:2',
             'type' => 'string|min:2',
@@ -69,7 +64,7 @@ class TagController extends BaseController
 
         $tag = $this->getModel()->findOrFail($tagId);
 
-        $tag->fill($this->request->all())->save();
+        $tag->fill(request()->all())->save();
 
         return $this->success(['tag' => $tag]);
     }

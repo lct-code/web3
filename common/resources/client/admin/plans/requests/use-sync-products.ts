@@ -10,7 +10,8 @@ interface Response extends BackendResponse {}
 
 export function useSyncProducts() {
   const {trans} = useTrans();
-  return useMutation(() => syncPlans(), {
+  return useMutation({
+    mutationFn: () => syncPlans(),
     onSuccess: () => {
       toast(trans(message('Plans synced')));
     },

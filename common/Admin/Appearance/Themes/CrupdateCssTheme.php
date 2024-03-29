@@ -2,35 +2,19 @@
 
 namespace Common\Admin\Appearance\Themes;
 
-use Auth;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 
 class CrupdateCssTheme
 {
-    /**
-     * @var CssTheme
-     */
-    private $cssTheme;
-
-    /**
-     * @param CssTheme $cssTheme
-     */
-    public function __construct(CssTheme $cssTheme)
+    public function execute(array $data, CssTheme $cssTheme = null): ?CssTheme
     {
-        $this->cssTheme = $cssTheme;
-    }
-
-    /**
-     * @param array $data
-     * @param CssTheme $cssTheme
-     * @return CssTheme
-     */
-    public function execute($data, $cssTheme = null)
-    {
-        if ( ! $cssTheme) {
-            $cssTheme = $this->cssTheme->newInstance([
+        if (!$cssTheme) {
+            $cssTheme = CssTheme::newInstance([
                 'user_id' => Auth::id(),
-                'colors' => $data['is_dark'] ? config('common.themes.dark') : config('common.themes.light')
+                'values' => $data['is_dark']
+                    ? config('common.themes.dark')
+                    : config('common.themes.light'),
             ]);
         }
 
@@ -39,7 +23,7 @@ class CrupdateCssTheme
             'is_dark',
             'default_dark',
             'default_light',
-            'colors',
+            'values',
         ]);
 
         $cssTheme->fill($attributes)->save();

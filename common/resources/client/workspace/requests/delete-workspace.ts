@@ -20,22 +20,22 @@ function deleteWorkspace({id}: DeleteWorkspacePayload): Promise<Response> {
 
 export function useDeleteWorkspace() {
   const {workspaceId, setWorkspaceId} = useActiveWorkspaceId();
-  return useMutation(
-    (props: DeleteWorkspacePayload) => deleteWorkspace(props),
-    {
-      onSuccess: (r, payload) => {
-        toast(message('Deleted workspace'));
-        queryClient.invalidateQueries(WorkspaceQueryKeys.fetchUserWorkspaces);
-        queryClient.invalidateQueries(
-          WorkspaceQueryKeys.workspaceWithMembers(payload.id)
-        );
+  return useMutation({
+    mutationFn: (props: DeleteWorkspacePayload) => deleteWorkspace(props),
+    onSuccess: (r, payload) => {
+      toast(message('Deleted workspace'));
+      queryClient.invalidateQueries({
+        queryKey: WorkspaceQueryKeys.fetchUserWorkspaces,
+      });
+      queryClient.invalidateQueries({
+        queryKey: WorkspaceQueryKeys.workspaceWithMembers(payload.id),
+      });
 
-        // if user deleted workspace that is currently active, switch to personal workspace
-        if (workspaceId === payload.id) {
-          setWorkspaceId(PersonalWorkspace.id);
-        }
-      },
-      onError: err => showHttpErrorToast(err),
-    }
-  );
+      // if user deleted workspace that is currently active, switch to personal workspace
+      if (workspaceId === payload.id) {
+        setWorkspaceId(PersonalWorkspace.id);
+      }
+    },
+    onError: err => showHttpErrorToast(err),
+  });
 }

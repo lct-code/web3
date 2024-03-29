@@ -20,10 +20,11 @@ export interface CreatePlaylistPayload {
 }
 
 export function useCreatePlaylist(form: UseFormReturn<CreatePlaylistPayload>) {
-  return useMutation((props: CreatePlaylistPayload) => createPlaylist(props), {
+  return useMutation({
+    mutationFn: (props: CreatePlaylistPayload) => createPlaylist(props),
     onSuccess: () => {
       toast(message('Playlist created'));
-      queryClient.invalidateQueries(['playlists']);
+      queryClient.invalidateQueries({queryKey: ['playlists']});
     },
     onError: r => onFormQueryError(r, form),
   });

@@ -12,7 +12,7 @@ export interface LengthAwarePaginationResponse<T> {
   prev_page: number;
 }
 
-interface SimplePaginationResponse<T> {
+export interface SimplePaginationResponse<T> {
   data: T[];
   from: number;
   to: number;

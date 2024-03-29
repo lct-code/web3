@@ -15,14 +15,15 @@ interface Payload {
 }
 
 export function useToggleRepost() {
-  return useMutation((payload: Payload) => toggleRepost(payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => toggleRepost(payload),
     onSuccess: (response, {repostable}) => {
       if (response.action === 'added') {
         userReposts().add([repostable]);
       } else {
         userReposts().remove([repostable]);
       }
-      queryClient.invalidateQueries(['reposts']);
+      queryClient.invalidateQueries({queryKey: ['reposts']});
     },
     onError: r => showHttpErrorToast(r),
   });

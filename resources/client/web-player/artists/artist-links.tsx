@@ -9,12 +9,14 @@ interface ArtistLinksProps {
   className?: string;
   linkClassName?: string;
   target?: HTMLAttributeAnchorTarget;
+  onLinkClick?: () => void;
 }
 export function ArtistLinks({
   artists,
   className,
   target,
   linkClassName,
+  onLinkClick,
 }: ArtistLinksProps) {
   if (!artists?.length) {
     return (
@@ -32,6 +34,7 @@ export function ArtistLinks({
             artist={artist}
             target={target}
             className={linkClassName}
+            onClick={onLinkClick}
           />
         </Fragment>
       ))}

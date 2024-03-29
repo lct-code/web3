@@ -2,7 +2,7 @@
 
 namespace Common\Workspaces\Actions;
 
-use App\User;
+use App\Models\User;
 use Common\Workspaces\Notifications\WorkspaceInvitation;
 use Common\Workspaces\WorkspaceInvite;
 use Illuminate\Notifications\DatabaseNotification;

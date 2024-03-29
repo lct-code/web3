@@ -23,7 +23,6 @@ import musicImage from '@app/admin/tracks-datatable-page/music.svg';
 import {SvgImage} from '@common/ui/images/svg-image/svg-image';
 import {IllustratedMessage} from '@common/ui/images/illustrated-message';
 import {CreateTrackDialog} from '@app/admin/tracks-datatable-page/track-form/create-track-dialog';
-import {useSortable} from '@common/ui/interactions/dnd/use-sortable';
 import {DragPreviewRenderer} from '@common/ui/interactions/dnd/use-draggable';
 import {DragPreview} from '@common/ui/interactions/dnd/drag-preview';
 import {CreateTrackPayload} from '@app/admin/tracks-datatable-page/requests/use-create-track';
@@ -34,6 +33,7 @@ import {
 import {useTrackUploader} from '@app/web-player/backstage/upload-page/use-track-uploader';
 import {useTrackUpload} from '@app/web-player/backstage/upload-page/use-track-upload';
 import {UpdateTrackPayload} from '@app/admin/tracks-datatable-page/requests/use-update-track';
+import {useSortable} from '@common/ui/interactions/dnd/sortable/use-sortable';
 
 export function AlbumTracksForm() {
   const form = useFormContext<CreateAlbumPayload>();
@@ -44,14 +44,14 @@ export function AlbumTracksForm() {
 
   const updateTrack = (
     uploadId: string,
-    newValues: Partial<CreateTrackPayload>
+    newValues: Partial<CreateTrackPayload>,
   ) => {
     const index = getValues('tracks')?.findIndex(f => f.uploadId === uploadId);
     if (index != null) {
       setValue(
         `tracks.${index}`,
         mergeTrackFormValues(newValues, getValues(`tracks.${index}`)),
-        {shouldDirty: true}
+        {shouldDirty: true},
       );
     }
   };
@@ -64,7 +64,7 @@ export function AlbumTracksForm() {
           artists: form.getValues('artists'),
           genres: form.getValues('genres'),
           tags: form.getValues('tags'),
-        })
+        }),
       ),
     onMetadataChange: (file, newData) => {
       hydrateAlbumForm(form, newData);
@@ -77,7 +77,7 @@ export function AlbumTracksForm() {
   return (
     <div>
       <div className="flex items-center gap-12">
-        <h2 className="text-xl font-semibold my-24">
+        <h2 className="my-24 text-xl font-semibold">
           <Trans message="Tracks" />
         </h2>
         <Button
@@ -99,12 +99,7 @@ export function AlbumTracksForm() {
           }}
         >
           <Tooltip label={<Trans message="Create track" />}>
-            <IconButton
-              variant="outline"
-              color="primary"
-              size="xs"
-              radius="rounded"
-            >
+            <IconButton variant="outline" color="primary" size="xs">
               <AddIcon />
             </IconButton>
           </Tooltip>
@@ -175,7 +170,7 @@ function TrackItem({
     items: tracks,
     type: 'albumFormTrack',
     preview: previewRef,
-    previewVariant: 'line',
+    strategy: 'line',
     onSortEnd: (oldIndex, newIndex) => {
       onSort(oldIndex, newIndex);
     },
@@ -188,14 +183,14 @@ function TrackItem({
       {...sortableProps}
     >
       <div className="flex items-center text-sm">
-        <IconButton className="flex-shrink-0 mr-14" disabled={isUploading}>
+        <IconButton className="mr-14 flex-shrink-0" disabled={isUploading}>
           <DragHandleIcon />
         </IconButton>
-        <div className="flex-auto whitespace-nowrap overflow-hidden overflow-ellipsis">
+        <div className="flex-auto overflow-hidden overflow-ellipsis whitespace-nowrap">
           {track.name}
         </div>
         {activeUpload && (
-          <div className="flex items-center mr-10">
+          <div className="mr-10 flex items-center">
             <TrackUploadStatusText
               fileUpload={activeUpload}
               status={status}
@@ -218,7 +213,7 @@ function TrackItem({
         >
           <Tooltip label={<Trans message="Edit track" />}>
             <IconButton
-              className="flex-shrink-0 ml-auto text-muted"
+              className="ml-auto flex-shrink-0 text-muted"
               disabled={isUploading}
             >
               <EditIcon />
@@ -269,9 +264,9 @@ const RowDragPreview = React.forwardRef<DragPreviewRenderer, DragPreviewProps>(
     return (
       <DragPreview ref={ref}>
         {() => (
-          <div className="p-8 rounded shadow bg-chip text-sm">{content}</div>
+          <div className="rounded bg-chip p-8 text-sm shadow">{content}</div>
         )}
       </DragPreview>
     );
-  }
+  },
 );

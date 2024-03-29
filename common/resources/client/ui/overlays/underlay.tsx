@@ -25,16 +25,17 @@ export function Underlay({
       {...domProps}
       className={clsx(
         className,
-        !isTransparent && 'bg-black/30',
-        'w-full h-full inset-0 z-10',
-        position
+        !isTransparent && 'bg-background/80',
+        'inset-0 z-10 h-full w-full',
+        position,
+        'backdrop-blur-sm'
       )}
       aria-hidden
       initial={disableInitialTransition ? undefined : {opacity: 0}}
       animate={{opacity: 1}}
       exit={{opacity: 0}}
       {...opacityAnimation}
-      transition={{duration: 0.3}}
+      transition={{duration: 0.15}}
     />
   );
 }

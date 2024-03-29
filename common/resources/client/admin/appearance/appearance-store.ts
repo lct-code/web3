@@ -6,6 +6,7 @@ import type {IAppearanceConfig} from './types/appearance-editor-config';
 import {AllCommands} from './commands/commands';
 import mergedAppearanceConfig from './config/merged-appearance-config';
 import {BootstrapData} from '../../core/bootstrap-data/bootstrap-data';
+import {FontConfig} from '@common/http/value-lists';
 
 export interface AppearanceValues {
   appearance: {
@@ -44,7 +45,8 @@ interface AppearanceStore {
   preview: {
     navigate: (sectionName: string) => void;
     setValues: (settings: AppearanceValues) => void;
-    setThemeColor: (name: string, value: string) => void;
+    setThemeFont: (font: FontConfig | null) => void;
+    setThemeValue: (name: string, value: string) => void;
     setActiveTheme: (themeId: number | string) => void;
     setHighlight: (selector: string | null | undefined) => void;
     setCustomCode: (mode: 'css' | 'html', value?: string) => void;
@@ -81,9 +83,13 @@ export const useAppearanceStore = create<AppearanceStore>()(
           const preview = get().iframeWindow;
           postMessage(preview, {type: 'setValues', values});
         },
-        setThemeColor: (name, value) => {
+        setThemeFont: font => {
           const preview = get().iframeWindow;
-          postMessage(preview, {type: 'setThemeColor', name, value});
+          postMessage(preview, {type: 'setThemeFont', value: font});
+        },
+        setThemeValue: (name, value) => {
+          const preview = get().iframeWindow;
+          postMessage(preview, {type: 'setThemeValue', name, value});
         },
         setActiveTheme: themeId => {
           const preview = get().iframeWindow;
@@ -113,8 +119,8 @@ export const useAppearanceStore = create<AppearanceStore>()(
           });
         },
       },
-    }))
-  )
+    })),
+  ),
 );
 
 function postMessage(window: Window | null, command: AllCommands) {

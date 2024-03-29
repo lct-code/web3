@@ -10,7 +10,6 @@ import {
 import {useNavigate} from '@common/utils/hooks/use-navigate';
 import {useLocation, useSearchParams} from 'react-router-dom';
 import {useNormalizedModel} from '@common/users/queries/use-normalized-model';
-import {ARTIST_MODEL} from '@app/web-player/artists/artist';
 import {useCurrentDateTime} from '@common/i18n/use-current-date-time';
 import {getAlbumLink} from '@app/web-player/albums/album-link';
 import {
@@ -35,7 +34,11 @@ function PageContent({wrapInContainer}: Props) {
   const navigate = useNavigate();
   const {pathname} = useLocation();
   const [searchParams] = useSearchParams();
-  const {data} = useNormalizedModel(ARTIST_MODEL, searchParams.get('artistId'));
+  const {data} = useNormalizedModel(
+    `normalized-models/artist/${searchParams.get('artistId')}`,
+    undefined,
+    {enabled: !!searchParams.get('artistId')},
+  );
   const artist = data?.model;
   const form = useForm<CreateAlbumPayload>({
     defaultValues: {
@@ -51,8 +54,6 @@ function PageContent({wrapInContainer}: Props) {
       });
     }
   }, [artist, form]);
-
-  console.log(uploadIsInProgress);
 
   return (
     <CrupdateResourceLayout
@@ -73,7 +74,7 @@ function PageContent({wrapInContainer}: Props) {
         });
       }}
       title={<Trans message="Add new album" />}
-      isLoading={createAlbum.isLoading || uploadIsInProgress}
+      isLoading={createAlbum.isPending || uploadIsInProgress}
       disableSaveWhenNotDirty
       wrapInContainer={wrapInContainer}
     >

@@ -18,21 +18,19 @@ export interface UpdateSubscriptionPayload extends Partial<Subscription> {
 }
 
 export function useUpdateSubscription(
-  form: UseFormReturn<UpdateSubscriptionPayload>
+  form: UseFormReturn<UpdateSubscriptionPayload>,
 ) {
   const {trans} = useTrans();
-  return useMutation(
-    (props: UpdateSubscriptionPayload) => updateSubscription(props),
-    {
-      onSuccess: () => {
-        toast(trans(message('Subscription updated')));
-        queryClient.invalidateQueries(
-          DatatableDataQueryKey('billing/subscriptions')
-        );
-      },
-      onError: err => onFormQueryError(err, form),
-    }
-  );
+  return useMutation({
+    mutationFn: (props: UpdateSubscriptionPayload) => updateSubscription(props),
+    onSuccess: () => {
+      toast(trans(message('Subscription updated')));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('billing/subscriptions'),
+      });
+    },
+    onError: err => onFormQueryError(err, form),
+  });
 }
 
 function updateSubscription({

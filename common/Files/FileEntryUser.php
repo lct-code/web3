@@ -2,18 +2,18 @@
 
 namespace Common\Files;
 
-use App\User;
+use App\Models\User;
 use Common\Auth\BaseUser;
 
 class FileEntryUser extends BaseUser
 {
     protected $table = 'users';
 
-    protected $billingEnabled = false;
+    protected bool $billingEnabled = false;
 
     public function getMorphClass()
     {
-        return User::class;
+        return User::MODEL_TYPE;
     }
 
     protected $hidden = [

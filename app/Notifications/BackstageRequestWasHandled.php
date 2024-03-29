@@ -2,7 +2,7 @@
 
 namespace App\Notifications;
 
-use App\BackstageRequest;
+use App\Models\BackstageRequest;
 use App\Services\UrlGenerator;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;

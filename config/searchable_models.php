@@ -1,19 +1,8 @@
 <?php
 
-use App\Album;
-use App\Artist;
-use App\Channel;
-use App\Genre;
-use App\Lyric;
-use App\Playlist;
-use App\Track;
+use App\Models\Album;
+use App\Models\Artist;
+use App\Models\Playlist;
+use App\Models\Track;
 
-return [
-    Artist::class,
-    Album::class,
-    Track::class,
-    Playlist::class,
-    Lyric::class,
-    Channel::class,
-    Genre::class,
-];
+return [Artist::class, Album::class, Track::class, Playlist::class];

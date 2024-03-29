@@ -22,7 +22,7 @@ export interface Artist {
   updated_at?: string;
   top_tracks?: Track[];
   albums?: Album[];
-  similar?: Artist[];
+  similar?: Omit<Artist, 'similar' | 'top_tracks' | 'albums'>[];
   genres?: Genre[];
   views: number;
   plays: number;

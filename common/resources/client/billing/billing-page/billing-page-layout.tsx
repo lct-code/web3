@@ -6,6 +6,7 @@ import {Outlet} from 'react-router-dom';
 import {Footer} from '../../ui/footer/footer';
 import {StaticPageTitle} from '../../seo/static-page-title';
 import {Trans} from '../../i18n/trans';
+import {Fragment} from 'react';
 
 export function BillingPageLayout() {
   const {user} = useAuth();
@@ -14,12 +15,12 @@ export function BillingPageLayout() {
   });
 
   return (
-    <div className="flex flex-col h-full">
+    <Fragment>
       <StaticPageTitle>
         <Trans message="Billing" />
       </StaticPageTitle>
-      <Navbar className="flex-shrink-0" menuPosition="billing-page" />
-      <div className="flex-auto overflow-auto flex flex-col">
+      <Navbar menuPosition="billing-page" />
+      <div className="flex flex-col">
         <div className="container mx-auto my-24 px-24 flex-auto">
           {query.isLoading ? (
             <ProgressCircle
@@ -31,8 +32,8 @@ export function BillingPageLayout() {
             <Outlet />
           )}
         </div>
-        <Footer className="flex-shrink-0 container mx-auto px-24" />
+        <Footer className="container mx-auto px-24" />
       </div>
-    </div>
+    </Fragment>
   );
 }

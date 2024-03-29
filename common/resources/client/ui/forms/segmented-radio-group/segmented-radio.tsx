@@ -31,24 +31,24 @@ export const SegmentedRadio = forwardRef<HTMLInputElement, SegmentedRadioProps>(
       <label
         ref={labelRef}
         className={clsx(
-          'inline-flex gap-8 select-none items-center whitespace-nowrap align-middle font-medium z-20 cursor-pointer transition-colors relative hover:text-main',
+          'relative z-20 inline-flex flex-auto cursor-pointer select-none items-center justify-center gap-8 whitespace-nowrap align-middle font-medium transition-colors hover:text-main',
           isSelected ? 'text-main' : 'text-muted',
           !isFirst && '',
           sizeClassNames,
-          props.disabled && 'text-disabled pointer-events-none',
-          props.invalid && 'text-danger'
+          props.disabled && 'pointer-events-none text-disabled',
+          props.invalid && 'text-danger',
         )}
       >
         <input
           type="radio"
-          className="appearance-none rounded absolute w-full h-full top-0 left-0 focus-visible:outline pointer-events-none"
+          className="pointer-events-none absolute left-0 top-0 h-full w-full appearance-none rounded focus-visible:outline"
           ref={inputRef}
           {...domProps}
         />
         {children && <span>{children}</span>}
       </label>
     );
-  }
+  },
 );
 
 function getSizeClassNames(size?: InputSize): string {

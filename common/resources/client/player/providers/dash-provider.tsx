@@ -29,7 +29,7 @@ export default function DashProvider() {
 
   const setupDash = useCallback(() => {
     if (!supportsMediaSource()) {
-      store.getState().emit('error');
+      store.getState().emit('error', {fatal: true});
       return;
     }
 
@@ -105,7 +105,7 @@ export default function DashProvider() {
 
   return (
     <video
-      className="w-full h-full"
+      className="h-full w-full"
       ref={videoRef}
       playsInline
       poster={cuedMedia?.poster}

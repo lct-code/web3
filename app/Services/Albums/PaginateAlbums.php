@@ -2,29 +2,23 @@
 
 namespace App\Services\Albums;
 
-use App\Album;
-use App\Genre;
+use App\Models\Album;
 use Common\Database\Datasource\Datasource;
 use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Str;
 
 class PaginateAlbums
 {
-    public function execute(array $params, Genre $genre = null): AbstractPaginator
+    public function execute(array $params, $builder = null): AbstractPaginator
     {
-        if ($genre) {
-            $builder = $genre
-                ->albums()
-                ->whereNotNull('image');
-        } else {
+        if (!$builder) {
             $builder = Album::query();
         }
 
         $builder->with(['artists']);
 
-        $datasource = (new Datasource($builder, $params));
+        $datasource = new Datasource($builder, $params);
         $order = $datasource->getOrder();
-
 
         if (Str::endsWith($order['col'], 'popularity')) {
             $datasource->order = false;

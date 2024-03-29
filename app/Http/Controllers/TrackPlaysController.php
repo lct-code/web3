@@ -1,9 +1,8 @@
 <?php namespace App\Http\Controllers;
 
-use App;
-use App\Actions\Track\LogTrackPlay;
+use App\Models\Track;
+use App\Services\Tracks\LogTrackPlay;
 use App\Services\Tracks\Queries\HistoryTrackQuery;
-use App\Track;
 use Common\Core\BaseController;
 use Common\Database\Datasource\Datasource;
 use Illuminate\Support\Carbon;

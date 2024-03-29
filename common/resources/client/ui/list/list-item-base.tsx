@@ -1,13 +1,13 @@
 import clsx from 'clsx';
 import React, {
-  ComponentPropsWithoutRef,
+  ComponentPropsWithRef,
   JSXElementConstructor,
   ReactNode,
 } from 'react';
 import {CheckIcon} from '../../icons/material/Check';
 import {To} from 'react-router-dom';
 
-export interface ListItemBaseProps extends ComponentPropsWithoutRef<'div'> {
+export interface ListItemBaseProps extends ComponentPropsWithRef<'div'> {
   startIcon?: ReactNode;
   endIcon?: ReactNode;
   endSection?: ReactNode;
@@ -20,7 +20,11 @@ export interface ListItemBaseProps extends ComponentPropsWithoutRef<'div'> {
   className?: string;
   showCheckmark?: boolean;
   elementType?: 'a' | JSXElementConstructor<any> | 'div';
+  target?: string;
   to?: To;
+  href?: string;
+  radius?: string;
+  padding?: string;
 }
 
 export const ListItemBase = React.forwardRef<HTMLDivElement, ListItemBaseProps>(
@@ -37,6 +41,8 @@ export const ListItemBase = React.forwardRef<HTMLDivElement, ListItemBaseProps>(
       isSelected,
       showCheckmark,
       elementType = 'div',
+      radius,
+      padding,
       ...domProps
     } = props;
 
@@ -49,9 +55,15 @@ export const ListItemBase = React.forwardRef<HTMLDivElement, ListItemBaseProps>(
       );
     }
 
+    // if (!endIcon && !endSection && showCheckmark) {
+    //   endIcon = (
+    //     <CheckIcon size="sm" className={clsx('text-primary', 'invisible')} />
+    //   );
+    // }
+
     const iconClassName = clsx(
       'icon-sm rounded overflow-hidden flex-shrink-0',
-      !isDisabled && 'text-muted'
+      !isDisabled && 'text-muted',
     );
     const endSectionClassName = clsx(!isDisabled && 'text-muted');
 
@@ -67,16 +79,16 @@ export const ListItemBase = React.forwardRef<HTMLDivElement, ListItemBaseProps>(
         {startIcon && <div className={iconClassName}>{startIcon}</div>}
         <div
           className={clsx(
-            'mr-auto w-full',
-            capitalizeFirst && 'first-letter:capitalize'
+            'min-w-auto mr-auto w-full overflow-hidden overflow-ellipsis',
+            capitalizeFirst && 'first-letter:capitalize',
           )}
         >
           {children}
           {description && (
             <div
               className={clsx(
-                'text-xs mt-4 whitespace-normal',
-                isDisabled ? 'text-disabled' : 'text-muted'
+                'mt-4 whitespace-normal text-xs',
+                isDisabled ? 'text-disabled' : 'text-muted',
               )}
             >
               {description}
@@ -90,23 +102,20 @@ export const ListItemBase = React.forwardRef<HTMLDivElement, ListItemBaseProps>(
         )}
       </Element>
     );
-  }
+  },
 );
 
-interface Props {
-  isSelected?: boolean;
-  isDisabled?: boolean;
-  isActive?: boolean;
-  className?: string;
-  showCheckmark?: boolean;
-}
 function itemClassName({
   className,
   isSelected,
   isActive,
   isDisabled,
   showCheckmark,
-}: Props): string {
+  endIcon,
+  endSection,
+  radius,
+  padding: userPadding,
+}: ListItemBaseProps): string {
   let state: string = '';
   if (isDisabled) {
     state = 'text-disabled pointer-events-none';
@@ -122,12 +131,27 @@ function itemClassName({
     state = 'hover:bg-hover';
   }
 
+  let padding;
+
+  if (userPadding) {
+    padding = userPadding;
+  } else if (showCheckmark) {
+    if (endIcon || endSection) {
+      padding = 'pl-8 pr-8 py-8';
+    } else {
+      padding = 'pl-8 pr-24 py-8';
+    }
+  } else {
+    padding = 'px-20 py-8';
+  }
+
   return clsx(
     'w-full select-none outline-none cursor-pointer',
-    'py-8 text-sm truncate flex items-center gap-10',
+    'text-sm truncate flex items-center gap-10',
     !isDisabled && 'text-main',
-    showCheckmark ? 'px-8' : 'px-20',
+    padding,
     state,
-    className
+    className,
+    radius,
   );
 }

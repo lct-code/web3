@@ -6,13 +6,13 @@ import {useAdminReport} from '@common/admin/analytics/use-admin-report';
 
 export function AdminVisitorsReport() {
   const {dateRange} = useOutletContext<AdminReportOutletContext>();
-  const {data, isLoading, isPreviousData} = useAdminReport({
+  const {data, isLoading, isPlaceholderData} = useAdminReport({
     types: ['visitors'],
     dateRange: dateRange,
   });
   return (
     <VisitorsReportCharts
-      isLoading={isLoading || isPreviousData}
+      isLoading={isLoading || isPlaceholderData}
       report={data?.visitorsReport}
     />
   );

@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Artist;
-use App\User;
+use App\Models\Artist;
+use App\Models\User;
 use Common\Core\Policies\BasePolicy;
 use Illuminate\Auth\Access\HandlesAuthorization;
 

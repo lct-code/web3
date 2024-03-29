@@ -46,14 +46,6 @@ import {AlbumContextDialog} from '@app/web-player/albums/album-context-dialog';
 import {TrackContextDialog} from '@app/web-player/tracks/context-dialog/track-context-dialog';
 import {PlaylistContextDialog} from '@app/web-player/playlists/playlist-context-dialog';
 
-export const mainSearchModels = [
-  ARTIST_MODEL,
-  ALBUM_MODEL,
-  TRACK_MODEL,
-  USER_MODEL,
-  PLAYLIST_MODEL,
-];
-
 interface SearchAutocompleteProps {
   className?: string;
 }
@@ -64,24 +56,24 @@ export function SearchAutocomplete({className}: SearchAutocompleteProps) {
   const [query, setQuery] = useState(searchQuery || '');
   const [isOpen, setIsOpen] = useState(false);
   const {isFetching, data} = useSearchResults({
+    loader: 'search',
     query,
-    types: mainSearchModels,
-    limit: 3,
   });
 
   return (
     <form
       onSubmit={e => {
         e.preventDefault();
-        if (query.trim().length) {
+        const encodedQuery = encodeURIComponent(query.trim());
+        if (encodedQuery) {
           setIsOpen(false);
-          navigate(`/search/${query.trim()}`);
+          navigate(`/search/${encodedQuery}`);
         }
       }}
-      className={clsx('flex items-center gap-14 flex-auto', className)}
+      className={clsx('flex flex-auto items-center gap-14', className)}
     >
       <button type="submit" aria-label={trans(message('Search'))}>
-        <SearchIcon className="text-muted flex-shrink-0" />
+        <SearchIcon className="flex-shrink-0 text-muted" />
       </button>
       <ComboBox
         unstyled
@@ -102,10 +94,11 @@ export function SearchAutocomplete({className}: SearchAutocompleteProps) {
         floatingMaxHeight={670}
         isOpen={isOpen}
         onOpenChange={setIsOpen}
+        autoFocusFirstItem={false}
       >
         {Object.entries(data?.results || {}).map(([groupName, results]) => (
           <Section key={groupName} label={<Trans message={groupName} />}>
-            {results.map(result => {
+            {results.data.map(result => {
               const key = `${groupName}-${result.id}`;
               switch (result.model_type) {
                 case ARTIST_MODEL:
@@ -128,7 +121,11 @@ export function SearchAutocomplete({className}: SearchAutocompleteProps) {
                       description={<Trans message="Artist" />}
                       textLabel={result.name}
                     >
-                      <DialogTrigger type="popover" triggerOnContextMenu>
+                      <DialogTrigger
+                        type="popover"
+                        mobileType="tray"
+                        triggerOnContextMenu
+                      >
                         <div>
                           <ArtistLink artist={result} />
                         </div>
@@ -152,7 +149,11 @@ export function SearchAutocomplete({className}: SearchAutocompleteProps) {
                       description={<ArtistLinks artists={result.artists} />}
                       textLabel={result.name}
                     >
-                      <DialogTrigger type="popover" triggerOnContextMenu>
+                      <DialogTrigger
+                        type="popover"
+                        mobileType="tray"
+                        triggerOnContextMenu
+                      >
                         <div>
                           <AlbumLink album={result} />
                         </div>
@@ -176,7 +177,11 @@ export function SearchAutocomplete({className}: SearchAutocompleteProps) {
                       description={<ArtistLinks artists={result.artists} />}
                       textLabel={result.name}
                     >
-                      <DialogTrigger type="popover" triggerOnContextMenu>
+                      <DialogTrigger
+                        type="popover"
+                        mobileType="tray"
+                        triggerOnContextMenu
+                      >
                         <div>
                           <TrackLink track={result} />
                         </div>
@@ -193,7 +198,7 @@ export function SearchAutocomplete({className}: SearchAutocompleteProps) {
                         navigate(getUserProfileLink(result));
                       }}
                       startIcon={
-                        <UserImage className="w-48 h-48" user={result} />
+                        <UserImage className="h-48 w-48" user={result} />
                       }
                       description={
                         result.followers_count ? (
@@ -224,7 +229,11 @@ export function SearchAutocomplete({className}: SearchAutocompleteProps) {
                       description={<PlaylistOwnerName playlist={result} />}
                       textLabel={result.name}
                     >
-                      <DialogTrigger type="popover" triggerOnContextMenu>
+                      <DialogTrigger
+                        type="popover"
+                        mobileType="tray"
+                        triggerOnContextMenu
+                      >
                         <div>
                           <PlaylistLink playlist={result} />
                         </div>
@@ -262,12 +271,12 @@ function PlayableImage({
 
   const queueId = queueGroupId(model);
   const isPlaying = usePlayerStore(
-    s => s.isPlaying && s.originalQueue[0]?.groupId === queueId
+    s => s.isPlaying && s.originalQueue[0]?.groupId === queueId,
   );
 
   return (
     <div
-      className={clsx(className, 'relative w-48 h-48 overflow-hidden')}
+      className={clsx(className, 'relative h-48 w-48 overflow-hidden')}
       onClick={e => {
         e.preventDefault();
         e.stopPropagation();
@@ -282,7 +291,7 @@ function PlayableImage({
             key="play-overlay"
             {...opacityAnimation}
             transition={{duration: 0.24}}
-            className="absolute w-full h-full inset-0 bg-black/60 m-auto flex items-center justify-center"
+            className="absolute inset-0 m-auto flex h-full w-full items-center justify-center bg-black/60"
           >
             <PlaybackToggleButton
               buttonType="icon"

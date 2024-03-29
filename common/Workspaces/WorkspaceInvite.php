@@ -2,7 +2,7 @@
 
 namespace Common\Workspaces;
 
-use App\User;
+use App\Models\User;
 use Common\Auth\Traits\HasAvatarAttribute;
 use Common\Auth\Traits\HasDisplayNameAttribute;
 use Illuminate\Database\Eloquent\Model;

@@ -1,8 +1,8 @@
-import {Album} from '../albums/album';
 import {Lyric} from './lyrics/lyric';
 import {Genre} from '../genres/genre';
-import {Artist} from '../artists/artist';
 import {Tag} from '@common/tags/tag';
+import {Artist} from '@app/web-player/artists/artist';
+import {Album} from '@app/web-player/albums/album';
 
 export const TRACK_MODEL = 'track';
 
@@ -15,7 +15,7 @@ export interface Track {
   popularity?: number;
   src?: string;
   image?: string;
-  lyric?: Lyric;
+  lyric?: Omit<Lyric, 'track'>;
   album?: Album;
   owner_id?: number;
   description?: string;

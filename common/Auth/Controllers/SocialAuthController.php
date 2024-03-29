@@ -1,12 +1,10 @@
 <?php namespace Common\Auth\Controllers;
 
-use App\User;
+use App\Models\User;
 use Common\Auth\Oauth;
 use Common\Core\BaseController;
-use Common\Settings\Settings;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -14,17 +12,10 @@ use Illuminate\Support\Facades\Session;
 class SocialAuthController extends BaseController
 {
     public function __construct(
-        protected Request $request,
         protected Oauth $oauth,
-        protected Settings $settings
     ) {
         $this->middleware('auth', ['only' => ['connect', 'disconnect']]);
         $this->middleware('guest', ['only' => ['login']]);
-
-        //abort if registration should be disabled
-        if ($this->settings->get('registration.disable')) {
-            abort(404);
-        }
     }
 
     /**
@@ -32,7 +23,10 @@ class SocialAuthController extends BaseController
      */
     public function connect(string $provider)
     {
-        return $this->oauth->connectCurrentUserTo($provider);
+        if (!settings("social.$provider.enable")) {
+            abort(403);
+        }
+        return $this->oauth->redirect($provider);
     }
 
     /**
@@ -49,10 +43,10 @@ class SocialAuthController extends BaseController
         }
 
         if (
-            !$this->request->has('password') ||
+            !request()->has('password') ||
             !Auth::validate([
                 'email' => $data['profile']->email,
-                'password' => $this->request->get('password'),
+                'password' => request('password'),
             ])
         ) {
             return $this->error(__('Specified credentials are not valid'), [
@@ -82,6 +76,10 @@ class SocialAuthController extends BaseController
      */
     public function login(string $provider)
     {
+        if (!settings("social.$provider.enable")) {
+            abort(403);
+        }
+
         return $this->oauth->loginWith($provider);
     }
 
@@ -95,8 +93,8 @@ class SocialAuthController extends BaseController
         try {
             $externalProfile = $this->oauth->socializeWith(
                 $provider,
-                $this->request->get('tokenFromApi'),
-                $this->request->get('secretFromApi'),
+                request('tokenFromApi'),
+                request('secretFromApi'),
             );
         } catch (Exception $e) {
             Log::error($e);
@@ -126,17 +124,20 @@ class SocialAuthController extends BaseController
         }
 
         // if we have already created a user for this social account, log user in
-        if ($existingProfile && $existingProfile->user) {
+        if ($existingProfile?->user) {
             $this->oauth->updateSocialProfileData(
                 $existingProfile,
                 $provider,
                 $externalProfile,
             );
-            return $this->oauth->logUserIn($existingProfile->user);
+            return $this->oauth->logUserIn($existingProfile->user, $provider);
         }
 
-        //if user is trying to log in with envato and does not have any valid purchases, bail
-        if ($provider === 'envato' && empty($externalProfile->purchases)) {
+        // if user is trying to log in with envato and does not have any valid purchases, bail
+        if (
+            $provider === 'envato' &&
+            empty($externalProfile->user['purchases'])
+        ) {
             return $this->oauth->getErrorResponse(
                 'You do not have any supported purchases.',
             );
@@ -144,7 +145,7 @@ class SocialAuthController extends BaseController
 
         // need to request password from user in order to connect accounts
         $user = User::where('email', $externalProfile->email)->first();
-        if ($user && $user->password) {
+        if ($user?->password) {
             $this->oauth->persistSocialProfileData([
                 'service' => $provider,
                 'profile' => $externalProfile,
@@ -153,7 +154,7 @@ class SocialAuthController extends BaseController
             return $this->oauth->getPopupResponse('REQUEST_PASSWORD');
         }
 
-        //if we have email and didn't create an account for this profile yet, do it now
+        // if we have email and didn't create an account for this profile yet, do it now
         return $this->oauth->createUserFromOAuthData([
             'profile' => $externalProfile,
             'service' => $provider,

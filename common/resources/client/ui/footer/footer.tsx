@@ -15,19 +15,20 @@ interface Props {
 
 export function Footer({className, padding}: Props) {
   const year = new Date().getFullYear();
+  const {branding} = useSettings();
   return (
     <footer
       className={clsx(
         'text-sm',
-        padding ? padding : 'pt-54 pb-28 md:pb-54',
-        className
+        padding ? padding : 'pb-28 pt-54 md:pb-54',
+        className,
       )}
     >
       <Menus />
-      <div className="md:flex md:text-left text-center items-center gap-30 justify-between text-muted">
+      <div className="items-center justify-between gap-30 text-center text-muted md:flex md:text-left">
         <Trans
-          message="Copyright © :year, All Rights Reserved"
-          values={{year}}
+          message="Copyright © :year :name, All Rights Reserved"
+          values={{year, name: branding.site_name}}
         />
         <div>
           <ThemeSwitcher />
@@ -40,20 +41,20 @@ export function Footer({className, padding}: Props) {
 
 function Menus() {
   const settings = useSettings();
-  const primaryMenu = settings.menus.find(m => m.positions.includes('footer'));
-  const secondaryMenu = settings.menus.find(m =>
-    m.positions.includes('footer-secondary')
+  const primaryMenu = settings.menus.find(m => m.positions?.includes('footer'));
+  const secondaryMenu = settings.menus.find(
+    m => m.positions?.includes('footer-secondary'),
   );
 
   if (!primaryMenu && !secondaryMenu) return null;
 
   return (
-    <div className="md:flex items-center justify-between overflow-x-auto border-b pb-14 mb-14 gap-30">
+    <div className="mb-14 items-center justify-between gap-30 overflow-x-auto border-b pb-14 md:flex">
       {primaryMenu && (
         <CustomMenu menu={primaryMenu} className="text-primary" />
       )}
       {secondaryMenu && (
-        <CustomMenu menu={secondaryMenu} className="text-muted mt-14 mb:mt-0" />
+        <CustomMenu menu={secondaryMenu} className="mb:mt-0 mt-14 text-muted" />
       )}
     </div>
   );
@@ -77,9 +78,9 @@ function ThemeSwitcher() {
       }}
     >
       {selectedTheme.is_dark ? (
-        <Trans message="Dark mode" />
-      ) : (
         <Trans message="Light mode" />
+      ) : (
+        <Trans message="Dark mode" />
       )}
     </Button>
   );

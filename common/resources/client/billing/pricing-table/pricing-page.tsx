@@ -5,19 +5,19 @@ import {ForumIcon} from '../../icons/material/Forum';
 import {Navbar} from '../../ui/navigation/navbar/navbar';
 import {Link} from 'react-router-dom';
 import {Footer} from '../../ui/footer/footer';
-import {useState} from 'react';
+import {Fragment, useState} from 'react';
 import {UpsellBillingCycle} from './find-best-price';
 import {BillingCycleRadio} from './billing-cycle-radio';
 import {StaticPageTitle} from '../../seo/static-page-title';
 import {PricingTable} from '@common/billing/pricing-table/pricing-table';
 
 export function PricingPage() {
-  const query = useProducts();
+  const query = useProducts('pricingPage');
   const [selectedCycle, setSelectedCycle] =
     useState<UpsellBillingCycle>('yearly');
 
   return (
-    <div className="flex flex-col h-full overflow-auto">
+    <Fragment>
       <StaticPageTitle>
         <Trans message="Pricing" />
       </StaticPageTitle>
@@ -25,11 +25,10 @@ export function PricingPage() {
         color="bg"
         darkModeColor="transparent"
         border="border-b"
-        className="flex-shrink-0"
         menuPosition="pricing-table-page"
       />
-      <div className="container mx-auto px-24 flex-auto">
-        <h1 className="text-3xl md:text-4xl text-center mt-30 md:mt-60 mb-30 font-normal md:font-medium">
+      <div className="container mx-auto px-24">
+        <h1 className="mb-30 mt-30 text-center text-3xl font-normal md:mt-60 md:text-4xl md:font-medium">
           <Trans message="Choose the right plan for you" />
         </h1>
 
@@ -37,26 +36,29 @@ export function PricingPage() {
           products={query.data?.products}
           selectedCycle={selectedCycle}
           onChange={setSelectedCycle}
-          className="mb-40 md:mb-70 flex justify-center"
+          className="mb-40 flex justify-center md:mb-70"
           size="lg"
         />
 
-        <PricingTable selectedCycle={selectedCycle} />
+        <PricingTable
+          selectedCycle={selectedCycle}
+          productLoader="pricingPage"
+        />
         <ContactSection />
       </div>
-      <Footer className="container mx-auto px-24 flex-shrink-0" />
-    </div>
+      <Footer className="container mx-auto flex-shrink-0 px-24" />
+    </Fragment>
   );
 }
 
 function ContactSection() {
   return (
-    <div className="p-24 text-center my-20 md:my-80">
+    <div className="my-20 p-24 text-center md:my-80">
       <ForumIcon size="xl" className="text-muted" />
-      <div className="md:text-lg my-8">
+      <div className="my-8 md:text-lg">
         <Trans message="Do you have any questions about PRO accounts?" />
       </div>
-      <div className="mb-24 text-sm md:text-base mt-20 md:mt-0">
+      <div className="mb-24 mt-20 text-sm md:mt-0 md:text-base">
         <Trans message="Our support team will be happy to assist you." />
       </div>
       <Button variant="flat" color="primary" elementType={Link} to="/contact">

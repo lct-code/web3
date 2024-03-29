@@ -16,12 +16,12 @@ interface Response extends BackendResponse {
 
 export function useRadioRecommendations() {
   const {seedType, seedId} = useParams();
-  return useQuery(
-    ['radio', seedType, +seedId!],
-    () => fetchRecommendations(seedType!, seedId!),
+  return useQuery({
+    queryKey: ['radio', seedType, +seedId!],
+    queryFn: () => fetchRecommendations(seedType!, seedId!),
     // different suggestions are returned every time, don't reload in background
-    {staleTime: Infinity}
-  );
+    staleTime: Infinity,
+  });
 }
 
 function fetchRecommendations(seedType: string, seedId: string | number) {

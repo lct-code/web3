@@ -11,8 +11,12 @@ export function loadFonts(
   options: {
     prefixSrc?: (src?: string) => string;
     id: string;
-  }
+    forceAssetLoad?: boolean;
+    document?: Document;
+    weights?: number[];
+  },
 ): Promise<FontFace[]> {
+  const doc = options.document || document;
   const googleFonts: FontConfig[] = [];
   const customFonts: FontFaceConfig[] = [];
 
@@ -28,17 +32,25 @@ export function loadFonts(
   });
 
   if (googleFonts?.length) {
-    const families = fonts.map(f => `${f.family}:400`).join('|');
+    const weights = options.weights || [400];
+    const families = fonts
+      .map(f => `${f.family}:${weights.join(',')}`)
+      .join('|');
     const googlePromise = lazyLoader.loadAsset(
       `https://fonts.googleapis.com/css?family=${families}&display=swap`,
-      {type: 'css', id: prefixId(options.id)}
+      {
+        type: 'css',
+        id: prefixId(options.id),
+        force: options.forceAssetLoad,
+        document: doc,
+      },
     );
     promises.push(googlePromise);
   }
 
   if (customFonts?.length) {
     const customFontPromises = customFonts.map(async fontConfig => {
-      const loadedFont = Array.from(document.fonts.values()).find(current => {
+      const loadedFont = Array.from(doc.fonts.values()).find(current => {
         return current.family === fontConfig.family;
       });
       if (loadedFont) {
@@ -51,9 +63,9 @@ export function loadFonts(
             ? options.prefixSrc(fontConfig.src)
             : fontConfig.src
         })`,
-        fontConfig.descriptors
+        fontConfig.descriptors,
       );
-      document.fonts.add(fontFace);
+      doc.fonts.add(fontFace);
       return fontFace.load();
     });
     promises = promises.concat(customFontPromises);

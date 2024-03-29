@@ -54,8 +54,8 @@ export function DenyBackstageRequestDialog({request}: Props) {
             name="notes"
             placeholder={trans(
               message(
-                'Add any extra notes that should be sent to use via notification email'
-              )
+                'Add any extra notes that should be sent to use via notification email',
+              ),
             )}
             inputElementType="textarea"
             rows={6}
@@ -71,7 +71,7 @@ export function DenyBackstageRequestDialog({request}: Props) {
           color="danger"
           type="submit"
           form={formId}
-          disabled={denyRequest.isLoading}
+          disabled={denyRequest.isPending}
         >
           <Trans message="Deny" />
         </Button>

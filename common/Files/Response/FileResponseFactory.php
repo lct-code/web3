@@ -9,7 +9,7 @@ class FileResponseFactory
 {
     public function create(
         FileEntry $entry,
-        string $disposition = 'inline'
+        string $disposition = 'inline',
     ): mixed {
         $options = [
             'useThumbnail' => Request::get('thumbnail') && $entry->thumbnail,
@@ -24,7 +24,7 @@ class FileResponseFactory
 
     private function resolveResponseClass(
         FileEntry $entry,
-        string $disposition = 'inline'
+        string $disposition = 'inline',
     ): FileResponse {
         $isLocalDrive =
             $entry->getDisk()->getAdapter() instanceof LocalFilesystemAdapter;
@@ -36,7 +36,10 @@ class FileResponseFactory
             return $staticFileDelivery === 'xsendfile'
                 ? new XSendFileResponse()
                 : new XAccelRedirectFileResponse();
-        } elseif (config('common.site.use_presigned_s3_urls')) {
+        } elseif (
+            !$isLocalDrive &&
+            config('common.site.use_presigned_s3_urls')
+        ) {
             return new StreamedFileResponse();
         } elseif (
             $disposition === 'inline' &&
@@ -63,6 +66,9 @@ class FileResponseFactory
             config('common.site.remote_file_visibility') === 'public' && $isS3;
         $shouldUsePresignedUrl =
             config('common.site.use_presigned_s3_urls') && $isS3;
-        return $shouldUsePresignedUrl || $shouldUsePublicUrl;
+        $hasCustomCdnUrl = config('common.site.file_preview_endpoint');
+        return $shouldUsePresignedUrl ||
+            $shouldUsePublicUrl ||
+            $hasCustomCdnUrl;
     }
 }

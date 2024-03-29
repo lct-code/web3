@@ -43,28 +43,36 @@ export function CommentDatatableItem({comment, isSelected, onToggle}: Props) {
               onClose={isSaved => {
                 setIsEditing(false);
                 if (isSaved) {
-                  queryClient.invalidateQueries(['comment']);
+                  queryClient.invalidateQueries({queryKey: ['comment']});
                 }
               }}
             />
           ) : (
             <Fragment>
               <div className="text-sm my-14">{comment.content}</div>
-              <div>
-                {comment.deleted ? (
-                  <RestoreCommentsButton commentIds={[comment.id]} />
-                ) : (
-                  <DeleteCommentsButton commentIds={[comment.id]} />
-                )}
-                <Button
-                  variant="outline"
-                  size="xs"
-                  onClick={() => {
-                    setIsEditing(true);
-                  }}
-                >
-                  <Trans message="Edit" />
-                </Button>
+              <div className="flex items-center gap-24 justify-between">
+                <div>
+                  {comment.deleted ? (
+                    <RestoreCommentsButton commentIds={[comment.id]} />
+                  ) : (
+                    <DeleteCommentsButton commentIds={[comment.id]} />
+                  )}
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    onClick={() => {
+                      setIsEditing(true);
+                    }}
+                  >
+                    <Trans message="Edit" />
+                  </Button>
+                </div>
+                <div className="text-xs text-danger">
+                  <Trans
+                    message="Reported [one 1 time|other :count times]"
+                    values={{count: comment.reports_count}}
+                  />
+                </div>
               </div>
             </Fragment>
           )}
@@ -139,7 +147,7 @@ function EditCommentForm({comment, onClose}: EditCommentFormProps) {
         e.preventDefault();
         updateComment.mutate(
           {commentId: comment.id, content},
-          {onSuccess: () => onClose(true)}
+          {onSuccess: () => onClose(true)},
         );
       }}
     >
@@ -157,7 +165,7 @@ function EditCommentForm({comment, onClose}: EditCommentFormProps) {
         color="primary"
         type="submit"
         className="mr-6"
-        disabled={updateComment.isLoading}
+        disabled={updateComment.isPending}
       >
         <Trans message="Save edit" />
       </Button>
@@ -166,7 +174,7 @@ function EditCommentForm({comment, onClose}: EditCommentFormProps) {
         variant="outline"
         className="mr-6"
         onClick={e => onClose(false)}
-        disabled={updateComment.isLoading}
+        disabled={updateComment.isPending}
       >
         <Trans message="Cancel" />
       </Button>

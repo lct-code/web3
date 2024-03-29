@@ -1,19 +1,22 @@
 import React, {MutableRefObject, ReactElement, ReactNode} from 'react';
 import {
+  OffsetOptions,
   Placement,
   ReferenceType,
   UseFloatingReturn,
   VirtualElement,
 } from '@floating-ui/react-dom';
-import {ListboxCollection} from './build-listbox-collection';
-import {Options as OffsetOptions} from '@floating-ui/core/src/middleware/offset';
+import {
+  buildListboxCollection,
+  ListboxCollection,
+} from './build-listbox-collection';
 import {ListboxItemProps} from './item';
 
 export type PrimitiveValue = string | number;
 type SingleSelectionProps = {
   selectionMode?: 'single';
   onSelectionChange?: (value: PrimitiveValue) => void;
-  selectedValue?: PrimitiveValue;
+  selectedValue?: PrimitiveValue | null;
   defaultSelectedValue?: PrimitiveValue;
 };
 type MultipleSelectionProps = {
@@ -39,6 +42,7 @@ export type ListboxProps = SelectionProps & {
   role?: 'listbox' | 'menu';
   virtualFocus?: boolean;
   loopFocus?: boolean;
+  autoFocusFirstItem?: boolean;
   autoUpdatePosition?: boolean;
   floatingWidth?: 'auto' | 'matchTrigger';
   floatingMinWidth?: string;
@@ -50,11 +54,13 @@ export type ListboxProps = SelectionProps & {
   allowEmptySelection?: boolean;
   // fired whenever user selects an item (via click or keyboard), regardless of current selection mode
   onItemSelected?: (value: PrimitiveValue) => void;
+  clearSelectionOnInputClear?: boolean;
   clearInputOnItemSelection?: boolean;
   blurReferenceOnItemSelection?: boolean;
   inputValue?: string;
   defaultInputValue?: string;
   onInputValueChange?: (value: string) => void;
+  allowCustomValue?: boolean; // for combobox
   isLoading?: boolean;
   showEmptyMessage?: boolean;
   showCheckmark?: boolean;
@@ -68,15 +74,18 @@ export interface UseListboxReturn {
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   focusItem: (
     fallbackOperation: 'increment' | 'decrement',
-    newIndex: number
+    newIndex: number,
   ) => void;
 
+  allowCustomValue: ListboxProps['allowCustomValue']; // for combobox
   loopFocus: ListboxProps['loopFocus'];
   floatingWidth: ListboxProps['floatingWidth'];
   floatingMinWidth: ListboxProps['floatingMinWidth'];
   floatingMaxHeight: ListboxProps['floatingMaxHeight'];
   showCheckmark: ListboxProps['showCheckmark'];
+  // active collection, either filtered or all provided items
   collection: ListboxCollection;
+  collections: ReturnType<typeof buildListboxCollection>;
   virtualFocus: ListboxProps['virtualFocus'];
   showEmptyMessage: ListboxProps['showEmptyMessage'];
   refs: {
@@ -84,7 +93,7 @@ export interface UseListboxReturn {
     floating: React.MutableRefObject<HTMLElement | null>;
   };
   reference: (instance: ReferenceType | null) => void;
-  floating: UseFloatingReturn['floating'];
+  floating: UseFloatingReturn['refs']['setFloating'];
   listboxId: string;
   role: ListboxProps['role'];
   listContent: (string | null)[];

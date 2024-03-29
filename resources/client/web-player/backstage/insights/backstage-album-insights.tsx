@@ -13,7 +13,7 @@ interface Props {
 }
 export function BackstageAlbumInsights({isNested}: Props) {
   const {albumId} = useParams();
-  const {data} = useAlbum({});
+  const {data} = useAlbum({loader: 'album'});
   return (
     <BackstageInsightsLayout
       reportModel={`album=${albumId}`}

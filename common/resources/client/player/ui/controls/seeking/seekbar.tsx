@@ -9,8 +9,14 @@ interface Props {
   trackColor?: UseSliderProps['trackColor'];
   fillColor?: UseSliderProps['fillColor'];
   className?: string;
+  onPointerMove?: UseSliderProps['onPointerMove'];
 }
-export function Seekbar({trackColor, fillColor, className}: Props) {
+export function Seekbar({
+  trackColor,
+  fillColor,
+  className,
+  onPointerMove,
+}: Props) {
   const {pause, seek, setIsSeeking, play, getState} = usePlayerActions();
   const duration = usePlayerStore(s => s.mediaDuration);
   const playerReady = usePlayerStore(s => s.providerReady);
@@ -32,6 +38,7 @@ export function Seekbar({trackColor, fillColor, className}: Props) {
       value={currentTime}
       minValue={0}
       maxValue={duration}
+      onPointerMove={onPointerMove}
       onPointerDown={() => {
         setIsSeeking(true);
         if (pauseWhileSeeking) {

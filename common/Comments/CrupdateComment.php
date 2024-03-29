@@ -2,23 +2,19 @@
 
 namespace Common\Comments;
 
-use App\User;
+use App\Models\User;
 use Auth;
 use Common\Comments\Notifications\CommentReceivedReply;
 use Illuminate\Support\Arr;
 
 class CrupdateComment
 {
-    public function __construct(protected Comment $comment)
-    {
-    }
-
     public function execute(
         array $data,
         Comment $initialComment = null,
     ): Comment {
         if (!$initialComment) {
-            $comment = $this->comment->newInstance([
+            $comment = new Comment([
                 'user_id' => Auth::id(),
             ]);
         } else {
@@ -36,9 +32,7 @@ class CrupdateComment
 
         if (isset($attributes['commentable_type'])) {
             // track => App\Track
-            $attributes['commentable_type'] = modelTypeToNamespace(
-                $data['commentable_type'],
-            );
+            $attributes['commentable_type'] = $data['commentable_type'];
         }
         $comment->fill($attributes)->save();
 

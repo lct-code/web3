@@ -97,7 +97,8 @@ export function ArtistAlbumsTable({albums = []}: Props) {
             className="ml-auto"
             startIcon={<AddIcon />}
             elementType={artistId ? Link : undefined}
-            to={`/admin/albums/new?artistId=${artistId}`}
+            to={`../../../albums/new?artistId=${artistId}`}
+            relative="path"
             disabled={!artistId}
           >
             <Trans message="Add album" />
@@ -155,7 +156,7 @@ function RowActions({album}: RowActionsProps) {
           }
         }}
       >
-        <IconButton size="md" disabled={deleteAlbum.isLoading}>
+        <IconButton size="md" disabled={deleteAlbum.isPending}>
           <CloseIcon />
         </IconButton>
         <ConfirmationDialog

@@ -1,6 +1,6 @@
 <?php namespace Common\Files\Actions;
 
-use App\User;
+use App\Models\User;
 use Common\Billing\Models\Product;
 use Common\Settings\Settings;
 use Illuminate\Support\Facades\Auth;

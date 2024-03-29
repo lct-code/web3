@@ -28,7 +28,7 @@ import {FocusScope} from '@react-aria/focus';
 import {ChipList} from '@common/ui/forms/input-field/chip-field/chip-list';
 import {Chip} from '@common/ui/forms/input-field/chip-field/chip';
 import {Link} from 'react-router-dom';
-import {TruncatedDescription} from '@app/web-player/tracks/truncated-description';
+import {TruncatedDescription} from '@common/ui/truncated-description';
 import {CommentBarContextProvider} from '@app/web-player/tracks/waveform/comment-bar-context';
 import {CommentBarNewCommentForm} from '@app/web-player/tracks/waveform/comment-bar-new-comment-form';
 import {AdHost} from '@common/admin/ads/ad-host';
@@ -37,15 +37,12 @@ import {useCommentPermissions} from '@app/web-player/tracks/hooks/use-comment-pe
 export function AlbumPage() {
   const {canView: showComments, canCreate: allowCommenting} =
     useCommentPermissions();
-  const query = useAlbum({
-    autoUpdate: true,
-    defaultRelations: true,
-  });
+  const query = useAlbum({loader: 'albumPage'});
   const {canEdit} = useAlbumPermissions(query.data?.album);
 
   if (query.data) {
     return (
-      <Fragment>
+      <div>
         <CommentBarContextProvider>
           <PageMetaTags query={query} />
           <AdHost slot="general_top" className="mb-44" />
@@ -70,7 +67,7 @@ export function AlbumPage() {
         ) : null}
         <TruncatedDescription
           description={query.data.album.description}
-          className="text-sm mt-24"
+          className="mt-24 text-sm"
         />
         <AdHost slot="album_above" className="mt-34" />
         <AlbumTrackTable album={query.data.album} />
@@ -82,11 +79,17 @@ export function AlbumPage() {
           />
         )}
         <AdHost slot="general_bottom" className="mt-44" />
-      </Fragment>
+      </div>
     );
   }
 
-  return <PageStatus query={query} loaderClassName="absolute inset-0 m-auto" />;
+  return (
+    <PageStatus
+      query={query}
+      loaderClassName="absolute inset-0 m-auto"
+      loaderIsScreen={false}
+    />
+  );
 }
 
 interface AlbumTrackTableProps {
@@ -94,7 +97,7 @@ interface AlbumTrackTableProps {
 }
 function AlbumTrackTable({album}: AlbumTrackTableProps) {
   const {data, sortDescriptor, onSortChange} = useSortableTableData(
-    album.tracks
+    album.tracks,
   );
   return (
     <div className="mt-44">
@@ -127,7 +130,7 @@ interface PlaylistPageHeaderProps {
 function AlbumPageHeader({album}: PlaylistPageHeaderProps) {
   const totalDuration = album.tracks?.reduce(
     (t, track) => t + (track.duration || 0),
-    0
+    0,
   );
 
   return (

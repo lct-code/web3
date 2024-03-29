@@ -19,10 +19,11 @@ const Endpoint = 'roles';
 
 export function useCreateRole(form: UseFormReturn<CreateRolePayload>) {
   const {trans} = useTrans();
-  return useMutation((payload: CreateRolePayload) => createRole(payload), {
+  return useMutation({
+    mutationFn: (payload: CreateRolePayload) => createRole(payload),
     onSuccess: () => {
       toast(trans(message('Created new role')));
-      queryClient.invalidateQueries(DatatableDataQueryKey('roles'));
+      queryClient.invalidateQueries({queryKey: DatatableDataQueryKey('roles')});
     },
     onError: r => onFormQueryError(r, form),
   });

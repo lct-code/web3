@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Grammar;
 use Illuminate\Database\Query\Expression;
 
 class TrendDateExpression extends Expression
@@ -18,7 +19,7 @@ class TrendDateExpression extends Expression
     ) {
     }
 
-    public function getValue(): string
+    public function getValue(Grammar $grammar): string
     {
         // dates in database are stored in UTC, and date_format will not return hour in many cases, so we need
         // to convert date_format result to specified timezone in mysql because it can use the full timestamp

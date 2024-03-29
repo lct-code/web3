@@ -20,8 +20,8 @@ interface Options {
 type FormattedDatasetLabels = Omit<FormattedDatasetItem, 'value'>;
 
 export function formatReportData(
-  report: ReportMetric | undefined,
-  {localeCode = 'en', shareFirstDatasetLabels = true}: Options
+  report: ReportMetric<DatasetItem> | undefined,
+  {localeCode = 'en', shareFirstDatasetLabels = true}: Options,
 ): FormattedReportData {
   if (!report) return {datasets: []};
 
@@ -38,7 +38,7 @@ export function formatReportData(
           label = generateDatasetLabels(
             datasetItem,
             report.granularity,
-            localeCode
+            localeCode,
           );
           firstDatasetLabels[itemIndex] = label;
         } else {
@@ -58,9 +58,9 @@ export function formatReportData(
 function generateDatasetLabels<T extends ChartType = ChartType>(
   datum: DatasetItem,
   granularity: RangedDatasetGranularity | undefined,
-  locale: string
+  locale: string,
 ): FormattedDatasetLabels {
-  if (datum.label != null) {
+  if (datum.label) {
     return {label: datum.label};
   }
 
@@ -72,11 +72,11 @@ function generateDatasetLabels<T extends ChartType = ChartType>(
 }
 
 function generateTimeLabels(
-  {date: isoDate, endDate: isoEndDate, value}: DatasetItem,
+  {date: isoDate, endDate: isoEndDate}: DatasetItem,
   granularity: RangedDatasetGranularity | undefined = 'day',
-  locale: string
+  locale: string,
 ): Omit<FormattedDatasetItem, 'value'> {
-  const date = parseAbsoluteToLocal(isoDate).toDate();
+  const date = parseAbsoluteToLocal(isoDate!).toDate();
   const endDate = isoEndDate ? parseAbsoluteToLocal(isoEndDate).toDate() : null;
 
   switch (granularity) {
@@ -161,5 +161,5 @@ const getFormatter = memoize(
       return shallowEqual(a, b);
     },
     callTimeout: undefined as any,
-  }
+  },
 );

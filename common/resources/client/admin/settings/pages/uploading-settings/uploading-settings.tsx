@@ -380,7 +380,7 @@ function S3DirectUploadField({invalid}: S3DirectUploadFieldProps) {
         onClick={() => {
           uploadCors.mutate();
         }}
-        disabled={!s3DriverEnabled || uploadCors.isLoading}
+        disabled={!s3DriverEnabled || uploadCors.isPending}
       >
         <Trans message="Configure CORS" />
       </Button>

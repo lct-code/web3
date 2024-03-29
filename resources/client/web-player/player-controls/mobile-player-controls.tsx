@@ -177,14 +177,13 @@ function AccountButton() {
   }, [primaryArtist, navigate, player?.show_become_artist_btn]);
 
   const button = (
-    <button className="text-xs">
-      <Badge
-        badgeClassName="mb-6"
-        badgeLabel={user?.unread_notifications_count}
-        badgeIsVisible={hasUnreadNotif}
-      >
-        <PersonIcon size="md" />
-      </Badge>
+    <button className="text-xs relative">
+      <PersonIcon size="md" />
+      {hasUnreadNotif ? (
+        <Badge className="-top-6" right="right-4">
+          {user?.unread_notifications_count}
+        </Badge>
+      ) : null}
       <div className="text-xs">
         <Trans message="Account" />
       </div>

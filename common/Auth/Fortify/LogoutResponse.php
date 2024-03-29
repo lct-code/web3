@@ -14,6 +14,8 @@ class LogoutResponse implements LogoutResponseContract
             ->init()
             ->getEncoded();
 
+        session()->forget('impersonator_id');
+
         return response()->json([
             'bootstrapData' => $data,
             'status' => 'success',

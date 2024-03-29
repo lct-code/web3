@@ -1,13 +1,15 @@
 import {useFormContext} from 'react-hook-form';
-import {SettingsPanel} from '../settings-panel';
-import {FormSwitch} from '../../../ui/forms/toggle/switch';
-import {AdminSettings} from '../admin-settings';
-import {FormTextField} from '../../../ui/forms/input-field/text-field/text-field';
-import {SettingsErrorGroup} from '../settings-error-group';
-import {Trans} from '../../../i18n/trans';
+import {SettingsPanel} from '@common/admin/settings/settings-panel';
+import {FormSwitch} from '@common/ui/forms/toggle/switch';
+import {AdminSettings} from '@common/admin/settings/admin-settings';
+import {FormTextField} from '@common/ui/forms/input-field/text-field/text-field';
+import {SettingsErrorGroup} from '@common/admin/settings/settings-error-group';
+import {Trans} from '@common/i18n/trans';
 import {Fragment} from 'react';
 import {Link} from 'react-router-dom';
-import {useSettings} from '../../../core/settings/use-settings';
+import {useSettings} from '@common/core/settings/use-settings';
+import {SettingsSeparator} from '@common/admin/settings/settings-separator';
+import {Button} from '@common/ui/buttons/button';
 
 export function AuthenticationSettings() {
   return (
@@ -19,7 +21,7 @@ export function AuthenticationSettings() {
     >
       <EmailConfirmationSection />
       <FormSwitch
-        className="mb-30"
+        className="mb-24"
         name="client.registration.disable"
         description={
           <Trans message="All registration related functionality (including social login) will be disabled." />
@@ -28,6 +30,7 @@ export function AuthenticationSettings() {
         <Trans message="Disable registration" />
       </FormSwitch>
       <FormSwitch
+        className="mb-24"
         name="client.single_device_login"
         description={
           <Trans message="Only allow one device to be logged into user account at the same time." />
@@ -35,18 +38,62 @@ export function AuthenticationSettings() {
       >
         <Trans message="Single device login" />
       </FormSwitch>
+      <FormSwitch
+        name="client.social.compact_buttons"
+        description={
+          <Trans message="Use compact design for social login buttons." />
+        }
+      >
+        <Trans message="Compact buttons" />
+      </FormSwitch>
       <EnvatoSection />
       <GoogleSection />
       <FacebookSection />
       <TwitterSection />
+      <SettingsSeparator />
+      <FormTextField
+        inputElementType="textarea"
+        rows={3}
+        className="mt-24"
+        name="client.auth.domain_blacklist"
+        label={<Trans message="Domain blacklist" />}
+        description={
+          <Trans message="Comma separated list of domains. Users will not be able to register or login using any email adress from specified domains." />
+        }
+      />
     </SettingsPanel>
   );
 }
 
-function EmailConfirmationSection() {
+export function MailNotSetupWarning() {
   const {watch} = useFormContext<AdminSettings>();
   const mailSetup = watch('server.mail_setup');
+  if (mailSetup) return null;
 
+  return (
+    <p className="mt-10 rounded-panel border p-10 text-sm text-danger">
+      <Trans
+        message="Outgoing mail method needs to be setup before enabling this setting. <a>Fix now</a>"
+        values={{
+          a: text => (
+            <Button
+              elementType={Link}
+              variant="outline"
+              size="xs"
+              display="flex"
+              className="mt-10 max-w-max"
+              to="/admin/settings/outgoing-email"
+            >
+              {text}
+            </Button>
+          ),
+        }}
+      />
+    </p>
+  );
+}
+
+function EmailConfirmationSection() {
   return (
     <FormSwitch
       className="mb-30"
@@ -54,23 +101,7 @@ function EmailConfirmationSection() {
       description={
         <Fragment>
           <Trans message="Require newly registered users to validate their email address before being able to login." />
-          {!mailSetup && (
-            <p className="mt-10 text-danger">
-              <Trans
-                message="Outgoing mail method needs to be setup before enabling this setting. <a>Fix now</a>"
-                values={{
-                  a: text => (
-                    <Link
-                      className="font-bold block underline"
-                      to="/admin/settings/mail#outgoing-emails"
-                    >
-                      {text}
-                    </Link>
-                  ),
-                }}
-              />
-            </p>
-          )}
+          <MailNotSetupWarning />
         </Fragment>
       }
     >
@@ -81,10 +112,10 @@ function EmailConfirmationSection() {
 
 function EnvatoSection() {
   const {watch} = useFormContext<AdminSettings>();
-  const {envato} = useSettings();
+  const settings = useSettings();
   const envatoLoginEnabled = watch('client.social.envato.enable');
 
-  if (!envato?.enable) return null;
+  if (!(settings as any).envato?.enable) return null;
 
   return (
     <SettingsErrorGroup separatorBottom={false} name="envato_group">
@@ -99,7 +130,7 @@ function EnvatoSection() {
           >
             <Trans message="Envato login" />
           </FormSwitch>
-          {envatoLoginEnabled && (
+          {!!envatoLoginEnabled && (
             <>
               <FormTextField
                 invalid={isInvalid}
@@ -147,7 +178,7 @@ function GoogleSection() {
           >
             <Trans message="Google login" />
           </FormSwitch>
-          {googleLoginEnabled && (
+          {!!googleLoginEnabled && (
             <>
               <FormTextField
                 invalid={isInvalid}
@@ -187,7 +218,7 @@ function FacebookSection() {
           >
             <Trans message="Facebook login" />
           </FormSwitch>
-          {facebookLoginEnabled && (
+          {!!facebookLoginEnabled && (
             <>
               <FormTextField
                 invalid={isInvalid}
@@ -232,7 +263,7 @@ function TwitterSection() {
           >
             <Trans message="Twitter login" />
           </FormSwitch>
-          {twitterLoginEnabled && (
+          {!!twitterLoginEnabled && (
             <>
               <FormTextField
                 invalid={isInvalid}

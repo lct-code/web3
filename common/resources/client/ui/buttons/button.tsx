@@ -6,6 +6,7 @@ import {IconSize} from '../../icons/svg-icon';
 
 export interface ButtonProps extends ButtonBaseProps {
   size?: ButtonSize;
+  sizeClassName?: string;
   equalWidth?: boolean;
   startIcon?: ReactElement | null | false;
   endIcon?: ReactElement | null | false;
@@ -17,18 +18,24 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       startIcon,
       endIcon,
       size = 'sm',
+      sizeClassName,
       className,
       equalWidth = false,
-      radius = 'rounded',
+      radius = 'rounded-button',
       variant = 'text',
+      disabled,
+      elementType,
+      to,
+      href,
+      download,
       ...other
     },
-    ref
+    ref,
   ) => {
     const mergedClassName = clsx(
       'font-semibold',
-      getButtonSizeStyle(size, {equalWidth, variant}),
-      className
+      sizeClassName || getButtonSizeStyle(size, {equalWidth, variant}),
+      className,
     );
     return (
       <ButtonBase
@@ -36,6 +43,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         radius={radius}
         variant={variant}
+        disabled={disabled}
+        to={disabled ? undefined : to}
+        href={disabled ? undefined : href}
+        download={disabled ? undefined : download}
+        elementType={disabled ? undefined : elementType}
         {...other}
       >
         {startIcon && (
@@ -45,7 +57,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {endIcon && <InlineIcon position="end" icon={endIcon} size={size} />}
       </ButtonBase>
     );
-  }
+  },
 );
 
 type InlineIconProps = {
@@ -60,7 +72,7 @@ function InlineIcon({icon, position, size}: InlineIconProps): ReactElement {
       '-ml-4 mr-8': position === 'start',
       '-mr-4 ml-8': position === 'end',
     },
-    icon.props.className
+    icon.props.className,
   );
   return React.cloneElement(icon, {className, size});
 }

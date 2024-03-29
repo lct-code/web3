@@ -12,17 +12,19 @@ interface Props<T extends TableDataItem> extends DataTableProps<T> {
   headerItemsAlign?: string;
   enableSelection?: boolean;
   onRowAction?: TableProps<T>['onAction'];
+  className?: string;
 }
 export function DataTablePage<T extends TableDataItem>({
   title,
   headerContent,
   headerItemsAlign = 'items-end',
+  className,
   ...dataTableProps
 }: Props<T>) {
   const titleId = useId();
 
   return (
-    <div className="p-12 md:p-24">
+    <div className={clsx('p-12 md:p-24', className)}>
       {title && (
         <div
           className={clsx(
@@ -31,7 +33,7 @@ export function DataTablePage<T extends TableDataItem>({
           )}
         >
           <StaticPageTitle>{title}</StaticPageTitle>
-          <h1 className="text-3xl font-light" id={titleId}>
+          <h1 className="text-3xl font-light first:capitalize" id={titleId}>
             {title}
           </h1>
           {headerContent}

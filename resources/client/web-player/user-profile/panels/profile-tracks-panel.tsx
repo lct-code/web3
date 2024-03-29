@@ -10,8 +10,8 @@ import {TrackList} from '@app/web-player/tracks/track-list/track-list';
 export function ProfileTracksPanel({user}: ProfileContentProps) {
   const query = useUserLikedTracks(user.id);
 
-  if (query.isInitialLoading) {
-    return <FullPageLoader className="min-h-100" />;
+  if (query.isLoading) {
+    return <FullPageLoader className="min-h-100" screen={false} />;
   }
 
   if (!query.items.length) {

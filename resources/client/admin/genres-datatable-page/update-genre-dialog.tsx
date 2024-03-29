@@ -58,7 +58,7 @@ export function UpdateGenreDialog({genre}: Props) {
               onClick={() =>
                 importArtists.mutate({genre}, {onSuccess: () => close()})
               }
-              disabled={importArtists.isLoading}
+              disabled={importArtists.isPending}
             >
               <Trans message="Import artists" />
             </Button>
@@ -70,7 +70,7 @@ export function UpdateGenreDialog({genre}: Props) {
         </Button>
         <Button
           form={formId}
-          disabled={updateGenre.isLoading}
+          disabled={updateGenre.isPending}
           variant="flat"
           color="primary"
           type="submit"

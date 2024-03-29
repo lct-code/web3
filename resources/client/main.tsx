@@ -1,50 +1,30 @@
 import './app.css';
 import React from 'react';
-import {BrowserRouter, Route, Routes} from 'react-router-dom';
-import {createRoot} from 'react-dom/client';
-import {AppearanceListener} from '@common/admin/appearance/commands/appearance-listener';
+import {BrowserRouter} from 'react-router-dom';
+import {createRoot, hydrateRoot} from 'react-dom/client';
 import {CommonProvider} from '@common/core/common-provider';
-import {AuthRoutes} from '@common/auth/auth-routes';
-import {AuthRoute} from '@common/auth/guards/auth-route';
-import {FullPageLoader} from '@common/ui/progress/full-page-loader';
-import {BillingRoutes} from '@common/billing/billing-routes';
-import {NotificationRoutes} from '@common/notifications/notification-routes';
-import {CookieNotice} from '@common/ui/cookie-notice/cookie-notice';
-import {ContactUsPage} from '@common/contact/contact-us-page';
-import {CustomPageLayout} from '@common/custom-page/custom-page-layout';
-import {ToastContainer} from '@common/ui/toast/toast-container';
-import {useAuth} from '@common/auth/use-auth';
-import {EmailVerificationPage} from '@common/auth/ui/email-verification-page/email-verification-page';
 import * as Sentry from '@sentry/react';
-import {BrowserTracing} from '@sentry/tracing';
 import {rootEl} from '@common/core/root-el';
-import {useSettings} from '@common/core/settings/use-settings';
 import {getBootstrapData} from '@common/core/bootstrap-data/use-backend-bootstrap-data';
-import {NotFoundPage} from '@common/ui/not-found-page/not-found-page';
 import {Playlist} from '@app/web-player/playlists/playlist';
 import {Track, TRACK_MODEL} from '@app/web-player/tracks/track';
 import {ALBUM_MODEL} from '@app/web-player/albums/album';
-import {ARTIST_MODEL} from '@app/web-player/artists/artist';
+import {Artist, ARTIST_MODEL} from '@app/web-player/artists/artist';
 import {Repost} from '@app/web-player/reposts/repost';
 import {UserProfile} from '@app/web-player/user-profile/user-profile';
 import {UserLink} from '@app/web-player/user-profile/user-link';
 import {UserArtist} from '@app/web-player/user-profile/user-artist';
-import {DynamicHomepage} from '@common/ui/dynamic-homepage';
-import {LandingPage} from '@app/landing-page/landing-page';
 import {LandingPageContent} from '@app/landing-page/landing-page-content';
-import {useAppearanceEditorMode} from '@common/admin/appearance/commands/use-appearance-editor-mode';
 import {ignoredSentryErrors} from '@common/errors/ignored-sentry-errors';
-
-const AdminRoutes = React.lazy(() => import('@common/admin/admin-routes'));
-const WebPlayerRoutes = React.lazy(
-  () => import('@app/web-player/web-player-routes')
-);
-const BackstageRoutes = React.lazy(
-  () => import('@app/web-player/backstage/backstage-routes')
-);
-const SwaggerApiDocs = React.lazy(
-  () => import('@common/swagger/swagger-api-docs-page')
-);
+import {FetchCustomPageResponse} from '@common/custom-page/use-custom-page';
+import {AppRoutes} from '@app/app-routes';
+import {UseArtistResponse} from '@app/web-player/artists/requests/use-artist';
+import {GetAlbumResponse} from '@app/web-player/albums/requests/use-album';
+import {getTrackResponse} from '@app/web-player/tracks/requests/use-track';
+import {Product} from '@common/billing/product';
+import {GetPlaylistResponse} from '@app/web-player/playlists/requests/use-playlist';
+import {GetUserProfileResponse} from '@app/web-player/user-profile/requests/use-user-profile';
+import {SearchResponse} from '@app/web-player/search/requests/use-search-results';
 
 declare module '@common/core/settings/settings' {
   interface Settings {
@@ -77,7 +57,7 @@ declare module '@common/core/settings/settings' {
       showDescription?: boolean;
     };
     youtube?: {
-      suggested_quality?: YT.SuggestedVideoQuality;
+      suggested_quality?: string;
       search_method?: string;
     };
     homepage: {
@@ -101,10 +81,6 @@ declare module '@common/core/settings/settings' {
 declare module '@common/auth/user' {
   interface User {
     uploaded_tracks: Track[];
-    followed_users?: this[];
-    followers_count?: number;
-    followed_users_count?: number;
-    followers?: this[];
     playlists: Playlist[];
     reposts?: Repost[];
     profile?: UserProfile;
@@ -115,6 +91,28 @@ declare module '@common/auth/user' {
 
 declare module '@common/core/bootstrap-data/bootstrap-data' {
   interface BootstrapData {
+    loaders?: {
+      artist?: UseArtistResponse;
+      artistPage?: UseArtistResponse;
+      editArtistPage?: UseArtistResponse;
+      album?: GetAlbumResponse;
+      albumEmbed?: GetAlbumResponse;
+      albumPage?: GetAlbumResponse;
+      editAlbumPage?: GetAlbumResponse;
+      track?: getTrackResponse;
+      trackPage?: getTrackResponse;
+      editTrackPage?: getTrackResponse;
+      playlistPage?: GetPlaylistResponse;
+      playlist?: GetPlaylistResponse;
+      userProfilePage?: GetUserProfileResponse;
+      searchPage?: SearchResponse;
+      search?: SearchResponse;
+      customPage?: FetchCustomPageResponse;
+      landingPage?: {
+        products: Product[];
+        trendingArtists: Artist[];
+      };
+    };
     playlists?: Playlist[];
     artists: {
       id: number;
@@ -134,112 +132,28 @@ declare module '@common/core/bootstrap-data/bootstrap-data' {
   }
 }
 
-const sentryDsn = getBootstrapData().settings.logging.sentry_public;
-const version = getBootstrapData().settings.version;
+const data = getBootstrapData();
+const sentryDsn = data.settings.logging.sentry_public;
 if (sentryDsn && import.meta.env.PROD) {
   Sentry.init({
     dsn: sentryDsn,
-    integrations: [new BrowserTracing()],
-    tracesSampleRate: 1.0,
+    integrations: [new Sentry.BrowserTracing()],
+    tracesSampleRate: 0.2,
     ignoreErrors: ignoredSentryErrors,
-    release: version,
+    release: data.sentry_release,
   });
 }
 
-const root = createRoot(rootEl);
-root.render(
-  <CommonProvider>
-    <Router />
-  </CommonProvider>
+const app = (
+  <BrowserRouter basename={data.settings.html_base_uri}>
+    <CommonProvider>
+      <AppRoutes />
+    </CommonProvider>
+  </BrowserRouter>
 );
 
-function Router() {
-  const {
-    billing,
-    notifications,
-    require_email_confirmation,
-    api,
-    html_base_uri,
-    homepage,
-  } = useSettings();
-  const {isAppearanceEditorActive} = useAppearanceEditorMode();
-  const {user, hasPermission} = useAuth();
-
-  if (user != null && require_email_confirmation && !user.email_verified_at) {
-    return (
-      <BrowserRouter>
-        <ToastContainer />
-        <Routes>
-          <Route path="*" element={<EmailVerificationPage />} />
-        </Routes>
-      </BrowserRouter>
-    );
-  }
-
-  return (
-    <BrowserRouter basename={html_base_uri}>
-      <AppearanceListener />
-      <CookieNotice />
-      <ToastContainer />
-      <Routes>
-        <Route
-          path="/*"
-          element={
-            <AuthRoute requireLogin={false} permission="music.view">
-              <React.Suspense fallback={<FullPageLoader />}>
-                <WebPlayerRoutes />
-              </React.Suspense>
-            </AuthRoute>
-          }
-        />
-
-        <Route
-          path="backstage/*"
-          element={
-            <AuthRoute>
-              <React.Suspense fallback={<FullPageLoader />}>
-                <BackstageRoutes />
-              </React.Suspense>
-            </AuthRoute>
-          }
-        />
-        {homepage?.type !== 'channel' &&
-          (user == null || isAppearanceEditorActive) && (
-            <Route
-              path="/"
-              element={
-                <DynamicHomepage homepageResolver={() => <LandingPage />} />
-              }
-            />
-          )}
-        <Route
-          path="/admin/*"
-          element={
-            <AuthRoute permission="admin.access">
-              <React.Suspense fallback={<FullPageLoader />}>
-                <AdminRoutes />
-              </React.Suspense>
-            </AuthRoute>
-          }
-        />
-        {AuthRoutes}
-        {billing.enable && BillingRoutes}
-        {notifications.integrated && NotificationRoutes}
-        {api?.integrated && hasPermission('api.access') && (
-          <Route
-            path="api-docs"
-            element={
-              <React.Suspense fallback={<FullPageLoader />}>
-                <SwaggerApiDocs />
-              </React.Suspense>
-            }
-          />
-        )}
-        <Route path="contact" element={<ContactUsPage />} />
-        <Route path="pages/:pageSlug" element={<CustomPageLayout />} />
-        <Route path="pages/:pageId/:pageSlug" element={<CustomPageLayout />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </BrowserRouter>
-  );
+if (data.rendered_ssr) {
+  hydrateRoot(rootEl, app);
+} else {
+  createRoot(rootEl).render(app);
 }

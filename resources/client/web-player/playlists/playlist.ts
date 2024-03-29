@@ -1,5 +1,5 @@
-import {Track} from '../tracks/track';
 import {User} from '@common/auth/user';
+import {Track} from '@app/web-player/tracks/track';
 
 export const PLAYLIST_MODEL = 'playlist';
 

@@ -17,7 +17,7 @@ export function Adornment({
   return (
     <div
       className={clsx(
-        'absolute h-full min-w-42 flex items-center justify-center top-0 text-muted z-10',
+        'pointer-events-none absolute top-0 z-10 flex h-full min-w-42 items-center justify-center text-muted',
         position,
         className
       )}

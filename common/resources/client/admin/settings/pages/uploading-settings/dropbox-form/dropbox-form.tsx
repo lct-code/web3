@@ -95,7 +95,7 @@ function DropboxRefreshTokenDialog({
                 onSuccess: response => {
                   close(response.refreshToken);
                 },
-              }
+              },
             );
           }}
         >
@@ -134,7 +134,7 @@ function DropboxRefreshTokenDialog({
           color="primary"
           form={formId}
           type="submit"
-          disabled={!appKey || !appSecret || generateRefreshToken.isLoading}
+          disabled={!appKey || !appSecret || generateRefreshToken.isPending}
         >
           <Trans message="Connect" />
         </Button>

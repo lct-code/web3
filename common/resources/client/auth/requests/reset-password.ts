@@ -26,7 +26,8 @@ function reset(payload: ResetPasswordPayload): Promise<Response> {
 
 export function useResetPassword(form: UseFormReturn<ResetPasswordPayload>) {
   const navigate = useNavigate();
-  return useMutation(reset, {
+  return useMutation({
+    mutationFn: reset,
     onSuccess: () => {
       navigate('/login', {replace: true});
       toast(message('Your password has been reset!'));

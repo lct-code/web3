@@ -22,9 +22,9 @@ interface ArtistAlbumsListProps {
 }
 export function ArtistAlbumsList({initialAlbums}: ArtistAlbumsListProps) {
   const query = useArtistAlbums(initialAlbums, 'list');
-  const {isInitialLoading, items} = query;
+  const {isLoading, items} = query;
 
-  if (!isInitialLoading && !items.length) {
+  if (!isLoading && !items.length) {
     return <NoDiscographyMessage />;
   }
 
@@ -32,22 +32,22 @@ export function ArtistAlbumsList({initialAlbums}: ArtistAlbumsListProps) {
     <section>
       {items.map(album => (
         <div key={album.id} className="mb-40">
-          <div className="flex items-center gap-14 mb-20">
+          <div className="mb-20 items-center gap-14 md:flex">
             <AlbumImage
               album={album}
               size="w-110 h-110"
-              className="rounded object-cover flex-shrink-0"
+              className="flex-shrink-0 rounded object-cover"
             />
             <div className="flex-auto">
-              <h4 className="font-semibold text-lg whitespace-nowrap min-w-0 overflow-hidden overflow-ellipsis">
+              <h4 className="min-w-0 overflow-hidden overflow-ellipsis whitespace-nowrap text-lg font-semibold max-md:mt-12">
                 <AlbumLink album={album} />
               </h4>
               {album.release_date && (
-                <div className="text-muted text-sm mt-2 mb-18">
+                <div className="mb-18 mt-2 text-sm text-muted">
                   <FormattedDate date={album.release_date} />
                 </div>
               )}
-              <DialogTrigger type="popover" offset={10}>
+              <DialogTrigger type="popover" mobileType="tray" offset={10}>
                 <Button
                   variant="outline"
                   size="xs"
@@ -73,7 +73,7 @@ interface AlbumTrackTableProps {
 }
 function AlbumTrackTable({album}: AlbumTrackTableProps) {
   const {data, sortDescriptor, onSortChange} = useSortableTableData(
-    album.tracks
+    album.tracks,
   );
   return (
     <TrackTable

@@ -6,7 +6,8 @@ export const enum YoutubeCommand {
   Pause = 'pauseVideo',
   Stop = 'stopVideo',
   Seek = 'seekTo',
-  Load = 'loadVideoById',
+  Cue = 'cueVideoById',
+  CueAndPlay = 'loadVideoById',
   Mute = 'mute',
   Unmute = 'unMute',
   SetVolume = 'setVolume',
@@ -19,7 +20,8 @@ export interface YouTubeCommandArg {
   [YoutubeCommand.Pause]: void;
   [YoutubeCommand.Stop]: void;
   [YoutubeCommand.Seek]: number;
-  [YoutubeCommand.Load]: string;
+  [YoutubeCommand.Cue]: string;
+  [YoutubeCommand.CueAndPlay]: string;
   [YoutubeCommand.Mute]: void;
   [YoutubeCommand.Unmute]: void;
   [YoutubeCommand.SetVolume]: number;
@@ -46,7 +48,9 @@ export interface YoutubeInternalState {
   lastTimeUpdate: number;
   playbackRate: number;
   playbackReady: boolean;
+  buffered: number;
   state: YouTubePlayerState;
+  firedPlaybackEnd: boolean;
 }
 
 export const enum YouTubePlaybackQuality {

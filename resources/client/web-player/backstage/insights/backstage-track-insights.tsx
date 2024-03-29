@@ -13,7 +13,7 @@ interface Props {
 }
 export function BackstageTrackInsights({isNested}: Props) {
   const {trackId} = useParams();
-  const {data} = useTrack({});
+  const {data} = useTrack({loader: 'track'});
   return (
     <BackstageInsightsLayout
       reportModel={`track=${trackId}`}

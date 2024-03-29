@@ -2,8 +2,8 @@
 
 namespace App\Services\Tracks\Queries;
 
-use App\Artist;
-use App\Services\Artists\LoadArtist;
+use App\Models\Artist;
+use App\Services\Artists\SyncArtistWithSpotify;
 use Illuminate\Database\Eloquent\Builder;
 
 class ArtistTrackQuery extends BaseTrackQuery
@@ -12,10 +12,10 @@ class ArtistTrackQuery extends BaseTrackQuery
 
     public function get(int $artistId): Builder
     {
-        $artist = app(Artist::class)->find($artistId);
+        $artist = Artist::find($artistId);
 
         if ($artist && $artist->needsUpdating()) {
-            app(LoadArtist::class)->updateArtistFromExternal($artist);
+            (new SyncArtistWithSpotify())->execute($artist);
         }
 
         return $this->baseQuery()

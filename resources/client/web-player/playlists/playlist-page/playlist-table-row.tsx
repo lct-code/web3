@@ -5,13 +5,13 @@ import React, {Fragment, useContext, useRef} from 'react';
 import {TableContext} from '@common/ui/tables/table-context';
 import {DragPreviewRenderer} from '@common/ui/interactions/dnd/use-draggable';
 import {useReorderPlaylistTracks} from '@app/web-player/playlists/requests/use-reorder-playlist-tracks';
-import {useSortable} from '@common/ui/interactions/dnd/use-sortable';
 import {usePlaylist} from '@app/web-player/playlists/requests/use-playlist';
 import {DialogTrigger} from '@common/ui/overlays/dialog/dialog-trigger';
 import {mergeProps} from '@react-aria/utils';
 import {PlaylistTrackContextDialog} from '@app/web-player/playlists/playlist-page/playlist-track-context-dialog';
 import {Trans} from '@common/i18n/trans';
 import {DragPreview} from '@common/ui/interactions/dnd/drag-preview';
+import {useSortable} from '@common/ui/interactions/dnd/sortable/use-sortable';
 
 export function PlaylistTableRow({
   item,
@@ -29,20 +29,20 @@ export function PlaylistTableRow({
   const domRef = useRef<HTMLTableRowElement>(null);
   const previewRef = useRef<DragPreviewRenderer>(null);
   const reorderTracks = useReorderPlaylistTracks();
-  const {data} = usePlaylist();
+  const {data} = usePlaylist({loader: 'playlistPage'});
 
   const {sortableProps} = useSortable({
     ref: domRef,
     disabled:
       (isTouchDevice ?? false) ||
-      reorderTracks.isLoading ||
+      reorderTracks.isPending ||
       // disable drag and drop if table is sorted via header
       sortDescriptor?.orderBy !== 'position',
     item: item,
     items: tracks,
     type: 'playlistTrack',
     preview: previewRef,
-    previewVariant: 'line',
+    strategy: 'line',
     onDragEnd: () => {
       selectRow(null);
     },
@@ -99,14 +99,14 @@ const RowDragPreview = React.forwardRef<
     selectedRows.length > 1 ? (
       <Trans message=":count tracks" values={{count: selectedRows.length}} />
     ) : (
-      `${track.name} - ${track.artists?.[0].name}`
+      `${track.name} - ${track.artists?.[0]?.name}`
     );
 
   return (
     <DragPreview ref={ref}>
       {() => (
         <div
-          className="p-8 rounded shadow bg-chip text-base"
+          className="rounded bg-chip p-8 text-base shadow"
           role="presentation"
         >
           {content}

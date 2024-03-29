@@ -2,22 +2,25 @@ import axios from 'axios';
 import {useQuery} from '@tanstack/react-query';
 import {memo} from 'react';
 import clsx from 'clsx';
+import {getAssetUrl} from '@common/utils/urls/get-asset-url';
 
 type DangerousHtml = {__html: string} | undefined;
 
 interface Props {
   src: string;
   className?: string;
+  height?: string | false;
 }
-export const SvgImage = memo(({src, className}: Props) => {
+export const SvgImage = memo(({src, className, height = 'h-full'}: Props) => {
   const {data: svgString} = useSvgImageContent(src);
   // render container even if image is not loaded yet, so there's
   // no layout shift if height is provided via className
   return (
     <div
       className={clsx(
-        'inline-block bg-no-repeat h-full svg-image-container',
-        className
+        'svg-image-container inline-block bg-no-repeat',
+        height,
+        className,
       )}
       dangerouslySetInnerHTML={svgString}
     />
@@ -25,7 +28,9 @@ export const SvgImage = memo(({src, className}: Props) => {
 });
 
 function useSvgImageContent(src: string) {
-  return useQuery(['svgImage', src], () => fetchSvgImageContent(src), {
+  return useQuery({
+    queryKey: ['svgImage', getAssetUrl(src)],
+    queryFn: () => fetchSvgImageContent(src),
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,

@@ -1,91 +1,129 @@
 import {isAbsoluteUrl} from '../urls/is-absolute-url';
 
-class LazyLoader {
-  private loadedAssets: Record<string, 'loaded' | Promise<void>> = {};
+interface Options {
+  id?: string;
+  force?: boolean;
+  type?: 'js' | 'css';
+  parentEl?: HTMLElement;
+  document?: Document;
+}
 
-  loadAsset(
-    url: string,
-    params: {
-      id?: string;
-      force?: boolean;
-      type?: 'js' | 'css';
-      parentEl?: HTMLElement;
-    } = {type: 'js'}
-  ): Promise<any> {
+interface LoadAssetOptions {
+  url: string;
+  id: string;
+  resolve: (value?: any | PromiseLike<any>) => void;
+  parentEl?: HTMLElement;
+  document?: Document;
+}
+
+class LazyLoader {
+  private loadedAssets: Record<
+    string,
+    {
+      state: 'loaded' | Promise<void>;
+      doc?: Document;
+    }
+  > = {};
+
+  loadAsset(url: string, params: Options = {type: 'js'}): Promise<any> {
+    const currentState = this.loadedAssets[url]?.state;
+
     // script is already loaded, return resolved promise
-    if (this.loadedAssets[url] === 'loaded' && !params.force) {
+    if (currentState === 'loaded' && !params.force) {
       return new Promise<void>(resolve => resolve());
     }
 
+    const neverLoaded =
+      !currentState || this.loadedAssets[url].doc !== params.document;
     // script has never been loaded before, load it, return promise and resolve on script load event
-    if (
-      !this.loadedAssets[url] ||
-      (params.force && this.loadedAssets[url] === 'loaded')
-    ) {
-      this.loadedAssets[url] = new Promise(resolve => {
-        const finalUrl = isAbsoluteUrl(url) ? url : `assets/${url}`;
-        const finalId = buildId(url, params.id);
+    if (neverLoaded || (params.force && currentState === 'loaded')) {
+      this.loadedAssets[url] = {
+        state: new Promise(resolve => {
+          const finalUrl = isAbsoluteUrl(url) ? url : `assets/${url}`;
+          const finalId = buildId(url, params.id);
 
-        if (params.type === 'css') {
-          this.loadStyleAsset(finalUrl, finalId, resolve);
-        } else {
-          this.loadScriptAsset(finalUrl, finalId, resolve, params.parentEl);
-        }
-      });
-      return this.loadedAssets[url] as Promise<void>;
+          const assetOptions: LoadAssetOptions = {
+            url: finalUrl,
+            id: finalId,
+            resolve,
+            parentEl: params.parentEl,
+            document: params.document,
+          };
+
+          if (params.type === 'css') {
+            this.loadStyleAsset(assetOptions);
+          } else {
+            this.loadScriptAsset(assetOptions);
+          }
+        }),
+        doc: params.document,
+      };
+      return this.loadedAssets[url].state as Promise<void>;
     }
 
     // script is still loading, return existing promise
-    return this.loadedAssets[url] as Promise<void>;
+    return this.loadedAssets[url].state as Promise<void>;
   }
 
   /**
    * Check whether asset is loading or has already loaded.
    */
-  alreadyLoading(url: string): boolean {
+  isLoadingOrLoaded(url: string): boolean {
     return this.loadedAssets[url] != null;
   }
 
-  private loadStyleAsset(
-    url: string,
-    id: string,
-    resolve: (value?: any | PromiseLike<any>) => void
-  ) {
-    const style = document.createElement('link');
+  private loadStyleAsset(options: LoadAssetOptions) {
+    const doc = options.document || document;
+    const parentEl = options.parentEl || doc.head;
+    const style = doc.createElement('link');
+    const prefixedId = buildId(options.url, options.id);
+
     style.rel = 'stylesheet';
-    style.id = buildId(url, id);
-    style.href = url;
+    style.id = prefixedId;
+    style.href = options.url;
+
+    try {
+      if (parentEl.querySelector(`#${prefixedId}`)) {
+        parentEl.querySelector(`#${prefixedId}`)?.remove();
+      }
+    } catch (e) {}
 
     style.onload = () => {
-      this.loadedAssets[url] = 'loaded';
-      resolve();
+      this.loadedAssets[options.url].state = 'loaded';
+      options.resolve();
     };
 
-    document.head.appendChild(style);
+    parentEl.appendChild(style);
   }
 
-  private loadScriptAsset(
-    url: string,
-    id: string,
-    resolve: (value?: any | PromiseLike<any>) => void,
-    parentEl?: HTMLElement
-  ) {
-    const s: HTMLScriptElement = document.createElement('script');
-    s.async = true;
-    s.id = buildId(url, id);
-    s.src = url;
+  private loadScriptAsset(options: LoadAssetOptions) {
+    const doc = options.document || document;
+    const parentEl = options.parentEl || doc.body;
+    const script: HTMLScriptElement = doc.createElement('script');
+    const prefixedId = buildId(options.url, options.id);
 
-    s.onload = () => {
-      this.loadedAssets[url] = 'loaded';
-      resolve();
+    script.async = true;
+    script.id = prefixedId;
+    script.src = options.url;
+
+    try {
+      if (parentEl.querySelector(`#${prefixedId}`)) {
+        parentEl.querySelector(`#${prefixedId}`)?.remove();
+      }
+    } catch (e) {}
+
+    script.onload = () => {
+      this.loadedAssets[options.url].state = 'loaded';
+      options.resolve();
     };
 
-    (parentEl || document.body).appendChild(s);
+    (parentEl || parentEl).appendChild(script);
   }
 }
 
 function buildId(url: string, id?: string): string {
-  return id || (url.split('/').pop() as string);
+  if (id) return id;
+  return btoa(url.split('/').pop() as string);
 }
 
 export default new LazyLoader();

@@ -21,9 +21,9 @@ export function FontSelectorFilters({
 }: FiltersHeaderProps) {
   const {trans} = useTrans();
   return (
-    <div className="flex items-center gap-24 mb-24">
+    <div className="mb-24 items-center gap-24 @xs:flex">
       <TextField
-        className="flex-auto"
+        className="mb-12 flex-auto @xs:mb-0"
         value={filters.query}
         onChange={e => {
           setFilters({

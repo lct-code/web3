@@ -12,7 +12,8 @@ interface Payload {
 }
 
 export function useDisconnectSocial() {
-  return useMutation(disconnect, {
+  return useMutation({
+    mutationFn: disconnect,
     onError: err => showHttpErrorToast(err),
   });
 }

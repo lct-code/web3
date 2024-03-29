@@ -5,7 +5,14 @@ interface BaseMediaItem<T = any> {
   groupId?: string | number;
   provider: 'youtube' | 'htmlAudio' | 'htmlVideo' | 'hls' | 'dash';
   meta?: T;
+  initialTime?: number;
   poster?: string;
+  captions?: {
+    id: string | number;
+    label: string;
+    src: string;
+    language?: string;
+  }[];
 }
 
 export interface YoutubeMediaItem<T = any> extends BaseMediaItem<T> {

@@ -22,17 +22,17 @@ function UpdateLocalization({
 }
 
 export function useUpdateLocalization(
-  form?: UseFormReturn<Partial<Localization>>
+  form?: UseFormReturn<Partial<Localization>>,
 ) {
-  return useMutation(
-    (props: Partial<Localization>) => UpdateLocalization(props),
-    {
-      onSuccess: () => {
-        toast(message('Localization updated'));
-        queryClient.invalidateQueries(DatatableDataQueryKey('localizations'));
-        queryClient.invalidateQueries(getLocalWithLinesQueryKey());
-      },
-      onError: r => (form ? onFormQueryError(r, form) : showHttpErrorToast(r)),
-    }
-  );
+  return useMutation({
+    mutationFn: (props: Partial<Localization>) => UpdateLocalization(props),
+    onSuccess: () => {
+      toast(message('Localization updated'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('localizations'),
+      });
+      queryClient.invalidateQueries({queryKey: getLocalWithLinesQueryKey()});
+    },
+    onError: r => (form ? onFormQueryError(r, form) : showHttpErrorToast(r)),
+  });
 }

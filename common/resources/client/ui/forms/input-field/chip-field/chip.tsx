@@ -18,7 +18,7 @@ export interface ChipProps {
   disabled?: boolean;
   selectable?: boolean;
   invalid?: boolean;
-  errorMessage?: ReactNode;
+  errorMessage?: ReactElement | string;
   children?: ReactNode;
   className?: string;
   adornment?: null | ReactElement<{
@@ -55,11 +55,11 @@ export function Chip(props: ChipProps) {
     switch (e.key) {
       case 'ArrowRight':
       case 'ArrowDown':
-        focusManager.focusNext({tabbable: true});
+        focusManager?.focusNext({tabbable: true});
         break;
       case 'ArrowLeft':
       case 'ArrowUp':
-        focusManager.focusPrevious({tabbable: true});
+        focusManager?.focusPrevious({tabbable: true});
         break;
       case 'Backspace':
       case 'Delete':
@@ -112,26 +112,28 @@ export function Chip(props: ChipProps) {
       onKeyDown={selectable ? handleKeyDown : undefined}
       onClick={selectable ? handleClick : undefined}
       className={clsx(
-        'flex-shrink-0 flex items-center justify-center gap-10 outline-none relative overflow-hidden whitespace-nowrap',
-        'after:absolute after:inset-0 after:pointer-events-none',
+        'relative flex flex-shrink-0 items-center justify-center gap-10 overflow-hidden whitespace-nowrap outline-none',
+        'min-w-0 max-w-full after:pointer-events-none after:absolute after:inset-0',
         onClick && 'cursor-pointer',
         radius,
         colorClassName(props),
         sizeStyle.chip,
         !disabled &&
           selectable &&
-          'focus:after:bg-black/10 hover:after:bg-black/5',
-        className
+          'hover:after:bg-black/5 focus:after:bg-black/10',
+        className,
       )}
     >
       {adornment}
-      {children}
+      <div className="flex-auto overflow-hidden overflow-ellipsis">
+        {children}
+      </div>
       {onRemove && (
         <ButtonBase
           ref={deleteButtonRef}
           className={clsx(
             'text-black/30 dark:text-white/50',
-            sizeStyle.closeButton
+            sizeStyle.closeButton,
           )}
           onClick={e => {
             e.stopPropagation();
@@ -151,7 +153,7 @@ function sizeClassNames({size, onRemove}: ChipProps) {
     case 'xs':
       return {
         adornment: {size: 'xs', margin: '-ml-3'},
-        chip: clsx('pl-8 h-18 text-xs font-medium w-max', !onRemove && 'pr-8'),
+        chip: clsx('pl-8 h-20 text-xs font-medium w-max', !onRemove && 'pr-8'),
         closeButton: 'mr-4 w-14 h-14',
       };
     case 'sm':

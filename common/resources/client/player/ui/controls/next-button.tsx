@@ -25,7 +25,7 @@ export function NextButton({
   const playerReady = usePlayerStore(s => s.providerReady);
 
   return (
-    <Tooltip label={<Trans message="Next" />}>
+    <Tooltip label={<Trans message="Next" />} usePortal={false}>
       <IconButton
         disabled={!playerReady}
         size={size}

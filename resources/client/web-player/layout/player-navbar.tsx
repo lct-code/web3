@@ -11,8 +11,12 @@ import {MicIcon} from '@common/icons/material/Mic';
 import {getArtistLink} from '@app/web-player/artists/artist-link';
 import {Navbar} from '@common/ui/navigation/navbar/navbar';
 import {SearchAutocomplete} from '@app/web-player/search/search-autocomplete';
+import clsx from 'clsx';
 
-export function PlayerNavbar() {
+interface Props {
+  className?: string;
+}
+export function PlayerNavbar({className}: Props) {
   const navigate = useNavigate();
   const primaryArtist = usePrimaryArtistForCurrentUser();
   const {player} = useSettings();
@@ -56,7 +60,7 @@ export function PlayerNavbar() {
       darkModeColor="bg"
       size="sm"
       authMenuItems={menuItems}
-      className="dashboard-grid-header"
+      className={clsx('dashboard-grid-header', className)}
     >
       <SearchAutocomplete />
       <ActionButtons />
@@ -75,7 +79,7 @@ function ActionButtons() {
 
   return (
     <Fragment>
-      {showTryProButton && (
+      {showTryProButton ? (
         <Button
           variant="outline"
           size="xs"
@@ -85,8 +89,8 @@ function ActionButtons() {
         >
           <Trans message="Try Pro" />
         </Button>
-      )}
-      {showUploadButton && (
+      ) : null}
+      {showUploadButton ? (
         <Button
           variant={showTryProButton ? 'text' : 'outline'}
           size="xs"
@@ -96,7 +100,7 @@ function ActionButtons() {
         >
           <Trans message="Upload" />
         </Button>
-      )}
+      ) : null}
     </Fragment>
   );
 }

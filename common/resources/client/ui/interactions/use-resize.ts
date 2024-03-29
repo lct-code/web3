@@ -5,7 +5,7 @@ import {
   InteractableRect,
 } from './interactable-event';
 import {usePointerEvents, UsePointerEventsProps} from './use-pointer-events';
-import {setActiveInteraction} from './active-interaction';
+import {activeInteraction, setActiveInteraction} from './active-interaction';
 import {calcNewSizeFromAspectRatio} from './utils/calc-new-size-from-aspect-ratio';
 import {restrictResizableWithinBoundary} from './utils/restrict-resizable-within-boundary';
 import {domRectToObj} from './utils/dom-rect-to-obj';
@@ -58,7 +58,7 @@ export function useResize({
     onMoveStart: (e, resizable) => {
       const target = e.target as HTMLElement;
 
-      if (!target.dataset.resizeHandle) {
+      if (!target.dataset.resizeHandle || activeInteraction) {
         return false;
       }
 
@@ -75,7 +75,7 @@ export function useResize({
         state.boundaryRect = boundaryRect;
       } else if (boundaryRef?.current) {
         state.boundaryRect = domRectToObj(
-          boundaryRef.current.getBoundingClientRect()
+          boundaryRef.current.getBoundingClientRect(),
         );
       }
 
@@ -97,7 +97,7 @@ export function useResize({
       const boundedRect = applyBounds(newRect, minWidth, minHeight, ratio);
 
       props.onResize?.(
-        interactableEvent({rect: boundedRect, e, deltaX, deltaY})
+        interactableEvent({rect: boundedRect, e, deltaX, deltaY}),
       );
 
       state.currentRect = newRect;
@@ -119,7 +119,7 @@ function resizeRect(
   rect: InteractableRect,
   deltaX: number,
   deltaY: number,
-  ratio: AspectRatio
+  ratio: AspectRatio,
 ): InteractableRect {
   const prevRect = {...rect};
   const newRect = {...rect};
@@ -165,7 +165,7 @@ function applyBounds(
   rect: InteractableRect,
   minWidth: number,
   minHeight: number,
-  ratio: AspectRatio
+  ratio: AspectRatio,
 ): InteractableRect {
   const isLeftSideHandle =
     state.resizeDir === resizeHandlePosition.bottomLeft ||
@@ -194,7 +194,7 @@ function applyBounds(
   if (state.boundaryRect) {
     boundedRect = restrictResizableWithinBoundary(
       boundedRect,
-      state.boundaryRect
+      state.boundaryRect,
     );
   }
 
@@ -205,7 +205,7 @@ function applyBounds(
     const size = calcNewSizeFromAspectRatio(
       ratio,
       boundedRect.width,
-      boundedRect.height
+      boundedRect.height,
     );
     boundedRect.width = size.width;
     boundedRect.height = size.height;

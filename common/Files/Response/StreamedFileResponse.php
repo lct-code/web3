@@ -32,6 +32,7 @@ class StreamedFileResponse implements FileResponse
             'Content-Length' => $fileSize,
             'Content-Disposition' => $disposition,
             'Cache-Control' => 'private, max-age=31536000, no-transform',
+            //'X-Accel-Buffering' => 'no',
         ]);
         $response->setCallback(function () use ($entry, $path) {
             $stream = $entry->getDisk()->readStream($path);

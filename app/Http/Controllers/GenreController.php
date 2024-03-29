@@ -1,8 +1,7 @@
 <?php namespace App\Http\Controllers;
 
-use App;
-use App\Channel;
-use App\Genre;
+use App\Models\Channel;
+use App\Models\Genre;
 use App\Services\Genres\PaginateGenres;
 use Common\Core\BaseController;
 use Illuminate\Http\Request;

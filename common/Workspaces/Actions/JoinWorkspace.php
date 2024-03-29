@@ -2,7 +2,7 @@
 
 namespace Common\Workspaces\Actions;
 
-use App\User;
+use App\Models\User;
 use Common\Workspaces\WorkspaceInvite;
 use Session;
 

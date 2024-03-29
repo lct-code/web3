@@ -20,10 +20,13 @@ interface Payload extends Partial<Subscription> {}
 
 export function useCreateSubscription(form: UseFormReturn<Payload>) {
   const {trans} = useTrans();
-  return useMutation((props: Payload) => createNewSubscription(props), {
+  return useMutation({
+    mutationFn: (props: Payload) => createNewSubscription(props),
     onSuccess: () => {
       toast(trans(message('Subscription created')));
-      queryClient.invalidateQueries(DatatableDataQueryKey(endpoint));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey(endpoint),
+      });
     },
     onError: err => onFormQueryError(err, form),
   });

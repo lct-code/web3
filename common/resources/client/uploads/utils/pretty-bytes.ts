@@ -1,7 +1,7 @@
 // Adapted from https://github.com/Flet/prettier-bytes/
 // Changing 1000 bytes to 1024, so we can keep uppercase KB vs kB
 // ISC License (c) Dan Flettre https://github.com/Flet/prettier-bytes/blob/master/LICENSE
-export function prettyBytes(num?: number): string {
+export function prettyBytes(num?: number, fractionDigits = 1): string {
   if (num == null || Number.isNaN(num)) return '';
   const neg = num < 0;
   const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
@@ -26,5 +26,5 @@ export function prettyBytes(num?: number): string {
     // decimal component.
     return `${(neg ? '-' : '') + num.toFixed(0)} ${unit}`;
   }
-  return `${(neg ? '-' : '') + num.toFixed(1)} ${unit}`;
+  return `${(neg ? '-' : '') + num.toFixed(fractionDigits)} ${unit}`;
 }

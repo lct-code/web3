@@ -1,8 +1,8 @@
-import defaultImage from './../artists/artist-image/artist-default-image-small.jpg';
 import {useTrans} from '@common/i18n/use-trans';
 import {message} from '@common/i18n/message';
 import clsx from 'clsx';
 import {Genre} from '@app/web-player/genres/genre';
+import {LabelIcon} from '@common/icons/material/Label';
 
 interface GenreImageProps {
   genre: Genre;
@@ -11,17 +11,25 @@ interface GenreImageProps {
 }
 export function GenreImage({genre, className, size}: GenreImageProps) {
   const {trans} = useTrans();
-  return (
+  const src = genre.image;
+  const imgClassName = clsx(
+    className,
+    size,
+    'object-cover bg-fg-base/4',
+    !src ? 'flex items-center justify-center' : 'block',
+  );
+
+  return src ? (
     <img
-      className={clsx(className, size, 'object-cover bg-fg-base/4')}
+      className={imgClassName}
       draggable={false}
       loading="lazy"
-      src={getGenreImage(genre)}
+      src={src}
       alt={trans(message('Image for :name', {values: {name: genre.name}}))}
     />
+  ) : (
+    <span className={clsx(imgClassName, 'overflow-hidden')}>
+      <LabelIcon className="max-w-[60%] text-divider" size="text-9xl" />
+    </span>
   );
-}
-
-export function getGenreImage(genre: Genre): string {
-  return genre?.image ? genre.image : defaultImage;
 }

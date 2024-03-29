@@ -1,5 +1,5 @@
 import {useMutation} from '@tanstack/react-query';
-import {apiClient, queryClient} from '../../../../http/query-client';
+import {apiClient} from '../../../../http/query-client';
 import {useTrans} from '../../../../i18n/use-trans';
 import {BackendResponse} from '../../../../http/backend-response/backend-response';
 import {showHttpErrorToast} from '../../../../utils/http/show-http-error-toast';
@@ -10,10 +10,10 @@ interface Response extends BackendResponse {}
 
 export function useUploadS3Cors() {
   const {trans} = useTrans();
-  return useMutation(() => uploadCors(), {
+  return useMutation({
+    mutationFn: () => uploadCors(),
     onSuccess: () => {
       toast(trans(message('CORS file updated')));
-      queryClient.invalidateQueries(['Query Key']);
     },
     onError: err => showHttpErrorToast(err),
   });

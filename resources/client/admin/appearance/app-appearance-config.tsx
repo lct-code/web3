@@ -1,6 +1,7 @@
 import {
   IAppearanceConfig,
   MenuSectionConfig,
+  SeoSettingsSectionConfig,
 } from '@common/admin/appearance/types/appearance-editor-config';
 import {message} from '@common/i18n/message';
 import {LandingPageSectionPrimaryFeatures} from '@app/admin/appearance/sections/landing-page-section/landing-page-section-primary-features';
@@ -97,6 +98,45 @@ export const AppAppearanceConfig: IAppearanceConfig = {
           '/backstage/requests',
         ],
       } as MenuSectionConfig,
+    },
+    // @ts-ignore
+    'seo-settings': {
+      config: {
+        pages: [
+          {
+            key: 'artist-page',
+            label: message('Artist page'),
+          },
+          {
+            key: 'album-page',
+            label: message('Album page'),
+          },
+          {
+            key: 'track-page',
+            label: message('Track page'),
+          },
+          {
+            key: 'playlist-page',
+            label: message('Playlist page'),
+          },
+          {
+            key: 'landing-page',
+            label: message('Landing page'),
+          },
+          {
+            key: 'channel-page',
+            label: message('Channel page'),
+          },
+          {
+            key: 'user-profile-page',
+            label: message('User profile page'),
+          },
+          {
+            key: 'search-page',
+            label: message('Search page'),
+          },
+        ],
+      } as SeoSettingsSectionConfig,
     },
   },
 };

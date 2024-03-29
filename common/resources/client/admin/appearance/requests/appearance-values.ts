@@ -1,6 +1,6 @@
 import {useQuery} from '@tanstack/react-query';
-import {BackendResponse} from '../../../http/backend-response/backend-response';
-import {apiClient} from '../../../http/query-client';
+import {BackendResponse} from '@common/http/backend-response/backend-response';
+import {apiClient} from '@common/http/query-client';
 import {AppearanceDefaults, AppearanceValues} from '../appearance-store';
 
 export interface FetchAppearanceValuesResponse extends BackendResponse {
@@ -9,7 +9,9 @@ export interface FetchAppearanceValuesResponse extends BackendResponse {
 }
 
 export function useAppearanceValues() {
-  return useQuery(['admin/appearance/values'], () => fetchAppearanceValues(), {
+  return useQuery({
+    queryKey: ['admin/appearance/values'],
+    queryFn: () => fetchAppearanceValues(),
     staleTime: Infinity,
   });
 }

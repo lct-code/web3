@@ -3,16 +3,36 @@
 namespace Common\Core\Exceptions;
 
 use ErrorException;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Exceptions\Handler;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Sentry\Laravel\Integration;
 use Sentry\State\Scope;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 use function Sentry\configureScope;
 
 class BaseExceptionHandler extends Handler
 {
+    public function render($request, Throwable $e)
+    {
+        $isAuthException =
+            $e instanceof AuthorizationException ||
+            ($e instanceof HttpException && $e->getStatusCode() === 403);
+
+        if (
+            $isAuthException &&
+            (requestIsFromFrontend() &&
+                !$request->expectsJson() &&
+                !Auth::check())
+        ) {
+            return redirect('/login');
+        }
+
+        return parent::render($request, $e);
+    }
+
     public function register()
     {
         if (config('app.env') !== 'production') {
@@ -31,6 +51,7 @@ class BaseExceptionHandler extends Handler
         });
 
         configureScope(function (Scope $scope): void {
+            $scope->setContext('app_name', ['value' => config('app.name')]);
             if ($user = Auth::user()) {
                 $scope->setUser(['email' => $user->email, 'id' => $user->id]);
             }
@@ -49,6 +70,7 @@ class BaseExceptionHandler extends Handler
         if (
             $previous &&
             method_exists($previous, 'response') &&
+            $previous->response() &&
             property_exists($previous->response(), 'action')
         ) {
             $array['action'] = $e->getPrevious()->response()->action;
@@ -79,7 +101,7 @@ class BaseExceptionHandler extends Handler
             // should not return a view here, in case laravel views folder is not readable as well
             return response(
                 "<div style='text-align:center'><h1>Could not access a file or folder</h1> <br> Location: <b>$path</b><br>" .
-                    '<p>See the article here for possible solutions: <a target="_blank" href="https://support.vebto.com/help-center/articles/21/25/207/changing-file-permissions">https://support.vebto.com/help-center/articles/207/changing-file-permissions</a></p></div>',
+                    '<p>See the article here for possible solutions: <a target="_blank" href="https://support.vebto.com/hc/articles/21/25/207/changing-file-permissions">https://support.vebto.com/help-center/articles/207/changing-file-permissions</a></p></div>',
             );
         }
     }

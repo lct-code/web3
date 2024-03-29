@@ -17,11 +17,14 @@ interface Payload {
 
 export function useDeleteBackstageRequest() {
   const navigate = useNavigate();
-  return useMutation(({requestId}: Payload) => deleteRequest(requestId), {
+  return useMutation({
+    mutationFn: ({requestId}: Payload) => deleteRequest(requestId),
     onSuccess: () => {
       toast(message('Request deleted'));
       navigate('/admin/backstage-requests');
-      queryClient.invalidateQueries(DatatableDataQueryKey('backstage-request'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('backstage-request'),
+      });
     },
     onError: err => showHttpErrorToast(err),
   });

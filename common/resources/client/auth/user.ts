@@ -3,6 +3,7 @@ import {Subscription} from '../billing/subscription';
 import {Role} from './role';
 import {SocialProfile} from './social-profile';
 import {AccessToken} from './access-token';
+import type {ActiveSession} from '@common/auth/ui/account-settings/sessions-panel/requests/use-user-sessions';
 
 export const USER_MODEL = 'user';
 
@@ -33,4 +34,17 @@ export interface User {
   card_brand?: string;
   card_expires?: string;
   model_type: typeof USER_MODEL;
+  banned_at?: string;
+  followed_users?: Omit<User, 'followed_users' | 'followers'>[];
+  followers_count?: number;
+  followed_users_count?: number;
+  followers?: Omit<User, 'followed_users' | 'followers'>[];
+  last_login?: ActiveSession;
+  bans?: {
+    id: number;
+    comment: string;
+    expired_at?: string;
+  }[];
+  two_factor_confirmed_at?: string;
+  two_factor_recovery_codes?: string[];
 }

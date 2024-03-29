@@ -25,7 +25,8 @@ function ResendInvite({
 }
 
 export function useResendInvite() {
-  return useMutation((props: Props) => ResendInvite(props), {
+  return useMutation({
+    mutationFn: (props: Props) => ResendInvite(props),
     onSuccess: () => {
       toast('Invite sent');
     },

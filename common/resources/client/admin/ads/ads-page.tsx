@@ -18,7 +18,6 @@ import {
 } from '../settings/requests/update-admin-settings';
 import {DialogTrigger} from '../../ui/overlays/dialog/dialog-trigger';
 import {ImageZoomDialog} from '../../ui/overlays/dialog/image-zoom-dialog';
-import {useIsMobileMediaQuery} from '../../utils/hooks/is-mobile-media-query';
 import {StaticPageTitle} from '../../seo/static-page-title';
 
 export function AdsPage() {
@@ -29,7 +28,7 @@ export function AdsPage() {
       <StaticPageTitle>
         <Trans message="Ads" />
       </StaticPageTitle>
-      <h1 className="font-light text-2xl md:text-3xl mb-20 md:mb-40">
+      <h1 className="mb-20 text-2xl font-light md:mb-40 md:text-3xl">
         <Trans message="Predefined Ad slots" />
       </h1>
       {query.isLoading ? (
@@ -77,7 +76,7 @@ function AdsForm({defaultValues}: AdsFormProps) {
         type="submit"
         variant="flat"
         color="primary"
-        disabled={updateSettings.isLoading}
+        disabled={updateSettings.isPending}
       >
         <Trans message="Save" />
       </Button>
@@ -89,7 +88,6 @@ interface AdSectionProps {
   adConfig: AdConfig;
 }
 function AdSection({adConfig}: AdSectionProps) {
-  const isMobile = useIsMobileMediaQuery();
   return (
     <div className="flex items-center gap-24">
       <FormTextField
@@ -99,21 +97,19 @@ function AdSection({adConfig}: AdSectionProps) {
         rows={8}
         label={<Trans {...adConfig.description} />}
       />
-      {!isMobile && (
-        <DialogTrigger type="modal">
-          <button
-            type="button"
-            className="outline-none focus-visible:ring cursor-zoom-in rounded overflow-hidden hover:scale-105 transition"
-          >
-            <img
-              src={adConfig.image}
-              className="w-auto h-[186px] border"
-              alt="Ad slot example"
-            />
-          </button>
-          <ImageZoomDialog image={adConfig.image} />
-        </DialogTrigger>
-      )}
+      <DialogTrigger type="modal">
+        <button
+          type="button"
+          className="cursor-zoom-in overflow-hidden rounded outline-none transition hover:scale-105 focus-visible:ring max-md:hidden"
+        >
+          <img
+            src={adConfig.image}
+            className="h-[186px] w-auto border"
+            alt="Ad slot example"
+          />
+        </button>
+        <ImageZoomDialog image={adConfig.image} />
+      </DialogTrigger>
     </div>
   );
 }

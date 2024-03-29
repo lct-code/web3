@@ -17,8 +17,8 @@ import {useAuthClickCapture} from '@app/web-player/use-auth-click-capture';
 
 const menuItemClassName = (isActive: boolean): string => {
   return clsx(
-    'h-44 px-12 mx-12 hover:bg-hover rounded-lg',
-    isActive && 'text-primary'
+    'h-44 px-12 mx-12 hover:bg-hover rounded-button',
+    isActive && 'text-primary',
   );
 };
 
@@ -27,7 +27,7 @@ interface Props {
 }
 export function Sidenav({className}: Props) {
   return (
-    <div className={clsx('border-r py-12 bg-alt overflow-y-auto', className)}>
+    <div className={clsx('overflow-y-auto border-r bg-alt py-12', className)}>
       <Logo />
       <CustomMenu
         className="mt-24 items-stretch"
@@ -42,7 +42,7 @@ export function Sidenav({className}: Props) {
           <Trans message="Your Music" />
         </SectionTitle>
         <CustomMenu
-          className="mt-12 text-sm items-stretch"
+          className="mt-12 items-stretch text-sm"
           menu="sidebar-secondary"
           orientation="vertical"
           gap="gap-none"
@@ -60,7 +60,7 @@ interface SectionTitleProps {
 }
 function SectionTitle({children}: SectionTitleProps) {
   return (
-    <div className="uppercase text-xs font-semibold text-muted mb-8 mx-24">
+    <div className="mx-24 mb-8 text-xs font-semibold uppercase text-muted">
       {children}
     </div>
   );
@@ -75,11 +75,11 @@ function Logo() {
   return (
     <Link
       to="/"
-      className="block flex-shrink-0 mx-18"
+      className="mx-18 block flex-shrink-0"
       aria-label={trans({message: 'Go to homepage'})}
     >
       <img
-        className="block w-auto h-56 max-w-[188px] object-contain"
+        className="block h-56 w-auto max-w-[188px] object-contain"
         src={logoUrl}
         alt={trans({message: 'Site logo'})}
       />
@@ -94,7 +94,7 @@ function PlaylistSection() {
 
   return (
     <div className="mt-40">
-      <div className="flex items-center justify-between mr-24">
+      <div className="mr-24 flex items-center justify-between">
         <SectionTitle>
           <Trans message="Playlists" />
         </SectionTitle>

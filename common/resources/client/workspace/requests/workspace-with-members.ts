@@ -9,7 +9,7 @@ export interface FetchWorkspaceWithMembersResponse extends BackendResponse {
 }
 
 function fetchWorkspaceWithMembers(
-  workspaceId: number
+  workspaceId: number,
 ): Promise<FetchWorkspaceWithMembersResponse> {
   return apiClient
     .get(`workspace/${workspaceId}`)
@@ -17,7 +17,8 @@ function fetchWorkspaceWithMembers(
 }
 
 export function useWorkspaceWithMembers(workspaceId: number) {
-  return useQuery(WorkspaceQueryKeys.workspaceWithMembers(workspaceId), () =>
-    fetchWorkspaceWithMembers(workspaceId)
-  );
+  return useQuery({
+    queryKey: WorkspaceQueryKeys.workspaceWithMembers(workspaceId),
+    queryFn: () => fetchWorkspaceWithMembers(workspaceId),
+  });
 }

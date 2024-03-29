@@ -2,7 +2,7 @@
 
 namespace App\Services\Providers\Spotify;
 
-use App\Track;
+use App\Models\Track;
 
 class SpotifyTrack
 {

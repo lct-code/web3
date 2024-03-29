@@ -14,6 +14,13 @@ class CsvExport extends Model
         'user_id' => 'integer',
     ];
 
+    const MODEL_TYPE = 'csv_export';
+
+    public static function getModelTypeAttribute(): string
+    {
+        return self::MODEL_TYPE;
+    }
+
     public function storeFile($stream): bool
     {
         Storage::delete($this->filePath());

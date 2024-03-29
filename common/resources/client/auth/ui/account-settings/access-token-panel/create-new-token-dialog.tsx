@@ -18,7 +18,7 @@ import {
 } from './create-new-token';
 import {ErrorIcon} from '../../../../icons/material/Error';
 import {Trans} from '../../../../i18n/trans';
-import {invalidateUseUserQuery} from '../../use-user';
+import {queryClient} from '@common/http/query-client';
 
 export function CreateNewTokenDialog() {
   const form = useForm<CreateAccessTokenPayload>();
@@ -35,7 +35,7 @@ export function CreateNewTokenDialog() {
         createToken.mutate(values, {
           onSuccess: response => {
             setPlainTextToken(response.plainTextToken);
-            invalidateUseUserQuery('me');
+            queryClient.invalidateQueries({queryKey: ['users']});
           },
         });
       }}
@@ -71,7 +71,7 @@ export function CreateNewTokenDialog() {
             color="primary"
             type="submit"
             form={formId}
-            disabled={createToken.isLoading}
+            disabled={createToken.isPending}
           >
             <Trans message="Create" />
           </Button>

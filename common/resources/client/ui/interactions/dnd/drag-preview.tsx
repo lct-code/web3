@@ -19,10 +19,10 @@ export const DragPreview = React.forwardRef<
     () =>
       (
         draggable: ConnectedDraggable,
-        callback: (node: HTMLElement) => void
+        callback: (node: HTMLElement) => void,
       ) => {
         // This will be called during the onDragStart event by useDrag. We need to render the
-        // preview synchronously before this event returns so we can call event.dataTransfer.setDragImage.
+        // preview synchronously before this event returns, so we can call event.dataTransfer.setDragImage.
         flushSync(() => {
           setChildren(render(draggable));
         });
@@ -35,7 +35,7 @@ export const DragPreview = React.forwardRef<
           setChildren(null);
         });
       },
-    [render]
+    [render],
   );
 
   if (!children) {
@@ -50,6 +50,6 @@ export const DragPreview = React.forwardRef<
     >
       {children}
     </div>,
-    rootEl
+    rootEl,
   );
 });

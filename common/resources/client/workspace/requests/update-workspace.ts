@@ -26,21 +26,23 @@ function updateWorkspace({
 }
 
 export function useUpdateWorkspace(
-  form: UseFormReturn<UpdateWorkspacePayload>
+  form: UseFormReturn<UpdateWorkspacePayload>,
 ) {
   const {close} = useDialogContext();
-  return useMutation(
-    (props: UpdateWorkspacePayload) => updateWorkspace(props),
-    {
-      onSuccess: response => {
-        close();
-        toast(message('Updated workspace'));
-        queryClient.invalidateQueries(WorkspaceQueryKeys.fetchUserWorkspaces);
-        queryClient.invalidateQueries(
-          WorkspaceQueryKeys.workspaceWithMembers(response.workspace.id)
-        );
-      },
-      onError: r => onFormQueryError(r, form),
-    }
-  );
+  return useMutation({
+    mutationFn: (props: UpdateWorkspacePayload) => updateWorkspace(props),
+    onSuccess: response => {
+      close();
+      toast(message('Updated workspace'));
+      queryClient.invalidateQueries({
+        queryKey: WorkspaceQueryKeys.fetchUserWorkspaces,
+      });
+      queryClient.invalidateQueries({
+        queryKey: WorkspaceQueryKeys.workspaceWithMembers(
+          response.workspace.id,
+        ),
+      });
+    },
+    onError: r => onFormQueryError(r, form),
+  });
 }

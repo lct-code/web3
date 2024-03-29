@@ -43,7 +43,7 @@ export function BaseSlider(props: BaseSliderProps) {
   let maxLabelLength = Math.max(
     [...numberFormatter.format(minValue)].length,
     [...numberFormatter.format(maxValue)].length,
-    [...numberFormatter.format(step)].length
+    [...numberFormatter.format(step)].length,
   );
 
   if (getValueLabel) {
@@ -61,7 +61,7 @@ export function BaseSlider(props: BaseSliderProps) {
         Math.max(
           maxLabelLength,
           [...numberFormatter.format(minValue)].length,
-          [...numberFormatter.format(maxValue)].length
+          [...numberFormatter.format(maxValue)].length,
         );
   }
   const style = getInputFieldClassNames({
@@ -112,27 +112,52 @@ export function BaseSlider(props: BaseSliderProps) {
       )}
       <div
         ref={trackRef}
-        className="h-30 relative"
+        className={clsx('relative', getWrapperHeight(props))}
         {...domProps}
         role="presentation"
       >
         <div
-          className={`absolute inset-0 m-auto h-4 rounded ${getTrackColor(
-            trackColor,
-            isDisabled
-          )}`}
+          className={clsx(
+            'absolute inset-0 m-auto rounded',
+            getTrackColor(trackColor, isDisabled),
+            getTrackHeight(size),
+          )}
         />
         <div
-          className={`absolute inset-0 my-auto h-4 rounded ${getFillColor(
-            fillColor,
-            isDisabled
-          )}`}
-          style={{width: `${getThumbPercent(0) * 100}%`}}
+          className={clsx(
+            'absolute inset-0 my-auto rounded',
+            getFillColor(fillColor, isDisabled),
+            getTrackHeight(size),
+          )}
+          style={{width: `${Math.max(getThumbPercent(0) * 100, 0)}%`}}
         />
         {children}
       </div>
     </div>
   );
+}
+
+function getWrapperHeight({size, wrapperHeight}: UseSliderProps): string {
+  if (wrapperHeight) return wrapperHeight;
+  switch (size) {
+    case 'xs':
+      return 'h-14';
+    case 'sm':
+      return 'h-20';
+    default:
+      return 'h-30';
+  }
+}
+
+function getTrackHeight(size: UseSliderProps['size']): string {
+  switch (size) {
+    case 'xs':
+      return 'h-2';
+    case 'sm':
+      return 'h-3';
+    default:
+      return 'h-4';
+  }
 }
 
 function getTrackColor(color: string, isDisabled: boolean): string {

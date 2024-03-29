@@ -1,10 +1,10 @@
 import {useFormContext} from 'react-hook-form';
-import {SettingsPanel} from '../settings-panel';
-import {SettingsErrorGroup} from '../settings-error-group';
-import {FormTextField} from '../../../ui/forms/input-field/text-field/text-field';
-import {SectionHelper} from '../../../ui/section-helper';
-import {ExternalLink} from '../../../ui/buttons/external-link';
-import {Trans} from '../../../i18n/trans';
+import {SettingsPanel} from '@common/admin/settings/settings-panel';
+import {SettingsErrorGroup} from '@common/admin/settings/settings-error-group';
+import {FormTextField} from '@common/ui/forms/input-field/text-field/text-field';
+import {SectionHelper} from '@common/ui/section-helper';
+import {ExternalLink} from '@common/ui/buttons/external-link';
+import {Trans} from '@common/i18n/trans';
 
 export function LoggingSettings() {
   return (
@@ -51,7 +51,6 @@ function SentrySection() {
             name="server.sentry_dsn"
             type="url"
             minLength={30}
-            required
             label={<Trans message="Sentry DSN" />}
           />
         );

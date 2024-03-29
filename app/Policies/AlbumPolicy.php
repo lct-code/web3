@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Album;
-use App\User;
+use App\Models\Album;
+use App\Models\User;
 use Common\Core\Policies\BasePolicy;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Database\Eloquent\Builder;

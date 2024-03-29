@@ -14,7 +14,6 @@ import {useFormContext} from 'react-hook-form';
 import {MenuItemConfig} from '../../core/settings/settings';
 import {FormSelect, Option} from '../../ui/forms/select/select';
 import {useAvailableRoutes} from '../appearance/sections/menus/hooks/available-routes';
-import {FormComboBox} from '../../ui/forms/combobox/form-combobox';
 import {ButtonBaseProps} from '../../ui/buttons/button-base';
 import {createSvgIconFromTree, IconTree} from '../../icons/create-svg-icon';
 import {DialogTrigger} from '../../ui/overlays/dialog/dialog-trigger';
@@ -144,28 +143,32 @@ function DestinationSelector({prefixName}: NameProps) {
         />
       )}
       {currentType === 'route' && (
-        <FormComboBox
+        <FormSelect
           className="mb-20"
           required
           items={routeItems}
           name={prefixName('action')}
-          openMenuOnFocus
           label={<Trans message="Page" />}
+          searchPlaceholder={trans(message('Search pages'))}
+          showSearchField
+          selectionMode="single"
         >
           {item => (
             <Item value={item.id} key={item.id}>
               {item.label}
             </Item>
           )}
-        </FormComboBox>
+        </FormSelect>
       )}
       {selectedCategory && (
-        <FormComboBox
+        <FormSelect
           className="mb-20"
           required
           items={selectedCategory.items}
           name={prefixName('action')}
-          openMenuOnFocus
+          showSearchField
+          searchPlaceholder={trans(message('Search...'))}
+          selectionMode="single"
           label={<Trans message={selectedCategory.name} />}
         >
           {item => (
@@ -173,7 +176,7 @@ function DestinationSelector({prefixName}: NameProps) {
               <Trans message={item.label} />
             </Item>
           )}
-        </FormComboBox>
+        </FormSelect>
       )}
     </Fragment>
   );

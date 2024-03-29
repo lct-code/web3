@@ -1,6 +1,6 @@
 <?php namespace Common\Auth\Roles;
 
-use App\User;
+use App\Models\User;
 use Common\Core\BaseController;
 use Common\Database\Datasource\Datasource;
 use Illuminate\Http\Request;

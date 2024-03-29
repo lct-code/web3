@@ -33,7 +33,7 @@ export function PipButton({size = 'md', iconSize, color, className}: Props) {
   );
 
   return (
-    <Tooltip label={<Trans message={labelMessage} />}>
+    <Tooltip label={<Trans message={labelMessage} />} usePortal={false}>
       <IconButton
         disabled={!playerReady}
         aria-label={labelMessage}

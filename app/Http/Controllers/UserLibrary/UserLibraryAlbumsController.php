@@ -1,6 +1,6 @@
 <?php namespace App\Http\Controllers\UserLibrary;
 
-use App\User;
+use App\Models\User;
 use Auth;
 use Common\Core\BaseController;
 use Common\Database\Datasource\Datasource;

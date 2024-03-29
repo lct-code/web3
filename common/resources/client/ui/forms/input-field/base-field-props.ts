@@ -5,6 +5,7 @@ export interface BaseFieldProps {
   disabled?: boolean;
   required?: boolean;
   labelSuffix?: ReactNode;
+  labelSuffixPosition?: 'spaced' | 'inline';
   autoFocus?: boolean;
   autoSelectText?: boolean;
   labelElementType?: ElementType;
@@ -12,7 +13,9 @@ export interface BaseFieldProps {
   labelPosition?: 'top' | 'side';
   labelDisplay?: string;
   size?: InputSize;
-  inputRadius?: 'rounded-full' | 'rounded';
+  inputRadius?: 'rounded-full' | 'rounded' | 'rounded-none' | string;
+  inputRing?: string;
+  inputFontSize?: string;
   inputBorder?: string;
   inputShadow?: string;
   invalid?: boolean;
@@ -31,7 +34,7 @@ export interface BaseFieldProps {
   inputWrapperClassName?: string;
   inputClassName?: string;
   unstyled?: boolean;
-  background?: 'bg-transparent' | 'bg-alt' | 'bg-paper' | 'bg-white';
+  background?: 'bg-transparent' | 'bg-alt' | 'bg' | 'bg-white';
   inputTestId?: string;
 }
 

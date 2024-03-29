@@ -15,10 +15,11 @@ export function useDeletePlaylist(playlistId: number | string) {
   const navigate = useNavigate();
   const {getRedirectUri} = useAuth();
 
-  return useMutation(() => deletePlaylist(playlistId), {
+  return useMutation({
+    mutationFn: () => deletePlaylist(playlistId),
     onSuccess: () => {
       toast(message('Playlist deleted'));
-      queryClient.invalidateQueries(['playlists']);
+      queryClient.invalidateQueries({queryKey: ['playlists']});
       // navigate to homepage if we are on this playlist page currently
       if (pathname.startsWith(`/playlist/${playlistId}`)) {
         navigate(getRedirectUri());

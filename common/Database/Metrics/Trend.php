@@ -22,7 +22,9 @@ class Trend extends BaseMetric
         $results = $this->query
             ->select(
                 DB::raw(
-                    "{$expression} as date_result, {$function}({$this->getWrappedColumn()}) as aggregate",
+                    "{$expression->getValue(
+                        DB::connection()->getQueryGrammar(),
+                    )} as date_result, {$function}({$this->getWrappedColumn()}) as aggregate",
                 ),
             )
             ->whereBetween($this->dateColumn, [

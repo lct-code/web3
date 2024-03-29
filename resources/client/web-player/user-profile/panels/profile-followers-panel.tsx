@@ -17,7 +17,7 @@ export function ProfileFollowersPanel({user}: Props) {
     endpoint: `users/${user.id}/followers`,
   });
 
-  if (query.isInitialLoading) {
+  if (query.isLoading) {
     return <FullPageLoader className="min-h-100" />;
   }
 

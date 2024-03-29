@@ -5,7 +5,7 @@ import {MailgunCredentials} from './mailgun-credentials';
 import {SmtpCredentials} from './smtp-credentials';
 import {SesCredentials} from './ses-credentials';
 import {PostmarkCredentials} from './postmark-credentials';
-import {GmailCredentials} from './gmail-credentials';
+import {ConnectGmailPanel} from './connect-gmail-panel';
 import {SettingsErrorGroup} from '../../settings-error-group';
 import {FormSelect, Option} from '../../../../ui/forms/select/select';
 import {Trans} from '../../../../i18n/trans';
@@ -14,26 +14,23 @@ import {LearnMoreLink} from '../../learn-more-link';
 export function OutgoingMailGroup() {
   const {watch, clearErrors} = useFormContext<AdminSettings>();
 
-  const selectedDrivers = [
-    watch('server.mail_driver'),
-    watch('client.mail.handler'),
-  ];
+  const selectedDriver = watch('server.mail_driver');
   const credentialForms: ComponentType<{isInvalid: boolean}>[] = [];
 
-  if (selectedDrivers.includes('mailgun')) {
+  if (selectedDriver === 'mailgun') {
     credentialForms.push(MailgunCredentials);
   }
-  if (selectedDrivers.includes('smtp')) {
+  if (selectedDriver === 'smtp') {
     credentialForms.push(SmtpCredentials);
   }
-  if (selectedDrivers.includes('ses')) {
+  if (selectedDriver === 'ses') {
     credentialForms.push(SesCredentials);
   }
-  if (selectedDrivers.includes('postmark')) {
+  if (selectedDriver === 'postmark') {
     credentialForms.push(PostmarkCredentials);
   }
-  if (selectedDrivers.includes('gmailApi')) {
-    credentialForms.push(GmailCredentials);
+  if (selectedDriver === 'gmailApi') {
+    credentialForms.push(ConnectGmailPanel);
   }
 
   return (

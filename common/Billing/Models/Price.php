@@ -20,6 +20,13 @@ class Price extends Model
         'subscriptions_count' => 'int',
     ];
 
+    const MODEL_TYPE = 'price';
+
+    public static function getModelTypeAttribute(): string
+    {
+        return self::MODEL_TYPE;
+    }
+
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);

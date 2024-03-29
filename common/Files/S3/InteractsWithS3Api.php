@@ -51,7 +51,7 @@ trait InteractsWithS3Api
         );
 
         if ($this->getDiskName() === 'public') {
-            $fileKey = $keepOriginalName ? $filename : "$uuid.${extension}";
+            $fileKey = $keepOriginalName ? $filename : "$uuid.$extension";
             $diskPrefix = request('diskPrefix');
             if ($diskPrefix) {
                 $fileKey = "$diskPrefix/$fileKey";

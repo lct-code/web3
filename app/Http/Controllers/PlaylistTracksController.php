@@ -1,6 +1,6 @@
 <?php namespace App\Http\Controllers;
 
-use App\Playlist;
+use App\Models\Playlist;
 use App\Services\Playlists\PlaylistTracksPaginator;
 use Auth;
 use Common\Core\BaseController;

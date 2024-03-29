@@ -1,9 +1,9 @@
-import {LocationDatasetItem, ReportMetric} from './report-metric';
+import {DatasetItem, LocationDatasetItem, ReportMetric} from './report-metric';
 
 export interface VisitorsReportData {
-  browsers: ReportMetric;
-  platforms: ReportMetric;
-  devices: ReportMetric;
+  browsers: ReportMetric<DatasetItem>;
+  platforms: ReportMetric<DatasetItem>;
+  devices: ReportMetric<DatasetItem>;
   locations: ReportMetric<LocationDatasetItem>;
-  pageViews: ReportMetric;
+  pageViews: ReportMetric<DatasetItem>;
 }

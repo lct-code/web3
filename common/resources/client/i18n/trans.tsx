@@ -7,9 +7,17 @@ import {MessageDescriptor} from './message-descriptor';
 export const Trans = memo((props: MessageDescriptor) => {
   const {message: initialMessage, values} = props;
   const {lines, localeCode} = useSelectedLocale();
-  let translatedMessage = lines?.[initialMessage] || initialMessage;
+  let translatedMessage: string | undefined;
 
-  if (!values) {
+  if (Object?.hasOwn(lines || {}, initialMessage)) {
+    translatedMessage = lines?.[initialMessage];
+  } else if (Object?.hasOwn(lines || {}, initialMessage?.toLowerCase())) {
+    translatedMessage = lines?.[initialMessage.toLowerCase()];
+  } else {
+    translatedMessage = initialMessage;
+  }
+
+  if (!values || !translatedMessage) {
     return <Fragment>{translatedMessage}</Fragment>;
   }
 
@@ -32,7 +40,7 @@ export const Trans = memo((props: MessageDescriptor) => {
       nodePlaceholders.push(key);
       // value is primitive, can do simple string replace
     } else if (value != undefined) {
-      translatedMessage = translatedMessage.replace(`:${key}`, `${value}`);
+      translatedMessage = translatedMessage?.replace(`:${key}`, `${value}`);
     }
   });
 
@@ -91,7 +99,7 @@ export const Trans = memo((props: MessageDescriptor) => {
 
 export function areEqual<T extends MessageDescriptor = MessageDescriptor>(
   prevProps: T,
-  nextProps: T
+  nextProps: T,
 ): boolean {
   const {values, ...otherProps} = prevProps;
   const {values: nextValues, ...nextOtherProps} = nextProps;

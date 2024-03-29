@@ -1,16 +1,12 @@
 <?php namespace App\Http\Controllers;
 
-use App;
-use App\Actions\Track\DeleteTracks;
-use App\Artist;
-use App\Genre;
 use App\Http\Requests\ModifyTracks;
+use App\Models\Track;
 use App\Services\Tracks\CrupdateTrack;
+use App\Services\Tracks\DeleteTracks;
+use App\Services\Tracks\LoadTrack;
 use App\Services\Tracks\PaginateTracks;
-use App\Track;
-use Arr;
 use Common\Core\BaseController;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Http\Request;
 
 class TrackController extends BaseController
@@ -38,57 +34,13 @@ class TrackController extends BaseController
     {
         $this->authorize('show', $track);
 
-        $params = $this->request->all();
-        if (
-            $this->request->get('defaultRelations') ||
-            defined('SHOULD_PRERENDER')
-        ) {
-            $load = ['tags', 'genres', 'artists', 'fullAlbum'];
-            $loadCount = ['reposts', 'likes'];
-        } else {
-            $load = array_filter(explode(',', Arr::get($params, 'with', '')));
-            $loadCount = array_filter(
-                explode(',', Arr::get($params, 'withCount', '')),
-            );
-        }
+        $loader = request('loader', 'trackPage');
+        $data = (new LoadTrack())->execute($track, $loader);
 
-        foreach ($load as $relation) {
-            if ($relation === 'fullAlbum') {
-                $track->load([
-                    'album' => function (BelongsTo $builder) {
-                        return $builder->with(['artists', 'tracks.artists']);
-                    },
-                ]);
-            } else {
-                $track->load(trim($relation));
-            }
-        }
-
-        $track->loadCount($loadCount);
-
-        if ($track->relationLoaded('album') && $track->album) {
-            $track->album->addPopularityToTracks();
-        }
-
-        $track->makeVisible('description');
-
-        if (Arr::get($params, 'forEditing')) {
-            $track->setHidden([]);
-            $track->setRelation(
-                'artists',
-                $track->artists->map(
-                    fn(Artist $artist) => $artist->toNormalizedArray(),
-                ),
-            );
-            $track->setRelation(
-                'genres',
-                $track->genres->map(
-                    fn(Genre $genre) => $genre->toNormalizedArray(),
-                ),
-            );
-        }
-
-        return $this->success(['track' => $track]);
+        return $this->renderClientOrApi([
+            'pageName' => $loader === 'trackPage' ? 'track-page' : null,
+            'data' => $data,
+        ]);
     }
 
     public function store(ModifyTracks $request)

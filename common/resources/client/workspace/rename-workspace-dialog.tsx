@@ -55,7 +55,7 @@ export function RenameWorkspaceDialog({workspace}: Props) {
           color="primary"
           type="submit"
           form={formId}
-          disabled={updateWorkspace.isLoading}
+          disabled={updateWorkspace.isPending}
         >
           <Trans message="Rename" />
         </Button>

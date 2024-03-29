@@ -2,8 +2,8 @@
 
 namespace App\Services\Artists;
 
-use App\Artist;
-use App\Genre;
+use App\Models\Artist;
+use App\Models\Genre;
 use Arr;
 
 class CrupdateArtist

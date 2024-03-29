@@ -1,4 +1,4 @@
-import {useQuery} from '@tanstack/react-query';
+import {keepPreviousData, useQuery} from '@tanstack/react-query';
 import {DateRangeValue} from '@common/ui/forms/input-field/date/date-range-picker/date-range-value';
 import {apiClient} from '@common/http/query-client';
 import {
@@ -55,14 +55,16 @@ interface Options {
 }
 
 export function useInsightsReport(payload: Payload, options: Options) {
-  return useQuery([endpoint, payload], () => fetchReport(endpoint, payload), {
-    keepPreviousData: true,
+  return useQuery({
+    queryKey: [endpoint, payload],
+    queryFn: () => fetchReport(endpoint, payload),
+    placeholderData: options.isEnabled ? keepPreviousData : undefined,
     enabled: options.isEnabled,
   });
 }
 
 function fetchReport<
-  T extends FetchInsightsReportResponse = FetchInsightsReportResponse
+  T extends FetchInsightsReportResponse = FetchInsightsReportResponse,
 >(endpoint: string, payload: Payload): Promise<T> {
   const params: Record<string, any> = {
     model: payload.model,

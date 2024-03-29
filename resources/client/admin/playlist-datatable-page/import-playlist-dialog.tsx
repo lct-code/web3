@@ -56,7 +56,7 @@ export function ImportPlaylistDialog() {
           variant="flat"
           color="primary"
           type="submit"
-          disabled={importPlaylist.isLoading}
+          disabled={importPlaylist.isPending}
         >
           <Trans message="Import" />
         </Button>

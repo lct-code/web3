@@ -11,10 +11,11 @@ interface Response extends BackendResponse {
 }
 
 export function useFollowPlaylist(playlist: Playlist) {
-  return useMutation(() => followPlaylist(playlist.id), {
+  return useMutation({
+    mutationFn: () => followPlaylist(playlist.id),
     onSuccess: () => {
       toast(message('Following :name', {values: {name: playlist.name}}));
-      queryClient.invalidateQueries(['playlists']);
+      queryClient.invalidateQueries({queryKey: ['playlists']});
     },
     onError: r => showHttpErrorToast(r),
   });

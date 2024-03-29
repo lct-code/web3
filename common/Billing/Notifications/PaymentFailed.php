@@ -2,7 +2,7 @@
 
 namespace Common\Billing\Notifications;
 
-use App\User;
+use App\Models\User;
 use Common\Billing\Subscription;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

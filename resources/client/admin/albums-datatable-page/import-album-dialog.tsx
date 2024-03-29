@@ -56,7 +56,7 @@ export function ImportAlbumDialog() {
           variant="flat"
           color="primary"
           type="submit"
-          disabled={importAlbum.isLoading}
+          disabled={importAlbum.isPending}
         >
           <Trans message="Import" />
         </Button>

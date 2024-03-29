@@ -1,11 +1,11 @@
 <?php
 
-use App\Actions\Channel\LoadChannelMenuItems;
+use Common\Channels\LoadChannelMenuItems;
 
 return [
     [
         'name' => 'Channel',
         'type' => 'channels',
         'itemsLoader' => LoadChannelMenuItems::class,
-    ]
+    ],
 ];

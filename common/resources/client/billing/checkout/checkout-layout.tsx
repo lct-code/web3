@@ -1,4 +1,4 @@
-import {ReactElement, useEffect} from 'react';
+import {Fragment, ReactElement, useEffect} from 'react';
 import {Navbar} from '../../ui/navigation/navbar/navbar';
 import {CustomMenu} from '../../menus/custom-menu';
 import {LocaleSwitcher} from '../../i18n/locale-switcher';
@@ -17,20 +17,20 @@ export function CheckoutLayout({children}: CheckoutLayoutProps) {
   }, []);
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto">
+    <Fragment>
       <StaticPageTitle>
         <Trans message="Checkout" />
       </StaticPageTitle>
       <Navbar
         size="sm"
         color="transparent"
-        className="flex-shrink-0 z-10 mb-20 md:mb-0"
+        className="z-10 mb-20 md:mb-0"
         textColor="text-main"
         logoColor="dark"
         darkModeColor="transparent"
         menuPosition="checkout-page-navbar"
       />
-      <div className="flex-auto md:flex w-full mx-auto justify-between px-20 md:px-0 md:pt-128 md:max-w-950">
+      <div className="md:flex w-full mx-auto justify-between px-20 md:px-0 md:pt-128 md:max-w-950">
         <div className="hidden md:block fixed right-0 top-0 w-1/2 h-full bg-alt shadow-[15px_0_30px_0_rgb(0_0_0_/_18%)]" />
         <div className="md:w-400 overflow-hidden">
           {left}
@@ -46,6 +46,6 @@ export function CheckoutLayout({children}: CheckoutLayoutProps) {
           <div className="relative z-10">{right}</div>
         </div>
       </div>
-    </div>
+    </Fragment>
   );
 }

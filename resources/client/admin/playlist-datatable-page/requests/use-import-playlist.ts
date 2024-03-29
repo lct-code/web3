@@ -18,10 +18,13 @@ export interface ImportPlaylistPayload {
 
 export function useImportPlaylist() {
   const {trans} = useTrans();
-  return useMutation((props: ImportPlaylistPayload) => importArtists(props), {
+  return useMutation({
+    mutationFn: (props: ImportPlaylistPayload) => importArtists(props),
     onSuccess: () => {
       toast(trans(message('Playlist imported')));
-      queryClient.invalidateQueries(DatatableDataQueryKey('playlists'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('playlists'),
+      });
     },
     onError: err => showHttpErrorToast(err),
   });

@@ -5,6 +5,7 @@ import {useRemoveTracksFromPlaylist} from '@app/web-player/playlists/requests/us
 import {useDialogContext} from '@common/ui/overlays/dialog/dialog-context';
 import {TableTrackContextDialog} from '@app/web-player/tracks/context-dialog/table-track-context-dialog';
 import {useAuth} from '@common/auth/use-auth';
+import {Track} from '@app/web-player/tracks/track';
 
 interface PlaylistTrackContextDialogProps {
   playlist: Playlist;
@@ -13,28 +14,42 @@ export function PlaylistTrackContextDialog({
   playlist,
   ...props
 }: PlaylistTrackContextDialogProps) {
-  const {user} = useAuth();
-  const {close: closeMenu} = useDialogContext();
-  const removeTracks = useRemoveTracksFromPlaylist();
-
-  const canRemove = playlist.owner_id === user?.id || playlist.collaborative;
-
   return (
     <TableTrackContextDialog {...props}>
-      {tracks => {
-        return canRemove ? (
-          <ContextMenuButton
-            onClick={() => {
-              if (!removeTracks.isLoading) {
-                removeTracks.mutate({playlistId: playlist.id, tracks});
-                closeMenu();
-              }
-            }}
-          >
-            <Trans message="Remove from this playlist" />
-          </ContextMenuButton>
-        ) : null;
-      }}
+      {tracks => (
+        <RemoveFromPlaylistMenuItem playlist={playlist} tracks={tracks} />
+      )}
     </TableTrackContextDialog>
+  );
+}
+
+interface RemoveFromPlaylistMenuItemProps {
+  playlist: Playlist;
+  tracks: Track[];
+}
+export function RemoveFromPlaylistMenuItem({
+  playlist,
+  tracks,
+}: RemoveFromPlaylistMenuItemProps) {
+  const {user} = useAuth();
+  const removeTracks = useRemoveTracksFromPlaylist();
+  const {close: closeMenu} = useDialogContext();
+  const canRemove = playlist.owner_id === user?.id || playlist.collaborative;
+
+  if (!canRemove) {
+    return null;
+  }
+
+  return (
+    <ContextMenuButton
+      onClick={() => {
+        if (!removeTracks.isPending) {
+          removeTracks.mutate({playlistId: playlist.id, tracks});
+          closeMenu();
+        }
+      }}
+    >
+      <Trans message="Remove from this playlist" />
+    </ContextMenuButton>
   );
 }

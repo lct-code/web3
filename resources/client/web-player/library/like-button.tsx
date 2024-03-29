@@ -22,7 +22,7 @@ export function LikeButton({
   const addToLibrary = useAddItemsToLibrary();
   const removeFromLibrary = useRemoveItemsFromLibrary();
   const isLiked = useLibraryStore(s => s.has(likeable));
-  const isLoading = addToLibrary.isLoading || removeFromLibrary.isLoading;
+  const isLoading = addToLibrary.isPending || removeFromLibrary.isPending;
 
   const labels = getLabels(likeable);
 

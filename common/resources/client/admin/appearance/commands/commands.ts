@@ -1,5 +1,6 @@
 import {To} from 'react-router-dom';
 import {AppearanceValues} from '../appearance-store';
+import {FontConfig} from '@common/http/value-lists';
 
 export interface AppearanceCommand {
   source: 'be-appearance-editor';
@@ -16,8 +17,8 @@ export interface SetAppearanceValues {
   values: AppearanceValues;
 }
 
-export interface SetThemeColor {
-  type: 'setThemeColor';
+export interface SetThemeValue {
+  type: 'setThemeValue';
   name: string;
   value: string;
 }
@@ -33,9 +34,15 @@ export interface SetCustomCode {
   value?: string;
 }
 
+export interface SetThemeFont {
+  type: 'setThemeFont';
+  value: FontConfig | null;
+}
+
 export type AllCommands =
   | Navigate
   | SetAppearanceValues
-  | SetThemeColor
+  | SetThemeValue
+  | SetThemeFont
   | SetActiveTheme
   | SetCustomCode;

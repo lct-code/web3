@@ -7,7 +7,6 @@ use Common\Database\Datasource\Filters\ElasticFilterer;
 use Common\Database\Datasource\Filters\MeilisearchFilterer;
 use Common\Database\Datasource\Filters\MysqlFilterer;
 use Common\Database\Datasource\Filters\TntFilterer;
-use Common\Search\Searchable;
 use Common\Settings\Settings;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +18,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Scout\Builder as ScoutBuilder;
+use Laravel\Scout\Searchable;
 use Matchish\ScoutElasticSearch\Engines\ElasticSearchEngine;
 use const App\Providers\WORKSPACED_RESOURCES;
 
@@ -28,8 +28,11 @@ class Datasource
     protected Model $model;
     protected array $params;
     protected bool $queryBuilt = false;
-    protected DatasourceFilters $filters;
+    public DatasourceFilters $filters;
     public array|null|false $order = null;
+    // sometimes we might need to order by ID or something else, if primary column
+    // is not guaranteed to be unique, to avoid duplicated items in pagination
+    public string|null $secondaryOrderCol = null;
     protected ?ScoutBuilder $scoutBuilder;
 
     public function __construct(
@@ -40,7 +43,7 @@ class Datasource
     ) {
         $this->model = $model->getModel();
         $this->params = $this->toCamelCase($params);
-        $this->builder = $model->newQuery();
+        $this->builder = $model instanceof Model ? $model->newQuery() : $model;
         $this->filters =
             $filters ?? new DatasourceFilters($this->params['filters'] ?? null);
     }
@@ -51,17 +54,20 @@ class Datasource
         $perPage = $this->limit();
         $page = (int) $this->param('page', 1);
         $method = $this->getPaginationMethod();
+        $columns = empty($this->builder->getQuery()->columns)
+            ? ['*']
+            : $this->builder->getQuery()->columns;
 
         if ($method === 'lengthAware') {
             return $this->scoutBuilder instanceof ScoutBuilder
                 ? $this->scoutBuilder->paginate($perPage, 'page', $page)
-                : $this->builder->paginate($perPage, ['*'], 'page', $page);
+                : $this->builder->paginate($perPage, $columns, 'page', $page);
         } else {
             return $this->scoutBuilder instanceof ScoutBuilder
                 ? $this->scoutBuilder->simplePaginate($perPage, 'page', $page)
                 : $this->builder->simplePaginate(
                     $perPage,
-                    ['*'],
+                    $columns,
                     'page',
                     $page,
                 );
@@ -110,10 +116,31 @@ class Datasource
         if ($this->order !== false) {
             $order = $this->getOrder();
             if (isset($order['col'])) {
-                $this->builder->orderBy(
-                    Str::snake($order['col']),
-                    $order['dir'] ?? 'desc',
+                $orderCol = str_replace(
+                    $this->builder->getModel()->getTable() . '.',
+                    '',
+                    $order['col'],
                 );
+                $methodName = Str::camel('orderBy' . ucfirst($orderCol));
+                $scopeMethodName = 'scope' . ucfirst($methodName);
+                if (
+                    method_exists($this->builder->getModel(), $methodName) ||
+                    method_exists($this->builder->getModel(), $scopeMethodName)
+                ) {
+                    $this->builder->$methodName($order['dir']);
+                } else {
+                    $this->builder->orderBy(
+                        Str::snake($order['col']),
+                        $order['dir'] ?? 'desc',
+                    );
+                }
+
+                if ($this->secondaryOrderCol) {
+                    $this->builder->orderBy(
+                        $this->secondaryOrderCol,
+                        $order['dir'] ?? 'desc',
+                    );
+                }
             }
         }
 
@@ -162,11 +189,10 @@ class Datasource
         }
     }
 
-    public function getOrder(): array
-    {
-        $defaultOrderDir = 'desc';
-        $defaultOrderCol = 'updated_at';
-
+    public function getOrder(
+        string $defaultOrderCol = 'updated_at',
+        string $defaultOrderDir = 'desc',
+    ): array {
         if (isset($this->order['col'])) {
             $orderCol = $this->order['col'];
             $orderDir = $this->order['dir'];
@@ -219,7 +245,7 @@ class Datasource
     private function limit(): int
     {
         if ($this->param('perPage')) {
-            return $this->param('perPage');
+            return (int) $this->param('perPage');
         } else {
             return $this->getQueryBuilder()->limit ?? 15;
         }

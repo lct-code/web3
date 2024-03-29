@@ -1,6 +1,6 @@
 import {UploadStrategy, UploadStrategyConfig} from './upload-strategy';
 import {UploadedFile} from '../../uploaded-file';
-import axios, {AxiosInstance} from 'axios';
+import axios, {AxiosInstance, AxiosProgressEvent} from 'axios';
 import {FileEntry} from '../../file-entry';
 import {
   getFromLocalStorage,
@@ -168,8 +168,8 @@ export class S3MultipartUpload implements UploadStrategy {
       .put(url, chunk.blob, {
         withCredentials: false,
         signal: this.abortController.signal,
-        onUploadProgress: (e: ProgressEvent) => {
-          if (!e.lengthComputable) return;
+        onUploadProgress: (e: AxiosProgressEvent) => {
+          if (!e.event.lengthComputable) return;
 
           chunk.bytesUploaded = e.loaded;
           const totalUploaded = this.chunks.reduce(

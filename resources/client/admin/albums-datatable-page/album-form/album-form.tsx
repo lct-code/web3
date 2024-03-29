@@ -23,18 +23,18 @@ export function AlbumForm({showExternalIdFields}: AlbumFormProps) {
   const isMobile = useIsMobileMediaQuery();
   return (
     <Fragment>
-      <div className="md:flex gap-24">
+      <div className="gap-24 md:flex">
         <div className="flex-shrink-0">
           <FormImageSelector
             name="image"
             diskPrefix="album_images"
             label={isMobile ? <Trans message="Image" /> : null}
             variant={isMobile ? 'input' : 'square'}
-            previewSize={isMobile ? undefined : 'w-full md:w-224 aspect-square'}
+            previewSize="md:w-full md:w-224 md:aspect-square"
             stretchPreview
           />
         </div>
-        <div className="flex-auto mt-24 md:mt-0">
+        <div className="mt-24 flex-auto md:mt-0">
           <FormTextField
             name="name"
             label={<Trans message="Name" />}

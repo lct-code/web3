@@ -1,6 +1,5 @@
 import {ButtonColor} from '@common/ui/buttons/get-shared-button-style';
 import {useSettings} from '@common/core/settings/use-settings';
-import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 import {useNavigate} from '@common/utils/hooks/use-navigate';
 import {Menu, MenuTrigger} from '@common/ui/navigation/menu/menu-trigger';
 import {IconButton} from '@common/ui/buttons/icon-button';
@@ -10,6 +9,7 @@ import {Trans} from '@common/i18n/trans';
 import {Link} from 'react-router-dom';
 import {Button} from '@common/ui/buttons/button';
 import {NavbarProps} from '@common/ui/navigation/navbar/navbar';
+import {Fragment} from 'react';
 
 interface NavbarAuthButtonsProps {
   primaryButtonColor?: ButtonColor;
@@ -19,36 +19,25 @@ export function NavbarAuthButtons({
   primaryButtonColor,
   navbarColor,
 }: NavbarAuthButtonsProps) {
-  const {registration} = useSettings();
-  const isMobile = useIsMobileMediaQuery();
-  const navigate = useNavigate();
-
   if (!primaryButtonColor) {
     primaryButtonColor = navbarColor === 'primary' ? 'paper' : 'primary';
   }
 
-  if (isMobile) {
-    return (
-      <MenuTrigger>
-        <IconButton size="md">
-          <PersonIcon />
-        </IconButton>
-        <Menu>
-          <Item value="login" onSelected={() => navigate('/login')}>
-            <Trans message="Login" />
-          </Item>
-          {!registration.disable && (
-            <Item value="register" onSelected={() => navigate('/register')}>
-              <Trans message="Register" />
-            </Item>
-          )}
-        </Menu>
-      </MenuTrigger>
-    );
-  }
-
   return (
-    <div className="text-sm">
+    <Fragment>
+      <MobileButtons />
+      <DesktopButtons primaryButtonColor={primaryButtonColor} />
+    </Fragment>
+  );
+}
+
+interface DesktopButtonsProps {
+  primaryButtonColor: ButtonColor;
+}
+function DesktopButtons({primaryButtonColor}: DesktopButtonsProps) {
+  const {registration} = useSettings();
+  return (
+    <div className="text-sm max-md:hidden">
       {!registration.disable && (
         <Button
           elementType={Link}
@@ -68,5 +57,27 @@ export function NavbarAuthButtons({
         <Trans message="Login" />
       </Button>
     </div>
+  );
+}
+
+function MobileButtons() {
+  const {registration} = useSettings();
+  const navigate = useNavigate();
+  return (
+    <MenuTrigger>
+      <IconButton size="md" className="md:hidden">
+        <PersonIcon />
+      </IconButton>
+      <Menu>
+        <Item value="login" onSelected={() => navigate('/login')}>
+          <Trans message="Login" />
+        </Item>
+        {!registration.disable && (
+          <Item value="register" onSelected={() => navigate('/register')}>
+            <Trans message="Register" />
+          </Item>
+        )}
+      </Menu>
+    </MenuTrigger>
   );
 }

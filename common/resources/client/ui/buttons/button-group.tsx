@@ -9,13 +9,7 @@ export interface ButtonGroupProps {
   color?: ButtonColor;
   variant?: ButtonVariant;
   size?: ButtonSize;
-  radius?:
-    | 'rounded-none'
-    | 'rounded'
-    | 'rounded-sm'
-    | 'rounded-md'
-    | 'rounded-lg'
-    | 'rounded-full';
+  radius?: string;
   className?: string;
   value?: any;
   onChange?: (newValue: any) => void;
@@ -26,7 +20,7 @@ export function ButtonGroup({
   children,
   color,
   variant,
-  radius,
+  radius = 'rounded-button',
   size,
   className,
   value,
@@ -80,13 +74,13 @@ export function ButtonGroup({
           button.props.className,
           // borders are hidden via negative margin, make sure both are visible for active item
           active ? 'z-20' : 'z-10',
-          getStyle(i, children, radius, adjustedColor)
+          getStyle(i, children, radius, adjustedColor),
         ),
       });
     }
   });
   return (
-    <div className={clsx(radius, 'inline-flex isolate', className)}>
+    <div className={clsx(radius, 'isolate inline-flex', className)}>
       {buttons}
     </div>
   );
@@ -96,14 +90,14 @@ function getStyle(
   i: number,
   children: ButtonGroupProps['children'],
   radius: ButtonGroupProps['radius'],
-  color?: ButtonColor
+  color?: ButtonColor,
 ): string {
   // first
   if (i === 0) {
     return clsx(
       radius,
       'rounded-tr-none rounded-br-none',
-      !color && 'border-r-transparent disabled:border-r-transparent'
+      !color && 'border-r-transparent disabled:border-r-transparent',
     );
   }
   // last
@@ -112,6 +106,6 @@ function getStyle(
   }
   return clsx(
     'rounded-none -ml-1',
-    !color && 'border-r-transparent disabled:border-r-transparent'
+    !color && 'border-r-transparent disabled:border-r-transparent',
   );
 }

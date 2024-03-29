@@ -1,6 +1,6 @@
 <?php namespace App\Http\Controllers;
 
-use App\Playlist;
+use App\Models\Playlist;
 use Common\Core\BaseController;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;

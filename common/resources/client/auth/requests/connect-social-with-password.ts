@@ -16,12 +16,13 @@ export interface ConnectSocialPayload {
 }
 
 export function useConnectSocialWithPassword(
-  form: UseFormReturn<ConnectSocialPayload>
+  form: UseFormReturn<ConnectSocialPayload>,
 ) {
   const navigate = useNavigate();
   const {getRedirectUri} = useAuth();
   const {setBootstrapData} = useBootstrapData();
-  return useMutation(connect, {
+  return useMutation({
+    mutationFn: connect,
     onSuccess: response => {
       setBootstrapData(response.bootstrapData);
       navigate(getRedirectUri(), {replace: true});

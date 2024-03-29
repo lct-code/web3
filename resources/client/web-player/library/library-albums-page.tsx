@@ -29,7 +29,7 @@ export function LibraryAlbumsPage() {
   const totalItems = useLibraryStore(s => Object.keys(s.album).length);
   const query = useUserLikedAlbums('me', {willSortOrFilter: true});
   const {
-    isInitialLoading,
+    isLoading,
     sortDescriptor,
     setSortDescriptor,
     searchQuery,
@@ -48,7 +48,7 @@ export function LibraryAlbumsPage() {
         <Trans message="Your albums" />
       </StaticPageTitle>
       <AdHost slot="general_top" className="mb-34" />
-      <h1 className="text-2xl font-semibold mb-20">
+      <h1 className="mb-20 text-2xl font-semibold">
         {totalItems ? (
           <Trans
             message="[one 1 liked album|other :count liked albums]"
@@ -58,7 +58,7 @@ export function LibraryAlbumsPage() {
           <Trans message="My albums" />
         )}
       </h1>
-      <div className="flex items-center gap-24 justify-between">
+      <div className="flex items-center justify-between gap-24">
         <TextField
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
@@ -75,7 +75,7 @@ export function LibraryAlbumsPage() {
       </div>
       <div className="mt-34">
         <AnimatePresence initial={false} mode="wait">
-          {isInitialLoading ? (
+          {isLoading ? (
             <PlayableMediaGridSkeleton itemCount={totalItems} />
           ) : (
             <m.div key="media-grid" {...opacityAnimation}>
@@ -89,7 +89,7 @@ export function LibraryAlbumsPage() {
           )}
         </AnimatePresence>
       </div>
-      {!items.length && !isInitialLoading && (
+      {!items.length && !isLoading && (
         <MediaPageNoResultsMessage
           className="mt-34"
           searchQuery={searchQuery}

@@ -20,7 +20,7 @@ type InputFieldStyleProps = Omit<
 >;
 
 export function getInputFieldClassNames(
-  props: InputFieldStyleProps = {}
+  props: InputFieldStyleProps = {},
 ): InputFieldStyle {
   const {
     size = 'md',
@@ -38,6 +38,9 @@ export function getInputFieldClassNames(
     flexibleHeight,
     inputShadow = 'shadow-sm',
     descriptionPosition = 'bottom',
+    inputRing,
+    inputFontSize,
+    labelSuffix,
   } = {...props};
 
   if (unstyled) {
@@ -58,10 +61,16 @@ export function getInputFieldClassNames(
     size: props.size,
     flexibleHeight,
   });
+  if (inputFontSize) {
+    sizeClass.font = inputFontSize;
+  }
+
   const isInputGroup = startAppend || endAppend;
+
   const ringColor = invalid
     ? 'focus:ring-danger/focus focus:border-danger/60'
     : 'focus:ring-primary/focus focus:border-primary/60';
+  const ringClassName = inputRing || `focus:ring ${ringColor}`;
 
   const radius = getRadius(props);
 
@@ -71,7 +80,7 @@ export function getInputFieldClassNames(
       'first-letter:capitalize text-left whitespace-nowrap',
       disabled && 'text-disabled',
       sizeClass.font,
-      labelPosition === 'side' ? 'mr-16' : 'mb-4'
+      labelSuffix ? '' : labelPosition === 'side' ? 'mr-16' : 'mb-4',
     ),
     input: clsx(
       'block text-left relative w-full appearance-none transition-shadow text',
@@ -81,12 +90,12 @@ export function getInputFieldClassNames(
       radius.input,
 
       getInputBorder(props),
-      !disabled && `focus:ring ${ringColor} focus:outline-none ${inputShadow}`,
+      !disabled && `${ringClassName} focus:outline-none ${inputShadow}`,
       disabled && 'text-disabled cursor-not-allowed',
       inputClassName,
       sizeClass.font,
       sizeClass.height,
-      getInputPadding(props)
+      getInputPadding(props),
     ),
     adornment: iconSizeClass(size),
     append: {
@@ -99,7 +108,7 @@ export function getInputFieldClassNames(
     inputWrapper: clsx(
       'isolate relative',
       inputWrapperClassName,
-      isInputGroup && 'flex items-stretch'
+      isInputGroup && 'flex items-stretch',
     ),
     size: sizeClass,
     description: `text-muted ${
@@ -137,12 +146,12 @@ function getInputPadding({
   if (inputRadius === 'rounded-full') {
     return clsx(
       startAdornment ? 'pl-54' : 'pl-28',
-      endAdornment ? 'pr-54' : 'pr-28'
+      endAdornment ? 'pr-54' : 'pr-28',
     );
   }
   return clsx(
     startAdornment ? 'pl-46' : 'pl-12',
-    endAdornment ? 'pr-46' : 'pr-12'
+    endAdornment ? 'pr-46' : 'pr-12',
   );
 }
 
@@ -158,18 +167,28 @@ function getRadius(props: InputFieldStyleProps): {
       input: clsx(
         !isInputGroup && 'rounded-full',
         startAppend && 'rounded-r-full rounded-l-none',
-        endAppend && 'rounded-l-full rounded-r-none'
+        endAppend && 'rounded-l-full rounded-r-none',
       ),
       append: startAppend ? 'rounded-l-full' : 'rounded-r-full',
+    };
+  } else if (inputRadius === 'rounded-none') {
+    return {
+      input: '',
+      append: '',
+    };
+  } else if (inputRadius) {
+    return {
+      input: inputRadius,
+      append: inputRadius,
     };
   }
   return {
     input: clsx(
-      !isInputGroup && 'rounded',
-      startAppend && 'rounded-r rounded-l-none',
-      endAppend && 'rounded-l rounded-r-none'
+      !isInputGroup && 'rounded-input',
+      startAppend && 'rounded-input-r rounded-l-none',
+      endAppend && 'rounded-input-l rounded-r-none',
     ),
-    append: startAppend ? 'rounded-l' : 'rounded-r',
+    append: startAppend ? 'rounded-input-l' : 'rounded-input-r',
   };
 }
 

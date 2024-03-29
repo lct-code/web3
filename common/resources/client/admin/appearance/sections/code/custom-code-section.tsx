@@ -1,9 +1,12 @@
-import {AppearanceButton} from '../../appearance-button';
-import {DialogTrigger} from '../../../../ui/overlays/dialog/dialog-trigger';
-import {Trans} from '../../../../i18n/trans';
+import {AppearanceButton} from '@common/admin/appearance/appearance-button';
+import {DialogTrigger} from '@common/ui/overlays/dialog/dialog-trigger';
+import {Trans} from '@common/i18n/trans';
 import {useFormContext} from 'react-hook-form';
-import {appearanceState, AppearanceValues} from '../../appearance-store';
-import {AceDialog} from '../../../../ace-editor/ace-dialog';
+import {
+  appearanceState,
+  AppearanceValues,
+} from '@common/admin/appearance/appearance-store';
+import {AceDialog} from '@common/ace-editor/ace-dialog';
 import {Fragment} from 'react';
 
 export function CustomCodeSection() {

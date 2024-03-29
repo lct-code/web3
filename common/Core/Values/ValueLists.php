@@ -24,7 +24,7 @@ class ValueLists
     ) {
     }
 
-    public function get(string $names, array $params = []): Collection
+    public function get(string $names, array $params = []): Collection|array
     {
         return collect(explode(',', $names))
             ->mapWithKeys(function ($name) use ($params) {
@@ -227,7 +227,7 @@ class ValueLists
             ->select(['name', 'id'])
             ->get();
     }
-    
+
     private function loadAppValueFile(string $name, array $params): ?array
     {
         $fileName = Str::kebab($name);

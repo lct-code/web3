@@ -1,8 +1,8 @@
 <?php
 
-use App\Album;
-use App\User;
-use App\UserProfile;
+use App\Models\Album;
+use App\Models\User;
+use App\Models\UserProfile;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Collection;
 

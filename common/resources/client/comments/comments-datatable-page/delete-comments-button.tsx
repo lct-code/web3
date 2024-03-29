@@ -28,9 +28,9 @@ export function DeleteCommentsButton({
             {commentIds},
             {
               onSuccess: () => {
-                queryClient.invalidateQueries(['comment']);
+                queryClient.invalidateQueries({queryKey: ['comment']});
               },
-            }
+            },
           );
         }
       }}
@@ -40,7 +40,7 @@ export function DeleteCommentsButton({
         size={size}
         color="danger"
         className="mr-10"
-        disabled={deleteComments.isLoading}
+        disabled={deleteComments.isPending}
       >
         <Trans message="Delete" />
       </Button>

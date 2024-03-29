@@ -31,7 +31,7 @@ export function PlayButton({
   );
 
   return (
-    <Tooltip label={label}>
+    <Tooltip label={label} usePortal={false}>
       <IconButton
         color={color}
         size={size}

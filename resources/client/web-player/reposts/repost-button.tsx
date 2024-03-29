@@ -38,7 +38,7 @@ export function RepostButton({
       size={size}
       radius={radius}
       startIcon={<RepeatIcon className={clsx(isReposted && 'text-primary')} />}
-      disabled={disabled || toggleRepost.isLoading}
+      disabled={disabled || toggleRepost.isPending}
       onClickCapture={authHandler}
       onClick={() => toggleRepost.mutate({repostable: item})}
     >

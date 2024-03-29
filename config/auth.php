@@ -39,6 +39,7 @@ return [
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
+            'remember' => 43200,
         ],
 
         'api' => [
@@ -68,7 +69,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\User::class,
+            'model' => \App\Models\User::class,
         ],
 
         // 'users' => [

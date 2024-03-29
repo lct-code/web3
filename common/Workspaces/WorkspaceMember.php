@@ -28,7 +28,7 @@ class WorkspaceMember extends Model
             'permission_id',
             'role_id',
         )
-            ->where('permissionable_type', Role::class)
+            ->where('permissionable_type', Role::MODEL_TYPE)
             ->select([
                 'permissions.id',
                 'permissions.name',

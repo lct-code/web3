@@ -5,5 +5,7 @@ export interface Lyric {
   text: string;
   track_id: number;
   track?: Track;
+  is_synced: boolean;
+  duration: number | null;
   updated_at: string;
 }

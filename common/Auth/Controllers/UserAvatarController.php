@@ -1,6 +1,6 @@
 <?php namespace Common\Auth\Controllers;
 
-use App\User;
+use App\Models\User;
 use Common\Auth\Events\UserAvatarChanged;
 use Common\Core\BaseController;
 use Illuminate\Http\Request;

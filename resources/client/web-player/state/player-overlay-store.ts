@@ -16,11 +16,13 @@ export const usePlayerOverlayStore = create<OverlayState>()(
     open: () => {
       set(state => {
         state.isMaximized = true;
+        state.isQueueOpen = false;
       });
     },
     toggle: () => {
       set(state => {
         state.isMaximized = !state.isMaximized;
+        state.isQueueOpen = false;
       });
     },
     toggleQueue: () => {

@@ -4,7 +4,6 @@ namespace Common\Files;
 
 use Arr;
 use Common\Files\Traits\GetsEntryTypeFromMime;
-use Common\Settings\Settings;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Str;
@@ -34,7 +33,7 @@ class FileEntryPayload
     public function __construct(array $data)
     {
         $this->prepareData($data);
-        $this->diskName =  Arr::get($data, 'disk', 'uploads');
+        $this->diskName = Arr::get($data, 'disk', 'uploads');
         $this->public = $this->diskName === 'public';
         $this->prepareEntryPayload();
     }
@@ -89,9 +88,7 @@ class FileEntryPayload
 
     private function getFilename()
     {
-        $keepOriginalName = app(Settings::class)->get(
-            'uploads.keep_original_name',
-        );
+        $keepOriginalName = settings('uploads.keep_original_name');
 
         if (isset($this->data['filename'])) {
             return $this->data['filename'];

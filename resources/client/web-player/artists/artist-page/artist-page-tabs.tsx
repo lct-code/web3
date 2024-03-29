@@ -90,10 +90,7 @@ export function ArtistPageTabs({data}: Props) {
             case artistPageTabs.discography:
               return (
                 <TabPanel key={artistPageTabs.discography}>
-                  <DiscographyTab
-                    artist={data.artist}
-                    initialAlbums={data.albums}
-                  />
+                  <DiscographyTab data={data} />
                 </TabPanel>
               );
             case artistPageTabs.similar:

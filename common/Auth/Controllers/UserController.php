@@ -1,22 +1,18 @@
 <?php namespace Common\Auth\Controllers;
 
-use App\User;
+use App\Models\User;
 use Auth;
+use Common\Auth\Actions\CreateUser;
+use Common\Auth\Actions\DeleteUsers;
 use Common\Auth\Actions\PaginateUsers;
-use Common\Auth\Requests\ModifyUsers;
-use Common\Auth\UserRepository;
+use Common\Auth\Actions\UpdateUser;
+use Common\Auth\Requests\CrupdateUserRequest;
 use Common\Core\BaseController;
-use Common\Settings\Settings;
-use Illuminate\Http\Request;
 
 class UserController extends BaseController
 {
-    public function __construct(
-        protected User $user,
-        protected UserRepository $userRepository,
-        protected Request $request,
-        protected Settings $settings,
-    ) {
+    public function __construct()
+    {
         $this->middleware('auth', ['except' => ['show']]);
     }
 
@@ -24,24 +20,30 @@ class UserController extends BaseController
     {
         $this->authorize('index', User::class);
 
-        $pagination = app(PaginateUsers::class)->execute($this->request->all());
+        $pagination = (new PaginateUsers())->execute(request()->all());
 
         return $this->success(['pagination' => $pagination]);
     }
 
     public function show(User $user)
     {
-        $relations = array_filter(
-            explode(',', $this->request->get('with', '')),
-        );
+        $relations = array_filter(explode(',', request('with', '')));
         $relations = array_merge(['roles', 'social_profiles'], $relations);
 
-        if ($this->settings->get('envato.enable')) {
+        if (settings('envato.enable')) {
             $relations[] = 'purchase_codes';
         }
 
         if (Auth::id() === $user->id) {
             $relations[] = 'tokens';
+            $user->makeVisible([
+                'two_factor_confirmed_at',
+                'two_factor_recovery_codes',
+            ]);
+            if ($user->two_factor_confirmed_at) {
+                $user->two_factor_recovery_codes = $user->recoveryCodes();
+                $user->syncOriginal();
+            }
         }
 
         $user->load($relations);
@@ -51,20 +53,20 @@ class UserController extends BaseController
         return $this->success(['user' => $user]);
     }
 
-    public function store(ModifyUsers $request)
+    public function store(CrupdateUserRequest $request)
     {
         $this->authorize('store', User::class);
 
-        $user = $this->userRepository->create($request->all());
+        $user = (new CreateUser())->execute($request->validated());
 
         return $this->success(['user' => $user], 201);
     }
 
-    public function update(User $user, ModifyUsers $request)
+    public function update(User $user, CrupdateUserRequest $request)
     {
         $this->authorize('update', $user);
 
-        $user = $this->userRepository->update($user, $request->all());
+        $user = (new UpdateUser())->execute($user, $request->validated());
 
         return $this->success(['user' => $user]);
     }
@@ -72,10 +74,10 @@ class UserController extends BaseController
     public function destroy(string $ids)
     {
         $userIds = explode(',', $ids);
-        $shouldDeleteCurrentUser = $this->request->get('deleteCurrentUser');
+        $shouldDeleteCurrentUser = request('deleteCurrentUser');
         $this->authorize('destroy', [User::class, $userIds]);
 
-        $users = $this->user->whereIn('id', $userIds)->get();
+        $users = User::whereIn('id', $userIds)->get();
 
         // guard against current user or admin user deletion
         foreach ($users as $user) {
@@ -96,7 +98,7 @@ class UserController extends BaseController
             }
         }
 
-        $this->userRepository->deleteMultiple($users->pluck('id'));
+        (new DeleteUsers())->execute($users->pluck('id')->toArray());
 
         return $this->success();
     }

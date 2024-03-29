@@ -30,7 +30,7 @@ export const Popover = forwardRef<HTMLDivElement, OverlayProps>(
       onPointerLeave,
       onPointerEnter,
     },
-    ref
+    ref,
   ) => {
     const viewPortStyle = useOverlayViewport();
     const objRef = useObjectRef(ref);
@@ -43,12 +43,12 @@ export const Popover = forwardRef<HTMLDivElement, OverlayProps>(
         triggerRef,
         isContextMenu,
       },
-      objRef
+      objRef,
     );
 
     return (
       <m.div
-        className="z-popover isolate"
+        className="isolate z-popover"
         role="presentation"
         ref={objRef}
         style={{...viewPortStyle, ...style, position: 'fixed'}}
@@ -64,7 +64,7 @@ export const Popover = forwardRef<HTMLDivElement, OverlayProps>(
         </FocusScope>
       </m.div>
     );
-  }
+  },
 );
 
 // this should only be rendered when overlay is open
@@ -83,7 +83,7 @@ function useCloseOnInteractOutside(
     triggerRef,
     isContextMenu = false,
   }: useCloseOnInteractOutsideProps,
-  ref: RefObject<Element>
+  ref: RefObject<Element>,
 ) {
   const stateRef = useRef({
     isPointerDown: false,
@@ -112,7 +112,7 @@ function useCloseOnInteractOutside(
 
       return ref.current && !ref.current.contains(target);
     },
-    [ref]
+    [ref],
   );
 
   // Only hide the overlay when it is the topmost visible overlay in the stack.
@@ -134,7 +134,7 @@ function useCloseOnInteractOutside(
       }
       return false;
     },
-    [triggerRef]
+    [triggerRef],
   );
 
   const onInteractOutsideStart = useCallback(
@@ -146,7 +146,7 @@ function useCloseOnInteractOutside(
         }
       }
     },
-    [clickedOnTriggerElement, isTopMostPopover]
+    [clickedOnTriggerElement, isTopMostPopover],
   );
 
   const onInteractOutside = useCallback(
@@ -163,7 +163,7 @@ function useCloseOnInteractOutside(
         }
       }
     },
-    [clickedOnTriggerElement, hideOverlay, state, isTopMostPopover]
+    [clickedOnTriggerElement, hideOverlay, state, isTopMostPopover],
   );
 
   // Add popover ref to the stack of visible popovers on mount, and remove on unmount.

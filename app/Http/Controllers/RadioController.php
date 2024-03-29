@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Artist;
-use App\Genre;
+use App\Models\Artist;
+use App\Models\Genre;
+use App\Models\Track;
 use App\Services\Providers\ProviderResolver;
-use App\Track;
 use Cache;
 use Carbon\Carbon;
 use Common\Core\BaseController;

@@ -1,4 +1,3 @@
-import {useState} from 'react';
 import {ColorPicker} from './color-picker';
 import {DialogFooter} from '../overlays/dialog/dialog-footer';
 import {Button} from '../buttons/button';
@@ -7,19 +6,14 @@ import {Dialog} from '../overlays/dialog/dialog';
 import {Trans} from '../../i18n/trans';
 
 interface ColorPickerDialogProps {
-  defaultValue?: string;
-  onChange?: (color: string) => void;
   hideFooter?: boolean;
   showInput?: boolean;
 }
 export function ColorPickerDialog({
-  defaultValue,
-  onChange,
   hideFooter = false,
   showInput = true,
 }: ColorPickerDialogProps) {
-  const {close} = useDialogContext();
-  const [value, setValue] = useState(defaultValue || '');
+  const {close, value, setValue, initialValue} = useDialogContext();
   // todo: remove this once pixie and bedrive are refactored to use dialogTrigger currentValue (use "currentValue" for defaultValue as well)
   //const initialValue = useRef(defaultValue);
 
@@ -27,30 +21,21 @@ export function ColorPickerDialog({
     <Dialog size="2xs">
       <ColorPicker
         showInput={showInput}
-        defaultValue={value}
+        defaultValue={initialValue as string}
         onChange={newValue => {
           setValue(newValue);
-          onChange?.(newValue);
         }}
       />
       {!hideFooter && (
         <DialogFooter dividerTop>
-          <Button
-            variant="text"
-            size="xs"
-            onClick={() => {
-              close();
-            }}
-          >
+          <Button variant="text" size="xs" onClick={() => close()}>
             <Trans message="Cancel" />
           </Button>
           <Button
             variant="flat"
             color="primary"
             size="xs"
-            onClick={() => {
-              close(value);
-            }}
+            onClick={() => close(value)}
           >
             <Trans message="Apply" />
           </Button>

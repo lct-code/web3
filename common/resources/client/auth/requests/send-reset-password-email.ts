@@ -15,10 +15,11 @@ export interface SendPasswordResetEmailPayload {
 }
 
 export function useSendPasswordResetEmail(
-  form: UseFormReturn<SendPasswordResetEmailPayload>
+  form: UseFormReturn<SendPasswordResetEmailPayload>,
 ) {
   const navigate = useNavigate();
-  return useMutation(sendResetPasswordEmail, {
+  return useMutation({
+    mutationFn: sendResetPasswordEmail,
     onSuccess: response => {
       toast(response.message);
       navigate('/login');
@@ -28,7 +29,7 @@ export function useSendPasswordResetEmail(
 }
 
 function sendResetPasswordEmail(
-  payload: SendPasswordResetEmailPayload
+  payload: SendPasswordResetEmailPayload,
 ): Promise<Response> {
   return apiClient
     .post('auth/forgot-password', payload)

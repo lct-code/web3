@@ -24,16 +24,14 @@ import {
 import {createPipSlice, PipSlice} from '@common/player/state/pip/pip-slice';
 import {subscribeWithSelector} from 'zustand/middleware';
 
-// todo: add option to show title in top left corner, same as vidstack
-
 export const createPlayerStore = (
   id: string | number,
-  options: PlayerStoreOptions
+  options: PlayerStoreOptions,
 ) => {
   // initialData from options should take priority over local storage data
   const initialData = deepMerge(
     getPlayerStateFromLocalStorage(id, options),
-    options.initialData || {}
+    options.initialData || {},
   );
 
   const setInLocalStorage = (key: string, value: any) => {
@@ -57,9 +55,13 @@ export const createPlayerStore = (
               s.controlsVisible = true;
             });
           },
-          error: () => {
+          error: e => {
             set(s => {
-              s.isPlaying = false;
+              // there could be a number of non-fatal errors where player will continue to
+              // work properly, like autoplay error from HTML5 video or buffer full from HLS
+              if (e?.fatal) {
+                s.isPlaying = false;
+              }
             });
           },
           durationChange: payload => {
@@ -79,6 +81,12 @@ export const createPlayerStore = (
           },
           playbackQualities: ({qualities}) => {
             set({playbackQualities: qualities});
+          },
+          audioTracks: ({tracks}) => {
+            set({audioTracks: tracks});
+          },
+          currentAudioTrackChange: ({trackId}) => {
+            set({currentAudioTrack: trackId});
           },
           playbackQualityChange: ({quality}) => {
             set({playbackQuality: quality});
@@ -106,6 +114,7 @@ export const createPlayerStore = (
                 get().appendToQueue(items);
               }
             }
+
             get().playNext();
           },
           posterLoaded: ({url}) => {
@@ -116,6 +125,9 @@ export const createPlayerStore = (
             if (provider) {
               provider.setVolume(get().volume);
               provider.setMuted(get().muted);
+              if (options.autoPlay) {
+                provider.play();
+              }
               set({providerReady: true});
             }
           },
@@ -255,6 +267,16 @@ export const createPlayerStore = (
               media = queue.getNext();
             }
 
+            // YouTube provider will not play the same tray unless we wait some time after playback end
+            if (get().repeat === 'one' && get().providerName === 'youtube') {
+              await new Promise(resolve => setTimeout(resolve, 50));
+            }
+
+            // allow user to handle playing next track
+            if (options.onBeforePlayNext?.(media)) {
+              return;
+            }
+
             if (media) {
               await get().play(media);
             } else {
@@ -272,6 +294,11 @@ export const createPlayerStore = (
               media = queue.getPrevious();
             }
 
+            // allow user to handle playing previous track
+            if (options.onBeforePlayPrevious?.(media)) {
+              return;
+            }
+
             if (media) {
               await get().play(media);
             } else {
@@ -281,6 +308,8 @@ export const createPlayerStore = (
           },
           cue: async media => {
             if (isSameMedia(media, get().cuedMedia)) return;
+
+            get().emit('beforeCued', {previous: get().cuedMedia});
 
             return new Promise((resolve, reject) => {
               const previousProvider = get().providerName;
@@ -296,10 +325,10 @@ export const createPlayerStore = (
                   unsubscribe();
                   resolve();
                 },
-                error: () => {
+                error: e => {
                   clearTimeout(timeoutId);
                   unsubscribe();
-                  reject();
+                  reject('Could not cue media');
                 },
               });
 
@@ -315,12 +344,14 @@ export const createPlayerStore = (
                 options.setMediaSessionMetadata?.(media);
               }
 
-              setInLocalStorage('cuedMediaId', media.id);
+              if (options.persistQueueInLocalStorage) {
+                setInLocalStorage('cuedMediaId', media.id);
+              }
             });
           },
           async overrideQueue(
             mediaItems: MediaItem[],
-            queuePointer: number = 0
+            queuePointer: number = 0,
           ): Promise<any> {
             if (!mediaItems?.length) return;
             const items = [...mediaItems];
@@ -330,7 +361,9 @@ export const createPlayerStore = (
                 : items;
               s.originalQueue = items;
             });
-            setInLocalStorage('queue', get().originalQueue.slice(0, 15));
+            if (options.persistQueueInLocalStorage) {
+              setInLocalStorage('queue', get().originalQueue.slice(0, 15));
+            }
             const media =
               queuePointer > -1 ? mediaItems[queuePointer] : queue.getCurrent();
             if (media) {
@@ -346,26 +379,30 @@ export const createPlayerStore = (
               s.shuffledQueue = prependToArrayAtIndex(
                 s.shuffledQueue,
                 shuffledNewItems,
-                index
+                index,
               );
               s.originalQueue = prependToArrayAtIndex(
                 s.originalQueue,
                 mediaItems,
-                index
+                index,
               );
             });
-            setInLocalStorage('queue', get().originalQueue.slice(0, 15));
+            if (options.persistQueueInLocalStorage) {
+              setInLocalStorage('queue', get().originalQueue.slice(0, 15));
+            }
           },
           removeFromQueue: mediaItems => {
             set(s => {
               s.shuffledQueue = s.shuffledQueue.filter(
-                item => !mediaItems.find(m => isSameMedia(m, item))
+                item => !mediaItems.find(m => isSameMedia(m, item)),
               );
               s.originalQueue = s.originalQueue.filter(
-                item => !mediaItems.find(m => isSameMedia(m, item))
+                item => !mediaItems.find(m => isSameMedia(m, item)),
               );
             });
-            setInLocalStorage('queue', get().originalQueue.slice(0, 15));
+            if (options.persistQueueInLocalStorage) {
+              setInLocalStorage('queue', get().originalQueue.slice(0, 15));
+            }
           },
           textTracks: [],
           currentTextTrack: -1,
@@ -376,9 +413,14 @@ export const createPlayerStore = (
           setTextTrackVisibility: isVisible => {
             get().providerApi?.setTextTrackVisibility?.(isVisible);
           },
+          audioTracks: [],
+          currentAudioTrack: -1,
+          setCurrentAudioTrack: trackId => {
+            get().providerApi?.setCurrentAudioTrack?.(trackId);
+          },
           destroy: () => {
-            get().exitFullscreen();
-            get().exitPip();
+            get().destroyFullscreen();
+            get().destroyPip();
             options?.onDestroy?.();
             resetMediaSession();
             listeners.clear();
@@ -386,6 +428,8 @@ export const createPlayerStore = (
           },
           init: async () => {
             // add initial and listeners from options, these will be present for the entire lifetime of the player
+            get().initFullscreen();
+
             listeners.add(internalListeners);
             if (options.listeners) {
               listeners.add(options.listeners as Partial<ProviderListeners>);
@@ -394,7 +438,7 @@ export const createPlayerStore = (
             const mediaId =
               initialData.cuedMediaId || initialData.queue?.[0]?.id;
             const mediaToCue = initialData.queue?.find(
-              media => media.id === mediaId
+              media => media.id === mediaId,
             );
             if (mediaToCue) {
               await get().cue(mediaToCue);
@@ -410,7 +454,7 @@ export const createPlayerStore = (
             listeners.forEach(l => l[event]?.({state: get(), ...payload}));
           },
         };
-      })
-    )
+      }),
+    ),
   );
 };

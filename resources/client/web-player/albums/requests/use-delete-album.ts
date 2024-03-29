@@ -19,16 +19,17 @@ export function useDeleteAlbum() {
   const navigate = useNavigate();
   const {getRedirectUri} = useAuth();
 
-  return useMutation((payload: Payload) => deleteAlbum(payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => deleteAlbum(payload),
     onSuccess: (response, {albumId}) => {
       toast(message('Album deleted'));
       // navigate to homepage if we are on this album page currently
       if (pathname.startsWith(`/album/${albumId}`)) {
         navigate(getRedirectUri());
       }
-      queryClient.invalidateQueries(['tracks']);
-      queryClient.invalidateQueries(['albums']);
-      queryClient.invalidateQueries(['artists']);
+      queryClient.invalidateQueries({queryKey: ['tracks']});
+      queryClient.invalidateQueries({queryKey: ['albums']});
+      queryClient.invalidateQueries({queryKey: ['artists']});
     },
     onError: r => showHttpErrorToast(r),
   });

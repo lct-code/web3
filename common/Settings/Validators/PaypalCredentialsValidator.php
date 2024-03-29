@@ -30,9 +30,9 @@ class PaypalCredentialsValidator implements SettingsValidator
         $this->settings = $settings;
     }
 
-    public function fails($settings)
+    public function fails($values)
     {
-        $this->setConfigDynamically($settings);
+        $this->setConfigDynamically($values);
 
         // create gateway after setting config dynamically
         // so gateway uses new configuration

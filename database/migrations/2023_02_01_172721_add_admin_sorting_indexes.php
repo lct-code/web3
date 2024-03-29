@@ -8,8 +8,15 @@ return new class extends Migration {
     public function up()
     {
         Schema::table('tracks', function (Blueprint $table) {
-            $table->index('updated_at');
-            $table->index('name');
+
+            $sm = Schema::getConnection()->getDoctrineSchemaManager();
+            $indexesFound = $sm->listTableIndexes('tracks');
+            if (!array_key_exists('updated_at_index', $indexesFound)) {
+                $table->index('updated_at');
+            }
+            if (!array_key_exists('name_index', $indexesFound)) {
+                $table->index('name');
+            }
         });
         Schema::table('artists', function (Blueprint $table) {
             $table->index('updated_at');

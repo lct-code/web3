@@ -26,12 +26,21 @@ class PaypalPlans
 
         // create any local product prices (plans) on PayPal, that don't exist there already
         $product->prices->each(function (Price $price) use ($product) {
-            if (!$price->paypal_id) {
+            if (
+                !$price->paypal_id ||
+                !$this->planExistsOnPaypal($price->paypal_id)
+            ) {
                 $this->create($product, $price);
             }
         });
 
         return true;
+    }
+
+    protected function planExistsOnPaypal(string $paypalPlanId): bool
+    {
+        $response = $this->paypal()->get("billing/plans/{$paypalPlanId}");
+        return $response->successful();
     }
 
     protected function create(Product $product, Price $price): bool

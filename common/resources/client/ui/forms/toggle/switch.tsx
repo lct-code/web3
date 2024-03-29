@@ -14,6 +14,7 @@ interface SwitchProps
   description?: ReactNode;
   invalid?: boolean;
   errorMessage?: string;
+  iconRight?: ReactNode;
 }
 export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
   (props, ref) => {
@@ -25,6 +26,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
       invalid,
       autoFocus,
       errorMessage,
+      iconRight,
       ...domProps
     } = props;
 
@@ -38,7 +40,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
 
     return (
       <div className={clsx(className, 'isolate')}>
-        <label className="flex items-center select-none">
+        <label className="flex select-none items-center">
           <input
             {...domProps}
             type="checkbox"
@@ -50,13 +52,13 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
             className={clsx(
               style,
               !invalid &&
-                'checked:bg-primary dark:checked:bg-primary-dark checked:border-primary dark:checked:border-primary-dark',
-              invalid && 'checked:bg-danger checked:border-danger',
-              'outline-none cursor-pointer bg-chip border-chip border checked:bg-primary checked:border-primary p-0 overflow-hidden relative rounded-3xl appearance-none transition-colors flex-shrink-0 flex items-center outline-none',
-              'before:z-10 before:border before:rounded-3xl before:block before:bg-white before:transition-transform before:translate-x-2',
+                'checked:border-primary checked:bg-primary dark:checked:border-primary-dark dark:checked:bg-primary-dark',
+              invalid && 'checked:border-danger checked:bg-danger',
+              'relative flex flex-shrink-0 cursor-pointer appearance-none items-center overflow-hidden rounded-3xl border border-chip bg-chip p-0 outline-none transition-colors checked:border-primary checked:bg-primary',
+              'before:z-10 before:block before:translate-x-2 before:rounded-3xl before:border before:bg-white before:transition-transform',
               'checked:before:border-white',
               'focus-visible:ring',
-              props.disabled && 'opacity-80 cursor-not-allowed'
+              props.disabled && 'cursor-not-allowed opacity-80',
             )}
           />
           {children && (
@@ -65,12 +67,13 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
                 fieldClassNames.size.font,
                 'ml-12',
                 invalid && 'text-danger',
-                props.disabled && 'text-disabled'
+                props.disabled && 'text-disabled',
               )}
             >
               {children}
             </span>
           )}
+          {iconRight}
         </label>
         {description && !errorMessage && (
           <div id={descriptionId} className={fieldClassNames.description}>
@@ -84,7 +87,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 interface FormSwitchProps extends SwitchProps {
@@ -125,7 +128,7 @@ function getSizeClassName(size: InputSize): string {
     case 'md':
       return 'w-46 h-24 before:w-18 before:h-18 checked:before:translate-x-24';
     case 'xs':
-      return 'w-30 h-16 before:w-12 before:h-12 checked:before:translate-x-16';
+      return 'w-30 h-18 before:w-12 before:h-12 checked:before:translate-x-14';
     default:
       return 'w-38 h-20 before:w-14 before:h-14 checked:before:translate-x-20';
   }

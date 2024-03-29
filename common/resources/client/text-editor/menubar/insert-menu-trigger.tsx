@@ -45,7 +45,6 @@ export function InsertMenuTrigger({editor, size}: MenubarButtonProps) {
         <IconButton
           variant="text"
           size={size}
-          radius="rounded"
           className={clsx('flex-shrink-0')}
         >
           <MoreVertIcon />

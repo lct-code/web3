@@ -48,7 +48,7 @@ export function ConfirmPlanRenewalPage() {
           invalidateBillingUserQuery();
           navigate('/billing');
         },
-      }
+      },
     );
   };
 
@@ -81,7 +81,7 @@ export function ConfirmPlanRenewalPage() {
             size="md"
             className="w-full mb-16"
             onClick={handleResumeSubscription}
-            disabled={resumeSubscription.isLoading}
+            disabled={resumeSubscription.isPending}
           >
             <Trans message="Renew plan" />
           </Button>

@@ -28,7 +28,7 @@ export function FollowPlaylistButton({
   const follow = useFollowPlaylist(playlist);
   const unfollow = useUnfollowPlaylist(playlist);
   const isFollowing = useIsFollowingPlaylist(playlist.id);
-  const isLoading = follow.isLoading || unfollow.isLoading;
+  const isLoading = follow.isPending || unfollow.isPending;
 
   if (isCreator) {
     return null;

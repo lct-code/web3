@@ -9,10 +9,10 @@ import {InfiniteScrollSentinel} from '@common/ui/infinite-scroll/infinite-scroll
 import React from 'react';
 import {ProfileContentProps} from '@app/web-player/user-profile/user-profile-page';
 import {AlbumListItem} from '@app/web-player/albums/album-list/album-list-item';
-import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 import {ContentGrid} from '@app/web-player/playable-item/content-grid';
 import {TrackGridItem} from '@app/web-player/tracks/track-grid-item';
 import {AlbumGridItem} from '@app/web-player/albums/album-grid-item';
+import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 
 export function ProfileRepostsPanel({user}: ProfileContentProps) {
   const isMobile = useIsMobileMediaQuery();
@@ -21,7 +21,7 @@ export function ProfileRepostsPanel({user}: ProfileContentProps) {
     endpoint: `users/${user.id}/reposts`,
   });
 
-  if (query.isInitialLoading) {
+  if (query.isLoading) {
     return <FullPageLoader className="min-h-100" />;
   }
 

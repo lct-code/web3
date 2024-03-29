@@ -65,7 +65,7 @@ export function ImportTrackDialog() {
           variant="flat"
           color="primary"
           type="submit"
-          disabled={importTrack.isLoading}
+          disabled={importTrack.isPending}
         >
           <Trans message="Import" />
         </Button>

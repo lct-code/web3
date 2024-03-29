@@ -29,7 +29,7 @@ export function PlayableGridItem({
   link,
   likeButton,
   contextDialog,
-  radius = 'rounded',
+  radius = 'rounded-panel',
 }: PlayableGridProps) {
   const navigate = useNavigate();
   return (
@@ -37,11 +37,12 @@ export function PlayableGridItem({
       <DialogTrigger
         type="popover"
         placement="bottom-start"
+        mobileType="tray"
         triggerOnContextMenu
       >
-        <div className="w-full relative isolate group">
+        <div className="group relative isolate w-full">
           <div
-            className="w-full aspect-square this"
+            className="this aspect-square w-full"
             onClick={() => navigate(link)}
           >
             {cloneElement(image, {
@@ -51,21 +52,21 @@ export function PlayableGridItem({
           </div>
           <div
             key="bg-overlay"
-            className={`absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black/75 ${radius} z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}
+            className={`absolute left-0 top-0 h-full w-full bg-gradient-to-b from-transparent to-black/75 ${radius} pointer-events-none z-20 opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
           />
           <div
             className={clsx(
-              'absolute bottom-0 left-0 w-full p-12 z-30 flex items-center gap-14',
+              'absolute bottom-0 left-0 z-30 flex w-full items-center gap-14 p-12',
               radius === 'rounded-full' &&
-                'justify-center top-0 right-0 pointer-events-none'
+                'pointer-events-none right-0 top-0 justify-center',
             )}
           >
             <PlaybackToggleButton
               size={radius === 'rounded-full' ? 'lg' : 'md'}
               radius="rounded-full"
               className={clsx(
-                'shadow-md pointer-events-auto',
-                radius === 'rounded-full' && 'invisible group-hover:visible'
+                'pointer-events-auto shadow-md',
+                radius === 'rounded-full' && 'invisible group-hover:visible',
               )}
               variant="flat"
               color="white"
@@ -76,7 +77,7 @@ export function PlayableGridItem({
             />
 
             {radius !== 'rounded-full' && (
-              <DialogTrigger type="popover">
+              <DialogTrigger type="popover" mobileType="tray">
                 <IconButton
                   className="invisible md:group-hover:visible"
                   color="white"
@@ -101,11 +102,11 @@ export function PlayableGridItem({
       <div
         className={clsx(
           radius === 'rounded-full' && 'text-center',
-          'text-sm mt-12'
+          'mt-12 text-sm',
         )}
       >
         <div className="overflow-hidden overflow-ellipsis">{title}</div>
-        <div className="text-muted mt-4 whitespace-nowrap overflow-hidden overflow-ellipsis">
+        <div className="mt-4 overflow-hidden overflow-ellipsis whitespace-nowrap text-muted">
           {subtitle}
         </div>
       </div>

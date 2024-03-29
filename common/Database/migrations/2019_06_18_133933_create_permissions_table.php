@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreatePermissionsTable extends Migration
 {
@@ -19,7 +19,7 @@ class CreatePermissionsTable extends Migration
             $table->increments('id');
             $table->string('name', 30)->unique();
             $table->string('display_name');
-            $table->string('description')->nullable();
+            $table->text('description')->nullable();
             $table->string('group', 30);
             $table->text('restrictions')->nullable();
             $table->timestamps();

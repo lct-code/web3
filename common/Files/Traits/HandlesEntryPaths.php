@@ -67,7 +67,7 @@ trait HandlesEntryPaths
 
     public function scopeAllParents(Builder $builder): Builder
     {
-        return $builder->whereIn('id', $this->getParentIds());
+        return $builder->whereIn('id', $this->getParentIds())->orderBy('path');
     }
 
     /**

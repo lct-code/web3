@@ -40,7 +40,12 @@ export function CrupdateTagForm({
         description={<Trans message="User friendly tag name." />}
         className="mb-20"
       />
-      <FormSelect name="type" selectionMode="single" disabled={isSystem}>
+      <FormSelect
+        label={<Trans message="Type" />}
+        name="type"
+        selectionMode="single"
+        disabled={isSystem}
+      >
         {types
           .filter(t => !t.system)
           .map(type => (

@@ -17,7 +17,8 @@ function deleteAccount(userId: number): Promise<Response> {
 export function useDeleteAccount() {
   const {user} = useAuth();
   const logout = useLogout();
-  return useMutation(() => deleteAccount(user!.id), {
+  return useMutation({
+    mutationFn: () => deleteAccount(user!.id),
     onSuccess: () => {
       toast('Account deleted');
       logout.mutate();

@@ -18,8 +18,8 @@ export function GenreLink({genre, className, ...linkProps}: GenreLinkProps) {
     <Link
       {...linkProps}
       className={clsx(
-        'block first-letter:capitalize hover:underline outline-none focus-visible:underline',
-        className
+        'block outline-none first-letter:capitalize hover:underline focus-visible:underline',
+        className,
       )}
       to={uri}
     >
@@ -30,10 +30,10 @@ export function GenreLink({genre, className, ...linkProps}: GenreLinkProps) {
 
 export function getGenreLink(
   genre: Genre,
-  {absolute}: {absolute?: boolean} = {}
+  {absolute}: {absolute?: boolean} = {},
 ) {
   const genreName = slugifyString(genre.name);
-  let link = `/channel/genre/${genreName}`;
+  let link = `/genre/${genreName}`;
   if (absolute) {
     link = `${getBootstrapData().settings.base_url}${link}`;
   }

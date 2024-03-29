@@ -4,7 +4,8 @@ namespace Common\Admin\Appearance;
 
 use Common\Settings\Settings;
 use Illuminate\Support\Facades\File;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class GenerateFavicon
 {
@@ -30,7 +31,7 @@ class GenerateFavicon
 
     public function execute(string $filePath): void
     {
-        if (!str_starts_with($filePath, 'http') && !file_exists($filePath)) {
+        if (str_starts_with($filePath, 'http') || !file_exists($filePath)) {
             return;
         }
 
@@ -42,7 +43,7 @@ class GenerateFavicon
         }
         $this->generateFaviconForSize([16, 16], public_path(), 'favicon.ico');
 
-        $uri = self::FAVICON_DIR . '/icon-144x144.png';
+        $uri = self::FAVICON_DIR . '/icon-144x144.png?v=' . time();
         app(Settings::class)->save(['branding.favicon' => $uri]);
     }
 
@@ -51,13 +52,14 @@ class GenerateFavicon
         string $dir = null,
         string $name = null,
     ): void {
-        $img = Image::make($this->initialFilePath);
-        $img->fit($size[0], $size[1]);
-        $img->encode('png');
+        $manager = new ImageManager(new Driver());
+
+        $img = $manager->read($this->initialFilePath);
+        $img->coverDown($size[0], $size[1]);
 
         $dir = $dir ?? $this->absoluteFaviconDir;
         $name = $name ?? "icon-$size[0]x$size[1].png";
 
-        File::put("$dir/$name", $img);
+        $img->toPng()->save("$dir/$name");
     }
 }

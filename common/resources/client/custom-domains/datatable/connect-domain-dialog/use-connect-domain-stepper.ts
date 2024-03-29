@@ -71,7 +71,7 @@ export function useConnectDomainStepper({
               },
             });
           },
-        }
+        },
       );
     });
   };
@@ -144,8 +144,8 @@ export function useConnectDomainStepper({
       });
       if (nextStep === ConnectDomainStep.Finalize) {
         connectDomain.mutate(form.getValues(), {
-          onSettled: () => {
-            close();
+          onSettled: response => {
+            close(response?.domain);
           },
         });
       }

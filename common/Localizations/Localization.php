@@ -1,12 +1,9 @@
 <?php namespace Common\Localizations;
 
-use Common\Search\Searchable;
-use Illuminate\Database\Eloquent\Model;
+use Common\Core\BaseModel;
 
-class Localization extends Model
+class Localization extends BaseModel
 {
-    use Searchable;
-
     const MODEL_TYPE = 'localization';
 
     protected $guarded = ['id'];

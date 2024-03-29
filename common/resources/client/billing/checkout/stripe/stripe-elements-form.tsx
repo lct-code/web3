@@ -1,17 +1,19 @@
 import clsx from 'clsx';
-import {Button} from '../../../ui/buttons/button';
+import {Button} from '@common/ui/buttons/button';
 import {FormEventHandler, Fragment, ReactNode, useState} from 'react';
-import {useStripe} from './use-stripe';
-import {Skeleton} from '../../../ui/skeleton/skeleton';
+import {useStripe} from '@common/billing/checkout/stripe/use-stripe';
+import {Skeleton} from '@common/ui/skeleton/skeleton';
 
 interface StripeElementsFormProps {
   productId?: string | number;
+  priceId?: string | number;
   type: 'setupIntent' | 'subscription';
   submitLabel: ReactNode;
   returnUrl: string;
 }
 export function StripeElementsForm({
   productId,
+  priceId,
   type = 'subscription',
   submitLabel,
   returnUrl,
@@ -19,6 +21,7 @@ export function StripeElementsForm({
   const {stripe, elements, paymentElementRef, stripeIsEnabled} = useStripe({
     type,
     productId,
+    priceId,
   });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,13 +66,13 @@ export function StripeElementsForm({
         {stripeIsEnabled && <StripeSkeleton />}
       </div>
       {errorMessage && !isSubmitting && (
-        <div className="text-danger mt-20">{errorMessage}</div>
+        <div className="mt-20 text-danger">{errorMessage}</div>
       )}
       <Button
         variant="flat"
         color="primary"
         size="md"
-        className="w-full mt-40"
+        className="mt-40 w-full"
         type="submit"
         disabled={isSubmitting || !stripeIsReady}
       >
@@ -82,9 +85,9 @@ export function StripeElementsForm({
 function StripeSkeleton() {
   return (
     <Fragment>
-      <Skeleton className="h-30 mb-20" />
-      <Skeleton className="h-30 mb-20" />
-      <Skeleton className="h-30 mb-20" />
+      <Skeleton className="mb-20 h-30" />
+      <Skeleton className="mb-20 h-30" />
+      <Skeleton className="mb-20 h-30" />
       <Skeleton className="h-30" />
     </Fragment>
   );

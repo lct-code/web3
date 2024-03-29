@@ -12,7 +12,8 @@ function clearCache(): Promise<Response> {
 }
 
 export function useClearCache() {
-  return useMutation(() => clearCache(), {
+  return useMutation({
+    mutationFn: () => clearCache(),
     onSuccess: () => {
       toast(message('Cache cleared'));
     },

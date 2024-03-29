@@ -1,8 +1,8 @@
 import {useQuery} from '@tanstack/react-query';
-import {BackendResponse} from '../../../http/backend-response/backend-response';
-import {apiClient} from '../../../http/query-client';
+import {BackendResponse} from '@common/http/backend-response/backend-response';
+import {apiClient} from '@common/http/query-client';
 import {useParams} from 'react-router-dom';
-import {Product} from '../../../billing/product';
+import {Product} from '@common/billing/product';
 
 const Endpoint = (id: number | string) => `billing/products/${id}`;
 
@@ -12,7 +12,10 @@ export interface FetchRoleResponse extends BackendResponse {
 
 export function useProduct() {
   const {productId} = useParams();
-  return useQuery([Endpoint(productId!)], () => fetchProduct(productId!));
+  return useQuery({
+    queryKey: [Endpoint(productId!)],
+    queryFn: () => fetchProduct(productId!),
+  });
 }
 
 function fetchProduct(productId: number | string): Promise<FetchRoleResponse> {

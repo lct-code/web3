@@ -15,9 +15,9 @@ class StaticFileDeliveryValidator implements SettingsValidator
 {
     const KEYS = ['static_file_delivery'];
 
-    public function fails($settings): bool|array
+    public function fails($values): bool|array
     {
-        if (!$settings['static_file_delivery']) {
+        if (!$values['static_file_delivery']) {
             return false;
         }
 
@@ -25,7 +25,7 @@ class StaticFileDeliveryValidator implements SettingsValidator
         $originalDriver = config('common.site.uploads_disk_driver');
 
         app(DotEnvEditor::class)->write([
-            'STATIC_FILE_DELIVERY' => $settings['static_file_delivery'],
+            'STATIC_FILE_DELIVERY' => $values['static_file_delivery'],
             'UPLOADS_DISK_DRIVER' => 'local',
         ]);
 

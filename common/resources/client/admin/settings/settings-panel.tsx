@@ -16,18 +16,26 @@ interface Props {
   title: ReactNode;
   description: ReactNode;
   children: ReactNode;
+  transformValues?: (values: AdminSettingsWithFiles) => AdminSettingsWithFiles;
 }
-export function SettingsPanel({title, description, children}: Props) {
+export function SettingsPanel({
+  title,
+  description,
+  children,
+  transformValues,
+}: Props) {
   const {data} = useAdminSettings();
 
   return (
     <section>
       <div className="mb-40">
-        <h2 className="text-xl mb-4">{title}</h2>
+        <h2 className="mb-4 text-xl">{title}</h2>
         <div className="text-sm text-muted">{description}</div>
       </div>
       {data ? (
-        <FormWrapper defaultValues={data}>{children}</FormWrapper>
+        <FormWrapper defaultValues={data} transformValues={transformValues}>
+          {children}
+        </FormWrapper>
       ) : (
         <ProgressCircle isIndeterminate aria-label="Loading settings..." />
       )}
@@ -38,8 +46,13 @@ export function SettingsPanel({title, description, children}: Props) {
 interface FormWrapperProps {
   children: ReactNode;
   defaultValues: AdminSettings;
+  transformValues?: (values: AdminSettingsWithFiles) => AdminSettingsWithFiles;
 }
-function FormWrapper({children, defaultValues}: FormWrapperProps) {
+function FormWrapper({
+  children,
+  defaultValues,
+  transformValues,
+}: FormWrapperProps) {
   const form = useForm<AdminSettingsWithFiles>({defaultValues});
   const updateSettings = useUpdateAdminSettings(form);
   return (
@@ -56,6 +69,7 @@ function FormWrapper({children, defaultValues}: FormWrapperProps) {
           form.clearErrors(keys as any);
         }}
         onSubmit={value => {
+          value = transformValues ? transformValues(value) : value;
           updateSettings.mutate(value);
         }}
       >
@@ -65,13 +79,13 @@ function FormWrapper({children, defaultValues}: FormWrapperProps) {
             type="submit"
             variant="flat"
             color="primary"
-            disabled={updateSettings.isLoading}
+            disabled={updateSettings.isPending}
           >
             <Trans message="Update" />
           </Button>
         </div>
       </Form>
-      {updateSettings.isLoading && (
+      {updateSettings.isPending && (
         <ProgressBar
           size="xs"
           className="absolute -bottom-14 left-30 w-full"

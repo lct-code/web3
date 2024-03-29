@@ -2,7 +2,7 @@
 
 namespace Common\Csv;
 
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -85,7 +85,7 @@ abstract class BaseCsvExportJob implements ShouldQueue
             return;
         }
 
-        User::find($this->requesterId)->notify(
+        User::find($this->requesterId)?->notify(
             new CsvExportReadyNotif($export, $this->notificationName()),
         );
     }

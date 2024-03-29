@@ -6,8 +6,10 @@ use Str;
 
 trait GetsEntryTypeFromMime
 {
-    protected function getTypeFromMime(string $mime, string $extension = null): string
-    {
+    protected function getTypeFromMime(
+        string $mime,
+        string $extension = null,
+    ): string {
         $default = explode('/', $mime)[0];
 
         if ($mime === 'text/plain' && $extension === 'csv') {
@@ -26,7 +28,7 @@ trait GetsEntryTypeFromMime
                 return 'file';
             case 'vnd.android.package-archive':
                 return 'android package';
-            case Str::contains($mime, ['xls', 'excel', 'spreadsheetml']):
+            case Str::contains($mime, ['xls', 'excel', 'spreadsheetml', 'csv']):
                 return 'spreadsheet';
             case Str::contains($mime, 'photoshop'):
                 return 'photoshop';

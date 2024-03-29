@@ -1,13 +1,12 @@
 <?php namespace App\Http\Controllers;
 
-use App;
-use App\Actions\IncrementModelViews;
-use App\Album;
 use App\Http\Requests\ModifyAlbums;
+use App\Models\Album;
 use App\Services\Albums\CrupdateAlbum;
 use App\Services\Albums\DeleteAlbums;
+use App\Services\Albums\LoadAlbum;
 use App\Services\Albums\PaginateAlbums;
-use App\Services\Albums\ShowAlbum;
+use App\Services\IncrementModelViews;
 use Common\Core\BaseController;
 use Illuminate\Http\Request;
 
@@ -34,17 +33,17 @@ class AlbumController extends BaseController
     {
         $this->authorize('show', $album);
 
-        $response = app(ShowAlbum::class)->execute(
-            $album,
-            $this->request->all(),
-            $this->request->has('autoUpdate'),
-        );
+        $loader = request('loader', 'albumPage');
+        $data = (new LoadAlbum())->execute($album, $loader);
 
         app(IncrementModelViews::class)->execute($album->id, 'album');
 
         $album->makeVisible('description');
 
-        return $this->success($response);
+        return $this->renderClientOrApi([
+            'pageName' => $loader === 'albumPage' ? 'album-page' : null,
+            'data' => $data,
+        ]);
     }
 
     public function update(Album $album, ModifyAlbums $request)

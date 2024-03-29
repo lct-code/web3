@@ -17,7 +17,8 @@ function removeAvatar(user: User): Promise<Response> {
 }
 
 export function useRemoveAvatar({user}: UserProps) {
-  return useMutation(() => removeAvatar(user), {
+  return useMutation({
+    mutationFn: () => removeAvatar(user),
     onSuccess: () => {
       toast(message('Removed avatar'));
     },

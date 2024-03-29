@@ -1,12 +1,13 @@
 import {ReactNode} from 'react';
 import clsx from 'clsx';
 
-interface SectionHelperProps {
+export interface SectionHelperProps {
   title?: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
-  color?: 'positive' | 'danger' | 'warning' | 'primary' | 'neutral';
+  color?: 'positive' | 'danger' | 'warning' | 'primary' | 'neutral' | 'bgAlt';
   className?: string;
+  size?: 'sm' | 'md';
 }
 export function SectionHelper({
   title,
@@ -14,22 +15,24 @@ export function SectionHelper({
   actions,
   color = 'primary',
   className,
+  size = 'md',
 }: SectionHelperProps) {
   return (
     <div
       className={clsx(
         className,
-        'p-10 rounded',
-        color === 'positive' &&
-          'bg-positive/focus border-l-positive border-l-4',
-        color === 'warning' && 'bg-warning/focus border-l-warning border-l-4',
-        color === 'danger' && 'bg-danger/focus border-l-danger border-l-4',
-        color === 'primary' && 'bg-primary/focus border-l-primary border-l-4',
-        color === 'neutral' && 'bg-paper border'
+        'rounded p-10',
+        size === 'sm' ? 'text-xs' : 'text-sm',
+        color === 'positive' && 'bg-positive/focus',
+        color === 'warning' && 'bg-warning/focus',
+        color === 'danger' && 'bg-danger/focus',
+        color === 'primary' && 'bg-primary/focus',
+        color === 'neutral' && 'border bg',
+        color === 'bgAlt' && 'border bg-alt',
       )}
     >
-      {title && <div className="text-sm mb-4 font-medium">{title}</div>}
-      {description && <div className="text-sm">{description}</div>}
+      {title && <div className="mb-4 font-medium">{title}</div>}
+      {description && <div>{description}</div>}
       {actions && <div className="mt-14">{actions}</div>}
     </div>
   );

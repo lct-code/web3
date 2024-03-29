@@ -17,10 +17,13 @@ interface Props {
 }
 
 export function useCreateWorkspace(form: UseFormReturn<Props>) {
-  return useMutation((props: Props) => createWorkspace(props), {
+  return useMutation({
+    mutationFn: (props: Props) => createWorkspace(props),
     onSuccess: () => {
       toast(message('Created workspace'));
-      queryClient.invalidateQueries(WorkspaceQueryKeys.fetchUserWorkspaces);
+      queryClient.invalidateQueries({
+        queryKey: WorkspaceQueryKeys.fetchUserWorkspaces,
+      });
     },
     onError: r => onFormQueryError(r, form),
   });

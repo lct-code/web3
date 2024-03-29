@@ -19,7 +19,10 @@ export function BufferingSpinner({
   size,
 }: Props) {
   const isActive = usePlayerStore(
-    s => s.isBuffering || (s.playbackStarted && !s.providerReady)
+    s =>
+      // YouTube will already show a spinner, no need for a custom one
+      (s.isBuffering && s.providerName !== 'youtube') ||
+      (s.playbackStarted && !s.providerReady)
   );
   return (
     <AnimatePresence initial={false}>

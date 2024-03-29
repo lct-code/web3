@@ -21,14 +21,19 @@ import {ProductFeatureList} from '@common/billing/pricing-table/product-feature-
 interface PricingTableProps {
   selectedCycle: UpsellBillingCycle;
   className?: string;
+  productLoader?: string;
 }
-export function PricingTable({selectedCycle, className}: PricingTableProps) {
-  const query = useProducts();
+export function PricingTable({
+  selectedCycle,
+  className,
+  productLoader,
+}: PricingTableProps) {
+  const query = useProducts(productLoader);
   return (
     <div
       className={clsx(
-        'flex flex-col md:flex-row items-center gap-24 pb-20 overflow-x-auto overflow-y-visible',
-        className
+        'flex flex-col items-stretch gap-24 overflow-x-auto overflow-y-visible pb-20 md:flex-row md:justify-center',
+        className,
       )}
     >
       <AnimatePresence initial={false} mode="wait">
@@ -76,10 +81,9 @@ function PlanList({plans, selectedPeriod}: PlanListProps) {
             key={plan.id}
             {...opacityAnimation}
             className={clsx(
-              'px-28 rounded-lg w-full md:max-w-350 md:min-w-240 border shadow-lg bg-paper',
-              plan.recommended ? 'py-56' : 'py-28',
+              'w-full rounded-panel border bg px-28 py-28 shadow-lg md:min-w-240 md:max-w-350',
               isFirst && 'ml-auto',
-              isLast && 'mr-auto'
+              isLast && 'mr-auto',
             )}
           >
             <div className="mb-32">
@@ -88,12 +92,12 @@ function PlanList({plans, selectedPeriod}: PlanListProps) {
                 size="sm"
                 className={clsx(
                   'mb-20 w-min',
-                  !plan.recommended && 'invisible'
+                  !plan.recommended && 'invisible',
                 )}
               >
                 <Trans message="Most popular" />
               </Chip>
-              <div className="text-xl font-semibold mb-12">
+              <div className="mb-12 text-xl font-semibold">
                 <Trans message={plan.name} />
               </div>
               <div className="text-sm text-muted">
@@ -109,13 +113,13 @@ function PlanList({plans, selectedPeriod}: PlanListProps) {
                   price={price}
                 />
               ) : (
-                <div className="font-bold text-4xl">
+                <div className="text-4xl font-bold">
                   <Trans message="Free" />
                 </div>
               )}
               <div className="mt-60">
                 <Button
-                  variant="flat"
+                  variant={plan.recommended ? 'flat' : 'outline'}
                   color="primary"
                   className="w-full"
                   size="md"
@@ -130,7 +134,11 @@ function PlanList({plans, selectedPeriod}: PlanListProps) {
                   }}
                   to={upgradeRoute}
                 >
-                  <ActionButtonText product={plan} />
+                  {plan.free ? (
+                    <Trans message="Get started" />
+                  ) : (
+                    <Trans message="Upgrade" />
+                  )}
                 </Button>
               </div>
               <ProductFeatureList product={plan} />
@@ -140,20 +148,6 @@ function PlanList({plans, selectedPeriod}: PlanListProps) {
       })}
     </Fragment>
   );
-}
-
-interface ActionButtonTextProps {
-  product: Product;
-}
-function ActionButtonText({product}: ActionButtonTextProps) {
-  const {isLoggedIn} = useAuth();
-  if (product.free && isLoggedIn) {
-    return <Trans message="You're on :plan" values={{plan: product.name}} />;
-  }
-  if (product.free) {
-    return <Trans message="Get started" />;
-  }
-  return <Trans message="Upgrade" />;
 }
 
 function SkeletonLoader() {
@@ -170,12 +164,12 @@ function PlanSkeleton() {
   return (
     <m.div
       {...opacityAnimation}
-      className="px-28 py-90 rounded-lg border shadow-lg w-full md:max-w-350"
+      className="w-full rounded-lg border px-28 py-90 shadow-lg md:max-w-350"
     >
       <Skeleton className="my-10" />
       <Skeleton className="mb-40" />
-      <Skeleton className="h-30 mb-40" />
-      <Skeleton className="h-40 mb-40" />
+      <Skeleton className="mb-40 h-30" />
+      <Skeleton className="mb-40 h-40" />
       <Skeleton className="mb-20" />
       <Skeleton />
       <Skeleton />

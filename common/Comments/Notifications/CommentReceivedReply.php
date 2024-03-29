@@ -2,8 +2,8 @@
 
 namespace Common\Comments\Notifications;
 
+use App\Models\User;
 use App\Services\UrlGenerator;
-use App\User;
 use Common\Comments\Comment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Database\Eloquent\Model;
@@ -18,13 +18,13 @@ class CommentReceivedReply extends Notification
 
     public function __construct(
         public Comment $newComment,
-        public array $originalComment
+        public array $originalComment,
     ) {
         $this->newComment = $newComment;
         $this->originalComment = $originalComment;
-        $this->commentable = app(
-            modelTypeToNamespace($newComment['commentable_type']),
-        )->find($newComment['commentable_id']);
+        $this->commentable = app($newComment['commentable_type'])->find(
+            $newComment['commentable_id'],
+        );
     }
 
     public function via(User $notifiable): array

@@ -1,7 +1,6 @@
 <?php namespace App\Http\Controllers;
 
-use App;
-use App\Artist;
+use App\Models\Artist;
 use App\Services\Artists\PaginateArtistAlbums;
 use Common\Core\BaseController;
 

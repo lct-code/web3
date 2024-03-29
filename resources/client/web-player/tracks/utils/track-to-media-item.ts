@@ -6,7 +6,7 @@ import {guessPlayerProvider} from '@common/player/utils/guess-player-provider';
 
 export function trackToMediaItem(
   track: Track,
-  queueGroupId?: string
+  queueGroupId?: string | number
 ): MediaItem<Track> {
   const provider: MediaItem['provider'] = track.src
     ? guessPlayerProvider(track.src)

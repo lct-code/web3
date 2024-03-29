@@ -25,7 +25,7 @@ class TusCache
     public function set(
         string $uploadKey,
         array $value,
-        $expiresAt = CarbonInterface::class,
+        CarbonInterface $expiresAt,
     ): bool {
         return cache()->set("tus:$uploadKey", $value, $expiresAt);
     }

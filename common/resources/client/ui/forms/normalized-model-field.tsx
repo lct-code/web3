@@ -7,8 +7,7 @@ import {IconButton} from '../buttons/icon-button';
 import {EditIcon} from '../../icons/material/Edit';
 import {message} from '../../i18n/message';
 import {Item} from './listbox/item';
-import {ComboBox} from './combobox/combobox';
-import {useController} from 'react-hook-form';
+import {useController, useFormContext} from 'react-hook-form';
 import {useControlledState} from '@react-stately/utils';
 import {getInputFieldClassNames} from './input-field/get-input-field-class-names';
 import clsx from 'clsx';
@@ -17,55 +16,57 @@ import {useNormalizedModels} from '../../users/queries/use-normalized-models';
 import {useNormalizedModel} from '../../users/queries/use-normalized-model';
 import {AnimatePresence, m} from 'framer-motion';
 import {opacityAnimation} from '../animation/opacity-animation';
+import {Select} from '@common/ui/forms/select/select';
+import {MessageDescriptor} from '@common/i18n/message-descriptor';
+import {BaseFieldProps} from '@common/ui/forms/input-field/base-field-props';
 
 interface NormalizedModelFieldProps {
-  modelType: string;
   label?: ReactNode;
   className?: string;
+  background?: BaseFieldProps['background'];
   value?: string | number;
+  placeholder?: MessageDescriptor;
+  searchPlaceholder?: MessageDescriptor;
   defaultValue?: string | number;
   onChange?: (value: string | number) => void;
   invalid?: boolean;
   errorMessage?: string;
   description?: ReactNode;
-  openMenuOnFocus?: boolean;
   autoFocus?: boolean;
   queryParams?: Record<string, string>;
-  customEndpoint?: string;
+  endpoint: string;
   disabled?: boolean;
+  required?: boolean;
 }
 export function NormalizedModelField({
-  modelType,
   label,
   className,
+  background,
   value,
   defaultValue = '',
+  placeholder = message('Select item...'),
+  searchPlaceholder = message('Find an item...'),
   onChange,
   description,
   errorMessage,
   invalid,
-  openMenuOnFocus,
   autoFocus,
   queryParams,
-  customEndpoint,
+  endpoint,
   disabled,
+  required,
 }: NormalizedModelFieldProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLButtonElement>(null);
   const [inputValue, setInputValue] = useState('');
   const [selectedValue, setSelectedValue] = useControlledState(
     value,
     defaultValue,
-    onChange
+    onChange,
   );
-  const query = useNormalizedModels(
-    modelType,
-    {
-      query: inputValue,
-      ...queryParams,
-    },
-    null,
-    customEndpoint
-  );
+  const query = useNormalizedModels(endpoint, {
+    query: inputValue,
+    ...queryParams,
+  });
   const {trans} = useTrans();
 
   const fieldClassNames = getInputFieldClassNames({size: 'md'});
@@ -75,13 +76,16 @@ export function NormalizedModelField({
       <div className={className}>
         <div className={fieldClassNames.label}>{label}</div>
         <div
-          className={clsx('p-10 border rounded', invalid && 'border-danger')}
+          className={clsx(
+            'rounded-input border p-8',
+            background,
+            invalid && 'border-danger',
+          )}
         >
           <AnimatePresence initial={false} mode="wait">
             <SelectedModelPreview
               disabled={disabled}
-              endpoint={customEndpoint}
-              modelType={modelType}
+              endpoint={endpoint}
               modelId={selectedValue}
               queryParams={queryParams}
               onEditClick={() => {
@@ -89,6 +93,7 @@ export function NormalizedModelField({
                 setInputValue('');
                 requestAnimationFrame(() => {
                   inputRef.current?.focus();
+                  inputRef.current?.click();
                 });
               }}
             />
@@ -105,26 +110,29 @@ export function NormalizedModelField({
   }
 
   return (
-    <ComboBox
+    <Select
       className={className}
+      showSearchField
       invalid={invalid}
       errorMessage={errorMessage}
       description={description}
+      color="white"
       isAsync
-      placeholder={trans(message('Find item..'))}
+      background={background}
+      placeholder={trans(placeholder)}
+      searchPlaceholder={trans(searchPlaceholder)}
       label={label}
       isLoading={query.isFetching}
       items={query.data?.results}
       inputValue={inputValue}
       onInputValueChange={setInputValue}
-      clearInputOnItemSelection
       selectionMode="single"
       selectedValue={selectedValue}
       onSelectionChange={setSelectedValue}
       ref={inputRef}
-      openMenuOnFocus={openMenuOnFocus}
       autoFocus={autoFocus}
       disabled={disabled}
+      required={required}
     >
       {model => (
         <Item
@@ -136,12 +144,11 @@ export function NormalizedModelField({
           {model.name}
         </Item>
       )}
-    </ComboBox>
+    </Select>
   );
 }
 
 interface SelectedModelPreviewProps {
-  modelType: string;
   modelId: string | number;
   selectedValue?: number | string;
   onEditClick?: () => void;
@@ -150,7 +157,6 @@ interface SelectedModelPreviewProps {
   queryParams?: NormalizedModelFieldProps['queryParams'];
 }
 function SelectedModelPreview({
-  modelType,
   modelId,
   onEditClick,
   endpoint,
@@ -158,10 +164,8 @@ function SelectedModelPreview({
   queryParams,
 }: SelectedModelPreviewProps) {
   const {data, isLoading} = useNormalizedModel(
-    modelType,
-    modelId,
+    `${endpoint}/${modelId}`,
     queryParams,
-    endpoint
   );
 
   if (isLoading || !data?.model) {
@@ -172,15 +176,15 @@ function SelectedModelPreview({
     <m.div
       className={clsx(
         'flex items-center gap-10',
-        disabled && 'text-disabled cursor-not-allowed pointer-events-none'
+        disabled && 'pointer-events-none cursor-not-allowed text-disabled',
       )}
       key="preview"
       {...opacityAnimation}
     >
       {data.model.image && <Avatar src={data.model.image} />}
       <div>
-        <div>{data.model.name}</div>
-        <div className="text-muted text-xs">{data.model.description}</div>
+        <div className="text-sm leading-4">{data.model.name}</div>
+        <div className="text-xs text-muted">{data.model.description}</div>
       </div>
       <Tooltip label={<Trans message="Change item" />}>
         <IconButton
@@ -200,9 +204,9 @@ function LoadingSkeleton() {
   return (
     <m.div className="flex items-center gap-10" {...opacityAnimation}>
       <Skeleton variant="rect" size="w-32 h-32" />
-      <div className="flex-auto max-h-[36px]">
+      <div className="max-h-[36px] flex-auto">
         <Skeleton className="text-xs" />
-        <Skeleton className="text-xs max-h-8" />
+        <Skeleton className="max-h-8 text-xs" />
       </div>
       <Skeleton variant="icon" size="w-24 h-24" />
     </m.div>
@@ -216,6 +220,7 @@ export function FormNormalizedModelField({
   name,
   ...fieldProps
 }: FormNormalizedModelFieldProps) {
+  const {clearErrors} = useFormContext();
   const {
     field: {onChange, value = ''},
     fieldState: {invalid, error},
@@ -226,7 +231,10 @@ export function FormNormalizedModelField({
   return (
     <NormalizedModelField
       value={value}
-      onChange={onChange}
+      onChange={value => {
+        onChange(value);
+        clearErrors(name);
+      }}
       invalid={invalid}
       errorMessage={error?.message}
       {...fieldProps}

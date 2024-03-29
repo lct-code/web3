@@ -4,21 +4,30 @@ import {BackendResponse} from '@common/http/backend-response/backend-response';
 import {useParams} from 'react-router-dom';
 import {Album} from '@app/web-player/albums/album';
 import {assignAlbumToTracks} from '@app/web-player/albums/assign-album-to-tracks';
+import {getBootstrapData} from '@common/core/bootstrap-data/use-backend-bootstrap-data';
 
-interface GetAlbumResponse extends BackendResponse {
+export interface GetAlbumResponse extends BackendResponse {
   album: Album;
+  loader: Params['loader'];
 }
 
 interface Params {
-  autoUpdate?: boolean;
-  forEditing?: boolean;
-  defaultRelations?: boolean;
-  with?: string;
+  loader: 'albumPage' | 'editAlbumPage' | 'album' | 'albumEmbed';
 }
 
 export function useAlbum(params: Params) {
   const {albumId} = useParams();
-  return useQuery(['albums', +albumId!], () => fetchAlbum(albumId!, params));
+  return useQuery({
+    queryKey: ['albums', +albumId!],
+    queryFn: () => fetchAlbum(albumId!, params),
+    initialData: () => {
+      const data = getBootstrapData().loaders?.[params.loader];
+      if (data?.album?.id == albumId && data?.loader === params.loader) {
+        return data;
+      }
+      return undefined;
+    },
+  });
 }
 
 function fetchAlbum(albumId: number | string, params: Params) {

@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Track;
+use App\Models\Track;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TrackFactory extends Factory
@@ -21,7 +21,7 @@ class TrackFactory extends Factory
             'number' => rand(1, 10),
             'duration' => $durations[$sampleNumber],
             'image' => $this->faker->imageUrl(240, 240),
-            'source' => "storage/samples/{$sampleNumber}.mp3",
+            'src' => "storage/samples/{$sampleNumber}.mp3",
             'created_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
             'updated_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
             'plays' => $this->faker->numberBetween(865, 596545),

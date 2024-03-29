@@ -1,15 +1,22 @@
 <?php namespace App\Services\Search;
 
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Support\Collection;
 
-interface SearchInterface {
-    public function search(string $q, int $limit, array $modelTypes): Collection;
-    public function artists(): Collection;
-    public function albums(): Collection;
-    public function tracks(): Collection;
-    public function playlists(): Collection;
-    public function users(): Collection;
-    public function channels(): Collection;
-    public function genres(): Collection;
-    public function tags(): Collection;
+interface SearchInterface
+{
+    public function search(
+        string $q,
+        int $page,
+        int $perPage,
+        array $modelTypes,
+    ): Collection;
+    public function artists(): Paginator;
+    public function albums(): Paginator;
+    public function tracks(): Paginator;
+    public function playlists(): Paginator;
+    public function users(): Paginator;
+    public function channels(): Paginator;
+    public function genres(): Paginator;
+    public function tags(): Paginator;
 }

@@ -17,14 +17,17 @@ import {
 } from '../../core/settings/site-config-context';
 import {useSettings} from '../../core/settings/use-settings';
 
-export function LoginPage() {
+interface Props {
+  onTwoFactorChallenge: () => void;
+}
+export function LoginPage({onTwoFactorChallenge}: Props) {
   const [searchParams] = useSearchParams();
   const {pathname} = useLocation();
 
   const isWorkspaceLogin = pathname.includes('workspace');
   const searchParamsEmail = searchParams.get('email') || undefined;
 
-  const {branding, registration, site} = useSettings();
+  const {branding, registration, site, social} = useSettings();
   const siteConfig = useContext(SiteConfigContext);
 
   const demoDefaults =
@@ -56,7 +59,7 @@ export function LoginPage() {
     />
   );
 
-  const isInvalid = !form.formState.isValid;
+  const isInvalid = !!Object.keys(form.formState.errors).length;
 
   return (
     <AuthLayout heading={heading} message={message}>
@@ -66,7 +69,13 @@ export function LoginPage() {
       <Form
         form={form}
         onSubmit={payload => {
-          login.mutate(payload);
+          login.mutate(payload, {
+            onSuccess: response => {
+              if (response.two_factor) {
+                onTwoFactorChallenge();
+              }
+            },
+          });
         }}
       >
         <FormTextField
@@ -91,7 +100,7 @@ export function LoginPage() {
           }
           required
         />
-        <FormCheckbox name="remember" className="block mb-32">
+        <FormCheckbox name="remember" className="mb-32 block">
           <Trans message="Stay signed in for a month" />
         </FormCheckbox>
         <Button
@@ -100,12 +109,20 @@ export function LoginPage() {
           variant="flat"
           color="primary"
           size="md"
-          disabled={login.isLoading}
+          disabled={login.isPending}
         >
           <Trans message="Continue" />
         </Button>
       </Form>
-      <SocialAuthSection dividerMessage={<Trans message="Or sign in with" />} />
+      <SocialAuthSection
+        dividerMessage={
+          social.compact_buttons ? (
+            <Trans message="Or sign in with" />
+          ) : (
+            <Trans message="OR" />
+          )
+        }
+      />
     </AuthLayout>
   );
 }
@@ -121,8 +138,8 @@ function getDemoFormDefaults(siteConfig: SiteConfigContextValue) {
     };
   } else {
     return {
-      email: 'admin@admin.com',
-      password: 'admin',
+      email: siteConfig.demo.email ?? 'admin@admin.com',
+      password: siteConfig.demo.password ?? 'admin',
     };
   }
 }

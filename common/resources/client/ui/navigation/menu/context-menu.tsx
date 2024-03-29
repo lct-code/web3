@@ -22,7 +22,6 @@ export function ContextMenu({position, children, ...props}: Props) {
     isOpen: props.isOpen && !!position,
     placement: 'right-start',
     floatingWidth: 'auto',
-    offset: {mainAxis: 5, alignmentAxis: 4},
     role: 'menu',
     loopFocus: true,
     children:
@@ -42,12 +41,12 @@ export function ContextMenu({position, children, ...props}: Props) {
     if (refs.floating.current) {
       refs.floating.current.addEventListener(
         'contextmenu',
-        preventContextOnMenu
+        preventContextOnMenu,
       );
       return () => {
         refs.floating.current?.removeEventListener(
           'contextmenu',
-          preventContextOnMenu
+          preventContextOnMenu,
         );
       };
     }
@@ -57,6 +56,8 @@ export function ContextMenu({position, children, ...props}: Props) {
     if (position) {
       reference(pointToVirtualElement(position));
       setIsOpen(true);
+    } else {
+      setIsOpen(false);
     }
   }, [position, reference, setIsOpen]);
 
@@ -82,7 +83,7 @@ export function ContextMenu({position, children, ...props}: Props) {
 
 export function pointToVirtualElement(
   {x, y}: {x: number; y: number},
-  contextElement?: Element
+  contextElement?: Element,
 ): VirtualElement {
   return {
     getBoundingClientRect() {

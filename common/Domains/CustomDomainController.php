@@ -8,7 +8,9 @@ use Common\Core\AppUrl;
 use Common\Core\BaseController;
 use Common\Database\Datasource\Datasource;
 use Common\Domains\Actions\DeleteCustomDomains;
+use Common\Domains\Validation\HostIsNotBlacklisted;
 use Exception;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
@@ -44,7 +46,13 @@ class CustomDomainController extends BaseController
         $this->authorize('store', get_class($this->customDomain));
 
         $this->validate($this->request, [
-            'host' => 'required|string|max:100|unique:custom_domains',
+            'host' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('custom_domains'),
+                new HostIsNotBlacklisted(),
+            ],
             'global' => 'boolean',
         ]);
 
@@ -66,18 +74,19 @@ class CustomDomainController extends BaseController
                 'string',
                 'max:100',
                 Rule::unique('custom_domains')->ignore($customDomain->id),
+                new HostIsNotBlacklisted(),
             ],
             'global' => 'boolean',
-            'resource_id' => 'integer',
-            'resource_type' => 'string',
+            'resource_id' => 'nullable|integer',
+            'resource_type' => 'nullable|string',
         ]);
 
         $data = $this->request->all();
         $data['user_id'] = Auth::id();
         $data['global'] = $this->request->get('global', $customDomain->global);
-        $domain = $customDomain->update($data);
+        $customDomain->update($data);
 
-        return $this->success(['domain' => $domain]);
+        return $this->success(['domain' => $customDomain]);
     }
 
     public function destroy(string $ids)
@@ -116,6 +125,7 @@ class CustomDomainController extends BaseController
                 'string',
                 'max:100',
                 Rule::unique('custom_domains')->ignore($domainId),
+                new HostIsNotBlacklisted(),
             ],
         ]);
 
@@ -130,7 +140,7 @@ class CustomDomainController extends BaseController
     public function validateDomainApi()
     {
         $this->validate($this->request, [
-            'host' => 'required|string',
+            'host' => ['required', 'string', new HostIsNotBlacklisted()],
         ]);
 
         $failReason = '';
@@ -152,9 +162,15 @@ class CustomDomainController extends BaseController
         }
 
         $host = trim($this->request->get('host'), '/');
-        $response = Http::get(
-            "$host/" . self::VALIDATE_CUSTOM_DOMAIN_PATH,
-        )->json();
+        try {
+            $response = Http::get(
+                "$host/" . self::VALIDATE_CUSTOM_DOMAIN_PATH,
+            )->json();
+        } catch (ConnectionException $e) {
+            $response = [];
+            $failReason = 'serverNotConfigured';
+        }
+
         if (Arr::get($response, 'result') === 'connected') {
             return $response;
         } else {

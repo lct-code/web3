@@ -2,19 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Album;
-use App\Repost;
-use App\User;
-use Auth;
+use App\Models\Album;
+use App\Models\Repost;
+use App\Models\User;
 use Common\Core\BaseController;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RepostController extends BaseController
 {
-    public function __construct(protected Repost $repost, protected Request $request)
-    {
-    }
-
     public function index(User $user)
     {
         $this->authorize('show', $user);
@@ -24,13 +19,9 @@ class RepostController extends BaseController
             ->with('repostable.artists')
             ->simplePaginate(20);
 
-        [$albums, $tracks] = $pagination
-            ->filter(function (Repost $repost) {
-                return !is_null($repost->repostable);
-            })
-            ->partition(function (Repost $repost) {
-                return $repost->repostable->model_type === Album::MODEL_TYPE;
-            });
+        [$albums, $tracks] = $pagination->partition(function (Repost $repost) {
+            return $repost->repostable?->model_type === Album::MODEL_TYPE;
+        });
 
         $albums->load('repostable.tracks');
 
@@ -44,19 +35,16 @@ class RepostController extends BaseController
         $this->middleware('auth');
 
         $userId = Auth::id();
-        $repostableType = modelTypeToNamespace(
-            $this->request->get('repostable_type'),
-        );
+        $repostableType = request('repostable_type');
 
-        $table = $repostableType === Album::class ? 'albums' : 'tracks';
-        $this->validate($this->request, [
+        $table = $repostableType === Album::MODEL_TYPE ? 'albums' : 'tracks';
+        $this->validate(request(), [
             'repostable_type' => 'required',
             'repostable_id' => "required|exists:$table,id",
         ]);
 
-        $existingRepost = $this->repost
-            ->where('user_id', $userId)
-            ->where('repostable_id', $this->request->get('repostable_id'))
+        $existingRepost = Repost::where('user_id', $userId)
+            ->where('repostable_id', request('repostable_id'))
             ->where('repostable_type', $repostableType)
             ->first();
 
@@ -64,9 +52,9 @@ class RepostController extends BaseController
             $existingRepost->delete();
             return $this->success(['action' => 'removed']);
         } else {
-            $newRepost = $this->repost->create([
+            $newRepost = Repost::create([
                 'user_id' => $userId,
-                'repostable_id' => $this->request->get('repostable_id'),
+                'repostable_id' => request('repostable_id'),
                 'repostable_type' => $repostableType,
             ]);
             return $this->success([

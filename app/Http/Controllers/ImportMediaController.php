@@ -2,34 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Album;
-use App\Artist;
-use App\Genre;
-use App\Playlist;
-use App\Services\Albums\ShowAlbum;
-use App\Services\Artists\LoadArtist;
+use App\Models\Album;
+use App\Models\Artist;
+use App\Models\Genre;
+use App\Models\Playlist;
+use App\Models\Track;
+use App\Services\Albums\SyncAlbumWithSpotify;
+use App\Services\Artists\SyncArtistWithSpotify;
 use App\Services\Lyrics\ImportLyrics;
 use App\Services\Providers\Spotify\SpotifyGenreArtists;
 use App\Services\Providers\Spotify\SpotifyPlaylist;
 use App\Services\Providers\Spotify\SpotifyTopTracks;
 use App\Services\Providers\Spotify\SpotifyTrack;
-use App\Track;
-use Auth;
 use Common\Core\BaseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 
 class ImportMediaController extends BaseController
 {
     public function __construct(protected Request $request)
     {
-        $this->middleware('isAdmin');
     }
 
     public function import()
     {
-        $modelType = $this->request->get('modelType');
-        $spotifyId = $this->request->get('spotifyId');
+        $modelType = request('modelType');
+        $spotifyId = request('spotifyId');
+
+        $namespace = modelTypeToNamespace(request('modelType'));
+        $this->authorize('store', $namespace);
 
         $this->validate($this->request, [
             'modelType' => 'required|string',
@@ -37,13 +39,13 @@ class ImportMediaController extends BaseController
 
         switch ($modelType) {
             case Artist::MODEL_TYPE:
-                $artist = app(LoadArtist::class)->updateArtistFromExternal(
+                $artist = (new SyncArtistWithSpotify())->execute(
                     Artist::firstOrCreate(['spotify_id' => $spotifyId]),
                     $this->request->all(),
                 );
                 return $this->success(['artist' => $artist]);
             case Album::MODEL_TYPE:
-                $album = app(ShowAlbum::class)->updateAlbum(
+                $album = (new SyncAlbumWithSpotify())->execute(
                     Album::firstOrCreate(
                         ['spotify_id' => $spotifyId],
                         ['owner_id' => Auth::id()],

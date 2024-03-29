@@ -1,9 +1,6 @@
 import {RouteObject} from 'react-router-dom';
 import React from 'react';
-import {ChannelsDatatablePage} from '@app/admin/channels-datatable-page/channels-datatable-page';
-import {EditChannelPage} from '@app/admin/channels-datatable-page/edit-channel-page';
 import {TracksDatatablePage} from '@app/admin/tracks-datatable-page/tracks-datatable-page';
-import {CreateChannelPage} from '@app/admin/channels-datatable-page/create-channel-page';
 import {CreateTrackPage} from '@app/admin/tracks-datatable-page/crupdate/create-track-page';
 import {UpdateTrackPage} from '@app/admin/tracks-datatable-page/crupdate/update-track-page';
 import {AlbumsDatatablePage} from '@app/admin/albums-datatable-page/albums-datatable-page';
@@ -25,6 +22,9 @@ import {AdminVisitorsReport} from '@app/admin/reports/admin-visitors-report';
 import {BackstageArtistInsights} from '@app/web-player/backstage/insights/backstage-artist-insights';
 import {BackstageAlbumInsights} from '@app/web-player/backstage/insights/backstage-album-insights';
 import {BackstageTrackInsights} from '@app/web-player/backstage/insights/backstage-track-insights';
+import {CreateChannelPage} from '@app/admin/channels/create-channel-page';
+import {EditChannelPage} from '@app/admin/channels/edit-channel-page';
+import {ChannelsDatatablePage} from '@common/admin/channels/channels-datatable-page';
 
 export const AppAdminRoutes: RouteObject[] = [
   // Reports
@@ -130,7 +130,7 @@ export const AppAdminRoutes: RouteObject[] = [
     path: 'lyrics',
     element: <LyricsDatatablePage />,
   },
-  // Lyrics
+  // Comments
   {
     path: 'comments',
     element: <CommentsDatatablePage />,

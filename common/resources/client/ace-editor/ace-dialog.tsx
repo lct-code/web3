@@ -1,4 +1,4 @@
-import React, {ReactNode, Suspense, useState} from 'react';
+import React, {MutableRefObject, ReactNode, Suspense, useState} from 'react';
 import {Dialog} from '../ui/overlays/dialog/dialog';
 import {DialogHeader} from '../ui/overlays/dialog/dialog-header';
 import {Trans} from '../i18n/trans';
@@ -7,18 +7,29 @@ import {ProgressCircle} from '../ui/progress/progress-circle';
 import {useDialogContext} from '../ui/overlays/dialog/dialog-context';
 import {DialogFooter} from '../ui/overlays/dialog/dialog-footer';
 import {Button} from '../ui/buttons/button';
+import type ReactAce from 'react-ace';
 
 const AceEditor = React.lazy(() => import('./ace-editor'));
 
 interface TextEditorSourcecodeDialogProps {
   defaultValue: string;
-  mode?: 'css' | 'html';
+  mode?: 'css' | 'html' | 'php_laravel_blade';
   title: ReactNode;
+  onSave?: (value?: string) => void;
+  isSaving?: boolean;
+  footerStartAction?: ReactNode;
+  beautify?: boolean;
+  editorRef?: MutableRefObject<ReactAce | null>;
 }
 export function AceDialog({
   defaultValue,
   mode = 'html',
   title,
+  onSave,
+  isSaving,
+  footerStartAction,
+  beautify,
+  editorRef,
 }: TextEditorSourcecodeDialogProps) {
   const [value, setValue] = useState(defaultValue);
   const [isValid, setIsValid] = useState<boolean>(true);
@@ -29,7 +40,7 @@ export function AceDialog({
       <DialogBody className="relative flex-auto" padding="p-0">
         <Suspense
           fallback={
-            <div className="flex items-center justify-center w-full h-400">
+            <div className="flex h-400 w-full items-center justify-center">
               <ProgressCircle
                 aria-label="Loading editor..."
                 isIndeterminate
@@ -39,37 +50,48 @@ export function AceDialog({
           }
         >
           <AceEditor
+            beautify={beautify}
             mode={mode}
-            onChange={newValue => {
-              setValue(newValue);
-            }}
+            onChange={newValue => setValue(newValue)}
             defaultValue={value || ''}
             onIsValidChange={setIsValid}
+            editorRef={editorRef}
           />
         </Suspense>
       </DialogBody>
-      <Footer isValid={isValid} value={value} />
+      <Footer
+        disabled={!isValid || isSaving}
+        value={value}
+        onSave={onSave}
+        startAction={footerStartAction}
+      />
     </Dialog>
   );
 }
 
 interface FooterProps {
-  isValid: boolean;
+  disabled: boolean | undefined;
   value?: string;
+  onSave?: (value?: string) => void;
+  startAction?: ReactNode;
 }
-function Footer({isValid, value}: FooterProps) {
+function Footer({disabled, value, onSave, startAction}: FooterProps) {
   const {close} = useDialogContext();
   return (
-    <DialogFooter dividerTop>
+    <DialogFooter dividerTop startAction={startAction}>
       <Button onClick={() => close()}>
         <Trans message="Cancel" />
       </Button>
       <Button
-        disabled={!isValid}
+        disabled={disabled}
         variant="flat"
         color="primary"
         onClick={() => {
-          close(value);
+          if (onSave) {
+            onSave(value);
+          } else {
+            close(value);
+          }
         }}
       >
         <Trans message="Save" />

@@ -2,8 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Models\Track;
 use App\Services\UrlGenerator;
-use App\Track;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -19,7 +19,7 @@ class ArtistUploadedMedia extends Notification
     {
         $this->urlGenerator = app(UrlGenerator::class);
     }
-    
+
     public function via(): array
     {
         return ['database', 'mail'];

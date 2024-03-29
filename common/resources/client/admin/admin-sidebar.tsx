@@ -14,7 +14,7 @@ export function AdminSidebar({className, isCompactMode}: Props) {
     <div
       className={clsx(
         className,
-        'text-sm pt-26 px-12 pb-16 text-muted font-medium bg-alt flex flex-col gap-20 border-r overflow-y-auto relative'
+        'relative flex flex-col gap-20 overflow-y-auto border-r bg-alt px-12 pb-16 pt-26 text-sm font-medium text-muted',
       )}
     >
       <CustomMenu
@@ -24,10 +24,10 @@ export function AdminSidebar({className, isCompactMode}: Props) {
         onlyShowIcons={isCompactMode}
         itemClassName={({isActive}) =>
           clsx(
-            'block w-full rounded py-12 px-16 border-l-4',
+            'block w-full rounded-button py-12 px-16',
             isActive
-              ? 'bg-primary/hover border-l-primary'
-              : 'border-l-transparent hover:bg-hover'
+              ? 'bg-primary/6 text-primary font-semibold'
+              : 'hover:bg-hover',
           )
         }
         gap="gap-8"

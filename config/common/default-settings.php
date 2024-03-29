@@ -11,7 +11,6 @@ return [
         'value' => 'images/logo-light.svg',
     ],
 
-
     //homepage
     ['name' => 'homepage.type', 'value' => 'channel'],
     ['name' => 'homepage.value', 'value' => 5],
@@ -204,33 +203,18 @@ return [
                 'items' => [
                     [
                         'type' => 'route',
-                        'label' => 'Genres',
-                        'action' => '/genres',
+                        'label' => 'Discover',
+                        'action' => '/',
                         'icon' => [
                             [
                                 'tag' => 'path',
                                 'attr' => [
                                     'd' =>
-                                        'M14.25 21.4q-.575.575-1.425.575-.85 0-1.425-.575l-8.8-8.8q-.275-.275-.437-.65Q2 11.575 2 11.15V4q0-.825.588-1.413Q3.175 2 4 2h7.15q.425 0 .8.162.375.163.65.438l8.8 8.825q.575.575.575 1.412 0 .838-.575 1.413ZM12.825 20l7.15-7.15L11.15 4H4v7.15ZM6.5 8q.625 0 1.062-.438Q8 7.125 8 6.5t-.438-1.062Q7.125 5 6.5 5t-1.062.438Q5 5.875 5 6.5t.438 1.062Q5.875 8 6.5 8ZM4 4Z',
+                                        'm12 5.69 5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3 2 12h3v8h6v-6h2v6h6v-8h3L12 3z',
                                 ],
                             ],
                         ],
                         'id' => 554,
-                    ],
-                    [
-                        'type' => 'route',
-                        'label' => 'Top 50',
-                        'action' => '/popular-tracks',
-                        'icon' => [
-                            [
-                                'tag' => 'path',
-                                'attr' => [
-                                    'd' =>
-                                        'M3.4 18 2 16.6l7.4-7.45 4 4L18.6 8H16V6h6v6h-2V9.4L13.4 16l-4-4Z',
-                                ],
-                            ],
-                        ],
-                        'id' => 974,
                     ],
                     [
                         'type' => 'route',

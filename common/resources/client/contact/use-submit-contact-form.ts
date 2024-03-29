@@ -20,9 +20,10 @@ export function useSubmitContactForm(form: UseFormReturn<ContactPagePayload>) {
   const {trans} = useTrans();
   const navigate = useNavigate();
 
-  return useMutation((props: ContactPagePayload) => submitContactForm(props), {
+  return useMutation({
+    mutationFn: (props: ContactPagePayload) => submitContactForm(props),
     onSuccess: () => {
-      toast(trans(message('Your message can be submitted.')));
+      toast(trans(message('Your message has been submitted.')));
       navigate('/');
     },
     onError: err => onFormQueryError(err, form),

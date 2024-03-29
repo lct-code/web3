@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Album;
-use App\Track;
+use App\Models\Album;
+use App\Models\Track;
 use Common\Auth\BaseUser;
 use Common\Comments\Comment;
 use Common\Comments\CommentPolicy;
@@ -23,8 +23,8 @@ class TrackCommentPolicy extends CommentPolicy
             $comments = Comment::with("commentable.artists")
                 ->where(function (Builder $builder) {
                     $builder
-                        ->where("commentable_type", Track::class)
-                        ->orWhere("commentable_type", Album::class);
+                        ->where("commentable_type", Track::MODEL_TYPE)
+                        ->orWhere("commentable_type", Album::MODEL_TYPE);
                 })
                 ->whereIn("comments.id", $commentIds)
                 ->get();

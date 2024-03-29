@@ -1,20 +1,20 @@
-import {useChannel} from '@app/web-player/channels/requests/use-channel';
 import React from 'react';
-import {Helmet} from '@common/seo/helmet';
 import {ChannelContent} from '@app/web-player/channels/channel-content';
 import {PageStatus} from '@common/http/page-status';
 import {AdHost} from '@common/admin/ads/ad-host';
+import {useChannel} from '@common/channels/requests/use-channel';
+import {PageMetaTags} from '@common/http/page-meta-tags';
 
 interface ChannelPageProps {
   slugOrId?: string | number;
 }
 export function ChannelPage({slugOrId}: ChannelPageProps) {
-  const query = useChannel(slugOrId);
+  const query = useChannel(slugOrId, 'channelPage');
 
   if (query.data) {
     return (
       <div>
-        <Helmet tags={query.data.seo} />
+        <PageMetaTags query={query} />
         <div className="pb-24">
           <AdHost slot="general_top" className="mb-34" />
           <ChannelContent
@@ -28,5 +28,11 @@ export function ChannelPage({slugOrId}: ChannelPageProps) {
     );
   }
 
-  return <PageStatus query={query} loaderClassName="absolute inset-0 m-auto" />;
+  return (
+    <PageStatus
+      query={query}
+      loaderClassName="absolute inset-0 m-auto"
+      loaderIsScreen={false}
+    />
+  );
 }

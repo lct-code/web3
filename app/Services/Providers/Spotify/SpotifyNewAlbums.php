@@ -1,7 +1,7 @@
 <?php namespace App\Services\Providers\Spotify;
 
-use App\Album;
-use App\Artist;
+use App\Models\Album;
+use App\Models\Artist;
 use App\Services\Artists\ArtistSaver;
 use App\Services\Providers\ContentProvider;
 use App\Services\Providers\SaveOrUpdate;

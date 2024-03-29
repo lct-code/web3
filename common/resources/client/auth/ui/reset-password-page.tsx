@@ -70,7 +70,7 @@ export function ResetPasswordPage() {
           variant="flat"
           color="primary"
           size="md"
-          disabled={resetPassword.isLoading}
+          disabled={resetPassword.isPending}
         >
           <Trans message="Reset password" />
         </Button>

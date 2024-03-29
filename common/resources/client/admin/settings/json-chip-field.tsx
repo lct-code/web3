@@ -1,7 +1,10 @@
 import {useController} from 'react-hook-form';
 import React, {useMemo} from 'react';
 import {mergeProps} from '@react-aria/utils';
-import {ChipField} from '../../ui/forms/input-field/chip-field/chip-field';
+import {
+  ChipField,
+  ChipValue,
+} from '../../ui/forms/input-field/chip-field/chip-field';
 import {FormChipFieldProps} from '../../ui/forms/input-field/chip-field/form-chip-field';
 
 export function JsonChipField({children, ...props}: FormChipFieldProps<any>) {
@@ -17,7 +20,7 @@ export function JsonChipField({children, ...props}: FormChipFieldProps<any>) {
     return typeof mixedValue === 'string' ? JSON.parse(mixedValue) : mixedValue;
   }, [value]);
 
-  const formProps: Partial<FormChipFieldProps<any>> = {
+  const formProps: Partial<FormChipFieldProps<ChipValue>> = {
     onChange: newValue => {
       const jsonValue = JSON.stringify(newValue.map(chip => chip.name));
       onChange(jsonValue);

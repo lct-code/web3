@@ -21,10 +21,7 @@ interface Props {
   wrapInContainer?: boolean;
 }
 export function UpdateAlbumPage({wrapInContainer}: Props) {
-  const query = useAlbum({
-    forEditing: true,
-    with: 'tags,genres,artists,fullTracks',
-  });
+  const query = useAlbum({loader: 'editAlbumPage'});
 
   if (query.data) {
     return (
@@ -37,7 +34,13 @@ export function UpdateAlbumPage({wrapInContainer}: Props) {
     );
   }
 
-  return <PageStatus query={query} loaderClassName="absolute inset-0 m-auto" />;
+  return (
+    <PageStatus
+      query={query}
+      loaderIsScreen={false}
+      loaderClassName="absolute inset-0 m-auto"
+    />
+  );
 }
 
 interface PageContentProps {
@@ -73,7 +76,7 @@ function PageContent({album, wrapInContainer}: PageContentProps) {
         updateAlbum.mutate(values);
       }}
       title={<Trans message="Edit “:name“ album" values={{name: album.name}} />}
-      isLoading={updateAlbum.isLoading || uploadIsInProgress}
+      isLoading={updateAlbum.isPending || uploadIsInProgress}
       disableSaveWhenNotDirty
       wrapInContainer={wrapInContainer}
     >

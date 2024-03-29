@@ -13,6 +13,8 @@ export interface PipSlice {
   enterPip: () => void;
   exitPip: () => void;
   togglePip: () => void;
+  initPip: () => void;
+  destroyPip: () => void;
 }
 
 type BaseSliceCreator = StateCreator<
@@ -28,7 +30,8 @@ type StoreLice = BaseSliceCreator extends (...a: infer U) => infer R
 
 const adapterFactories = [createChromePipAdapter, createSafariPipAdapter];
 
-export const createPipSlice: StoreLice = (set, get, store, listeners) => {
+export const createPipSlice: StoreLice = (set, get) => {
+  let subscription: () => void | undefined;
   let adapters: PipAdapter[] = [];
 
   const onPipChange = () => {
@@ -41,25 +44,6 @@ export const createPipSlice: StoreLice = (set, get, store, listeners) => {
     }
     return adapters.some(adapter => adapter.isSupported());
   };
-
-  listeners.add({
-    providerReady: ({el}) => {
-      // when changing adapters, remove previous adapter events and exit pip
-      adapters.every(a => a.unbindEvents());
-      if (get().isPip) {
-        adapters.every(a => a.exit());
-      }
-      // create new adapters, and if pip is supported on at least one, bind events
-      adapters = adapterFactories.map(factory =>
-        factory(el as HTMLVideoElement, onPipChange)
-      );
-      const canPip = isSupported();
-      if (canPip) {
-        adapters.every(a => a.bindEvents());
-      }
-      set({canPip});
-    },
-  });
 
   return {
     isPip: false,
@@ -78,6 +62,30 @@ export const createPipSlice: StoreLice = (set, get, store, listeners) => {
       } else {
         get().enterPip();
       }
+    },
+    initPip: () => {
+      subscription = get().subscribe({
+        providerReady: ({el}) => {
+          // when changing adapters, remove previous adapter events and exit pip
+          adapters.every(a => a.unbindEvents());
+          if (get().isPip) {
+            adapters.every(a => a.exit());
+          }
+          // create new adapters, and if pip is supported on at least one, bind events
+          adapters = adapterFactories.map(factory =>
+            factory(el as HTMLVideoElement, onPipChange)
+          );
+          const canPip = isSupported();
+          if (canPip) {
+            adapters.every(a => a.bindEvents());
+          }
+          set({canPip});
+        },
+      });
+    },
+    destroyPip: () => {
+      get().exitPip();
+      subscription?.();
     },
   };
 };

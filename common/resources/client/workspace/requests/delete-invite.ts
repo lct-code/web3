@@ -18,14 +18,15 @@ function deleteInvite({inviteId}: Props): Promise<Response> {
 }
 
 export function useDeleteInvite() {
-  return useMutation((props: Props) => deleteInvite(props), {
+  return useMutation({
+    mutationFn: (props: Props) => deleteInvite(props),
     onSuccess: () => {
-      queryClient.invalidateQueries(useUserNotifications.key);
+      queryClient.invalidateQueries({queryKey: useUserNotifications.key});
       toast(message('Declined workspace invitation'));
     },
     onError: e => {
       if (axios.isAxiosError(e) && e.response && e.response.status === 404) {
-        queryClient.invalidateQueries(useUserNotifications.key);
+        queryClient.invalidateQueries({queryKey: useUserNotifications.key});
         toast.danger(message('This invite is no longer valid'));
       } else {
         showHttpErrorToast(e);

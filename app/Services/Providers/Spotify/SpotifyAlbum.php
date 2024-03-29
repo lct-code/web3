@@ -1,7 +1,7 @@
 <?php namespace App\Services\Providers\Spotify;
 
 use App;
-use App\Album;
+use App\Models\Album;
 use App\Services\HttpClient;
 use Illuminate\Support\Arr;
 

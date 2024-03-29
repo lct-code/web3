@@ -1,8 +1,8 @@
 import React, {useContext, useEffect, useMemo} from 'react';
 import {Workspace} from './types/workspace';
 import {PersonalWorkspace, useUserWorkspaces} from './user-workspaces';
-import useCookie from 'react-use-cookie';
 import {setActiveWorkspaceId} from './active-workspace-id';
+import {useCookie} from '@common/utils/hooks/use-cookie';
 
 export interface ActiveWorkspaceIdContextValue {
   workspaceId: number | null;

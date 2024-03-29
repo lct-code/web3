@@ -1,5 +1,5 @@
 import {useForm} from 'react-hook-form';
-import {Fragment, ReactNode} from 'react';
+import {Fragment, ReactElement, ReactNode} from 'react';
 import {
   ConnectSocialPayload,
   useConnectSocialWithPassword,
@@ -24,13 +24,20 @@ import {useAuth} from '../use-auth';
 import {useTrans} from '../../i18n/use-trans';
 import {message} from '../../i18n/message';
 import {useSettings} from '../../core/settings/use-settings';
+import {MessageDescriptor} from '@common/i18n/message-descriptor';
+import clsx from 'clsx';
+import {EnvatoIcon} from '@common/icons/social/envato';
+
+const googleLabel = message('Continue with google');
+const facebookLabel = message('Continue with facebook');
+const twitterLabel = message('Continue with twitter');
+const envatoLabel = message('Continue with envato');
 
 interface SocialAuthSectionProps {
   dividerMessage: ReactNode;
 }
 export function SocialAuthSection({dividerMessage}: SocialAuthSectionProps) {
-  const {trans} = useTrans();
-  const {social, registration} = useSettings();
+  const {social} = useSettings();
   const navigate = useNavigate();
   const {getRedirectUri} = useAuth();
   const {loginWithSocial, requestingPassword, setIsRequestingPassword} =
@@ -39,9 +46,10 @@ export function SocialAuthSection({dividerMessage}: SocialAuthSectionProps) {
   const allSocialsDisabled =
     !social?.google?.enable &&
     !social?.facebook?.enable &&
-    !social?.twitter?.enable;
+    !social?.twitter?.enable &&
+    !social?.envato?.enable;
 
-  if (registration.disable || allSocialsDisabled) {
+  if (allSocialsDisabled) {
     return null;
   }
 
@@ -54,47 +62,44 @@ export function SocialAuthSection({dividerMessage}: SocialAuthSectionProps) {
 
   return (
     <Fragment>
-      <div className="relative text-center my-20 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-1 before:w-full before:bg-divider">
-        <span className="bg-paper relative z-10 px-10 text-sm text-muted">
+      <div className="relative my-20 text-center before:absolute before:left-0 before:top-1/2 before:h-1 before:w-full before:-translate-y-1/2 before:bg-divider">
+        <span className="relative z-10 bg-paper px-10 text-sm text-muted">
           {dividerMessage}
         </span>
       </div>
-      <div className="flex items-center justify-center gap-14">
+      <div
+        className={clsx(
+          'flex items-center justify-center gap-14',
+          !social.compact_buttons && 'flex-col',
+        )}
+      >
         {social?.google?.enable ? (
-          <IconButton
-            variant="outline"
-            radius="rounded"
-            aria-label={trans(message('Sign in with google'))}
-            onClick={() => {
-              handleSocialLogin('google');
-            }}
-          >
-            <GoogleIcon viewBox="0 0 48 48" />
-          </IconButton>
+          <SocialLoginButton
+            label={googleLabel}
+            icon={<GoogleIcon viewBox="0 0 48 48" />}
+            onClick={() => handleSocialLogin('google')}
+          />
         ) : null}
         {social?.facebook?.enable ? (
-          <IconButton
-            variant="outline"
-            radius="rounded"
-            aria-label={trans(message('Sign in with facebook'))}
-            onClick={() => {
-              handleSocialLogin('facebook');
-            }}
-          >
-            <FacebookIcon className="text-facebook" />
-          </IconButton>
+          <SocialLoginButton
+            label={facebookLabel}
+            icon={<FacebookIcon className="text-facebook" />}
+            onClick={() => handleSocialLogin('facebook')}
+          />
         ) : null}
         {social?.twitter?.enable ? (
-          <IconButton
-            variant="outline"
-            radius="rounded"
-            aria-label={trans(message('Sign in with twitter'))}
-            onClick={() => {
-              handleSocialLogin('twitter');
-            }}
-          >
-            <TwitterIcon className="text-twitter" />
-          </IconButton>
+          <SocialLoginButton
+            label={twitterLabel}
+            icon={<TwitterIcon className="text-twitter" />}
+            onClick={() => handleSocialLogin('twitter')}
+          />
+        ) : null}
+        {social?.envato?.enable ? (
+          <SocialLoginButton
+            label={envatoLabel}
+            icon={<EnvatoIcon viewBox="0 0 50 50" className="text-envato" />}
+            onClick={() => handleSocialLogin('envato')}
+          />
         ) : null}
       </div>
       <DialogTrigger
@@ -118,7 +123,7 @@ function RequestPasswordDialog() {
         <Trans message="Password required" />
       </DialogHeader>
       <DialogBody>
-        <div className="text-sm text-muted mb-30">
+        <div className="mb-30 text-sm text-muted">
           <Trans message="An account with this email address already exists. If you want to connect the two accounts, enter existing account password." />
         </div>
         <Form
@@ -146,11 +151,44 @@ function RequestPasswordDialog() {
           form={formId}
           variant="flat"
           color="primary"
-          disabled={connect.isLoading}
+          disabled={connect.isPending}
         >
           <Trans message="Connect" />
         </Button>
       </DialogFooter>
     </Dialog>
+  );
+}
+
+interface SocialLoginButtonProps {
+  onClick: () => void;
+  label: MessageDescriptor;
+  icon: ReactElement;
+}
+function SocialLoginButton({onClick, label, icon}: SocialLoginButtonProps) {
+  const {trans} = useTrans();
+  const {
+    social: {compact_buttons},
+  } = useSettings();
+
+  if (compact_buttons) {
+    return (
+      <IconButton variant="outline" aria-label={trans(label)} onClick={onClick}>
+        {icon}
+      </IconButton>
+    );
+  }
+
+  return (
+    <Button
+      variant="outline"
+      startIcon={icon}
+      onClick={onClick}
+      className="min-h-42 w-full"
+    >
+      <span className="min-w-160 text-start">
+        <Trans {...label} />
+      </span>
+    </Button>
   );
 }

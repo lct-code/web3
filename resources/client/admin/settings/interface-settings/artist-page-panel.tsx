@@ -4,7 +4,6 @@ import React, {Fragment, ReactNode, useRef} from 'react';
 import {DragPreviewRenderer} from '@common/ui/interactions/dnd/use-draggable';
 import {useFormContext} from 'react-hook-form';
 import {AdminSettingsWithFiles} from '@common/admin/settings/requests/update-admin-settings';
-import {useSortable} from '@common/ui/interactions/dnd/use-sortable';
 import {moveItemInNewArray} from '@common/utils/array/move-item-in-new-array';
 import {IconButton} from '@common/ui/buttons/icon-button';
 import {DragHandleIcon} from '@common/icons/material/DragHandle';
@@ -14,13 +13,14 @@ import clsx from 'clsx';
 import {FormSelect} from '@common/ui/forms/select/select';
 import {FormSwitch} from '@common/ui/forms/toggle/switch';
 import {Item} from '@common/ui/forms/listbox/item';
+import {useSortable} from '@common/ui/interactions/dnd/sortable/use-sortable';
 
 export function ArtistPagePanel() {
   const {watch} = useFormContext<AdminSettingsWithFiles>();
   const tabs = watch('client.artistPage.tabs') || [];
   return (
     <div>
-      <div className="text-sm mb-14">
+      <div className="mb-14 text-sm">
         <Trans message="Artist page tabs" />
         <div className="text-xs text-muted">
           <Trans message="Select which tabs should appear on artist page and in which order." />
@@ -140,11 +140,11 @@ function ArtistTabListItem({title, description, id}: ArtistTabListItemProps) {
     items: ids,
     type: 'artistPageTabs',
     preview: previewRef,
-    previewVariant: 'line',
+    strategy: 'line',
     onSortEnd: (oldIndex, newIndex) => {
       setValue(
         'client.artistPage.tabs',
-        moveItemInNewArray(tabs, oldIndex, newIndex)
+        moveItemInNewArray(tabs, oldIndex, newIndex),
       );
     },
   });
@@ -153,8 +153,8 @@ function ArtistTabListItem({title, description, id}: ArtistTabListItemProps) {
     <Fragment>
       <div
         className={clsx(
-          'flex items-center gap-8 py-6 border-b w-full',
-          isFirst && 'border-t border-t-transparent'
+          'flex w-full items-center gap-8 border-b py-6',
+          isFirst && 'border-t border-t-transparent',
         )}
         ref={ref}
         {...sortableProps}
@@ -192,9 +192,9 @@ const TabDragPreview = React.forwardRef<DragPreviewRenderer, DragPreviewProps>(
     return (
       <DragPreview ref={ref}>
         {() => (
-          <div className="p-8 rounded shadow bg-chip text-sm">{title}</div>
+          <div className="rounded bg-chip p-8 text-sm shadow">{title}</div>
         )}
       </DragPreview>
     );
-  }
+  },
 );

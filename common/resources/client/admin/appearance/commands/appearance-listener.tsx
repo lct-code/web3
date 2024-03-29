@@ -1,9 +1,13 @@
 import {useCallback, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {AllCommands} from './commands';
-import {setThemeColor} from '../../../ui/themes/utils/set-theme-color';
-import {applyThemeToDom} from '../../../ui/themes/utils/apply-theme-to-dom';
-import {useBootstrapData} from '../../../core/bootstrap-data/bootstrap-data-context';
+import {AllCommands} from '@common/admin/appearance/commands/commands';
+import {
+  removeThemeValue,
+  setThemeValue,
+} from '@common/ui/themes/utils/set-theme-value';
+import {applyThemeToDom} from '@common/ui/themes/utils/apply-theme-to-dom';
+import {useBootstrapData} from '@common/core/bootstrap-data/bootstrap-data-context';
+import {loadFonts} from '@common/ui/font-picker/load-fonts';
 
 export function AppearanceListener() {
   const navigate = useNavigate();
@@ -25,11 +29,22 @@ export function AppearanceListener() {
               ...command.values.settings,
             },
           });
-        case 'setThemeColor':
-          return setThemeColor(command.name, command.value);
+        case 'setThemeFont':
+          if (command.value) {
+            setThemeValue('--be-font-family', command.value.family);
+            loadFonts([command.value], {
+              id: 'be-primary-font',
+              forceAssetLoad: true,
+            });
+          } else {
+            removeThemeValue('--be-font-family');
+          }
+          return;
+        case 'setThemeValue':
+          return setThemeValue(command.name, command.value);
         case 'setActiveTheme':
           const theme = currentData.themes.all.find(
-            t => t.id === command.themeId
+            t => t.id === command.themeId,
           );
           if (theme) {
             applyThemeToDom(theme);
@@ -40,7 +55,7 @@ export function AppearanceListener() {
         default:
       }
     },
-    [currentData, mergeBootstrapData, navigate]
+    [currentData, mergeBootstrapData, navigate],
   );
 
   useEffect(() => {

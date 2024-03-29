@@ -2,7 +2,7 @@
 
 namespace Common\Billing\Invoices;
 
-use App\User;
+use App\Models\User;
 use Common\Core\Policies\BasePolicy;
 
 class InvoicePolicy extends BasePolicy

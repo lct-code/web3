@@ -20,26 +20,28 @@ export function CancelledPlanPanel() {
 
   return (
     <BillingPlanPanel title={<Trans message="Current plan" />}>
-      <div className="flex gap-20 justify-between mt-24">
+      <div className="mt-24 flex flex-col justify-between gap-20">
         <div>
           <Chip
-            className="w-min mb-10"
+            className="mb-10 w-min"
             size="xs"
             radius="rounded"
             color="danger"
           >
             <Trans message="Canceled" />
           </Chip>
-          <div className="text-xl font-bold mb-2">
+          <div className="mb-2 text-xl font-bold">
             {subscription.product.name}
           </div>
-          <FormattedPrice className="text-xl mb-8" price={subscription.price} />
-          <div className="text-base flex items-center gap-8">
+          <FormattedPrice className="mb-8 text-xl" price={subscription.price} />
+          <div className="flex items-center gap-8 text-base">
             <CalendarTodayIcon size="sm" className="text-muted" />
-            <Trans
-              message="Your plan will be canceled on :date"
-              values={{date: endingDate}}
-            />
+            <div className="flex-auto">
+              <Trans
+                message="Your plan will be canceled on :date"
+                values={{date: endingDate}}
+              />
+            </div>
           </div>
         </div>
         <div className="w-[233px]">
@@ -47,7 +49,7 @@ export function CancelledPlanPanel() {
             variant="flat"
             color="primary"
             size="md"
-            className="w-full mb-12"
+            className="mb-12 w-full"
             elementType={Link}
             to="/billing/renew"
           >

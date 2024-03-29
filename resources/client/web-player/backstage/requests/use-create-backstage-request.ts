@@ -26,17 +26,18 @@ export interface CreateBackstageRequestPayload {
 }
 
 export function useCreateBackstageRequest(
-  form: UseFormReturn<CreateBackstageRequestPayload>
+  form: UseFormReturn<CreateBackstageRequestPayload>,
 ) {
-  return useMutation(
-    (payload: CreateBackstageRequestPayload) => createRequest(payload),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(DatatableDataQueryKey(endpoint));
-      },
-      onError: err => onFormQueryError(err, form),
-    }
-  );
+  return useMutation({
+    mutationFn: (payload: CreateBackstageRequestPayload) =>
+      createRequest(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey(endpoint),
+      });
+    },
+    onError: err => onFormQueryError(err, form),
+  });
 }
 
 function createRequest(payload: CreateBackstageRequestPayload) {

@@ -15,14 +15,14 @@ export function SettingsLayout({className}: Props) {
     <div
       className={clsx(
         className,
-        'md:flex gap-30 min-h-full items-start p-24 container mx-auto'
+        'container mx-auto min-h-full items-start gap-30 p-24 md:flex',
       )}
     >
       <StaticPageTitle>
         <Trans message="Settings" />
       </StaticPageTitle>
       {isMobile ? <MobileNav /> : <DesktopNav />}
-      <div className="md:px-30 flex-auto relative max-w-500">
+      <div className="relative max-w-500 flex-auto md:px-30">
         <Outlet />
       </div>
     </div>
@@ -37,7 +37,7 @@ function MobileNav() {
   return (
     <Select
       minWidth="min-w-none"
-      className="w-full bg-paper mb-24"
+      className="mb-24 w-full bg"
       selectionMode="single"
       selectedValue={value}
       onSelectionChange={newPage => {
@@ -55,17 +55,17 @@ function MobileNav() {
 
 function DesktopNav() {
   return (
-    <div className="w-240 sticky top-24 flex-shrink-0">
+    <div className="sticky top-24 w-240 flex-shrink-0">
       {SettingsNavConfig.map(item => (
         <NavLink
           key={item.to as string}
           to={item.to}
           className={({isActive}) =>
             clsx(
-              'block p-14 whitespace-nowrap mb-8 rounded border-l-4 text-sm transition-bg-color',
+              'mb-8 block whitespace-nowrap rounded-button p-14 text-sm transition-bg-color',
               isActive
-                ? 'bg-primary/selected border-l-primary font-medium'
-                : 'border-l-transparent hover:bg-hover'
+                ? 'bg-primary/6 font-semibold text-primary'
+                : 'hover:bg-hover',
             )
           }
         >

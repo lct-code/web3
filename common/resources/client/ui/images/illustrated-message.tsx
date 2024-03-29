@@ -27,14 +27,14 @@ export function IllustratedMessage({
     <div className={clsx('text-center', className)}>
       {image && <div className={clsx(style.image, imageMargin)}>{image}</div>}
       {title && (
-        <div className={clsx(style.title, 'text-main mb-2')}>{title}</div>
+        <div className={clsx(style.title, 'mb-2 text-main')}>{title}</div>
       )}
       {description && (
-        <div className={clsx(style.description, 'text-muted mb-14')}>
+        <div className={clsx(style.description, 'text-muted')}>
           {description}
         </div>
       )}
-      {action && <div>{action}</div>}
+      {action && <div className="mt-20">{action}</div>}
     </div>
   );
 }

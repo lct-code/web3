@@ -1,15 +1,12 @@
 import {ReactElement, ReactNode} from 'react';
 import clsx from 'clsx';
-import {Link} from 'react-router-dom';
 import {useAuth} from '@common/auth/use-auth';
 import {NotificationDialogTrigger} from '@common/notifications/dialog/notification-dialog-trigger';
 import {Menu, MenuTrigger} from '@common/ui/navigation/menu/menu-trigger';
 import {useCustomMenu} from '@common/menus/use-custom-menu';
 import {createSvgIconFromTree} from '@common/icons/create-svg-icon';
-import {useTrans} from '@common/i18n/use-trans';
 import {Trans} from '@common/i18n/trans';
 import {IconButton} from '@common/ui/buttons/icon-button';
-import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 import {Item} from '@common/ui/forms/listbox/item';
 import {useNavigate} from '@common/utils/hooks/use-navigate';
 import {useIsDarkMode} from '@common/ui/themes/use-is-dark-mode';
@@ -23,15 +20,19 @@ import {
   NavbarAuthUserProps,
 } from '@common/ui/navigation/navbar/navbar-auth-user';
 import {NavbarAuthButtons} from '@common/ui/navigation/navbar/navbar-auth-buttons';
+import {useDarkThemeVariables} from '@common/ui/themes/use-dark-theme-variables';
+import {Logo} from '@common/ui/navigation/navbar/logo';
+import {useLightThemeVariables} from '@common/ui/themes/use-light-theme-variables';
 
-type NavbarColor = 'primary' | 'bg' | 'bg-alt' | 'transparent';
+type NavbarColor = 'primary' | 'bg' | 'bg-alt' | 'transparent' | string;
 
 export interface NavbarProps {
-  hideLogo?: boolean;
+  hideLogo?: boolean | null;
   toggleButton?: ReactElement;
   children?: ReactNode;
   className?: string;
   color?: NavbarColor;
+  bgOpacity?: number | string;
   darkModeColor?: NavbarColor;
   logoColor?: 'dark' | 'light';
   textColor?: string;
@@ -41,29 +42,37 @@ export interface NavbarProps {
   rightChildren?: ReactNode;
   menuPosition?: string;
   authMenuItems?: NavbarAuthUserProps['items'];
+  alwaysDarkMode?: boolean;
+  wrapInContainer?: boolean;
 }
-export function Navbar({
-  hideLogo,
-  toggleButton,
-  children,
-  className,
-  border,
-  size = 'md',
-  color = 'primary',
-  darkModeColor = 'bg-alt',
-  textColor,
-  rightChildren,
-  menuPosition,
-  logoColor,
-  primaryButtonColor,
-  authMenuItems,
-}: NavbarProps) {
-  const isMobile = useIsMobileMediaQuery();
-  const isDarkMode = useIsDarkMode();
+export function Navbar(props: NavbarProps) {
+  let {
+    hideLogo,
+    toggleButton,
+    children,
+    className,
+    border,
+    size = 'md',
+    color,
+    textColor,
+    darkModeColor,
+    rightChildren,
+    menuPosition,
+    logoColor,
+    primaryButtonColor,
+    authMenuItems,
+    alwaysDarkMode = false,
+    wrapInContainer = false,
+  } = props;
+  const isDarkMode = useIsDarkMode() || alwaysDarkMode;
   const {notifications} = useSettings();
   const {isLoggedIn} = useAuth();
-
-  const showNotifButton = !isMobile && isLoggedIn && notifications?.integrated;
+  const darkThemeVars = useDarkThemeVariables();
+  const lightThemeVars = useLightThemeVariables();
+  const showNotifButton = isLoggedIn && notifications?.integrated;
+  color = color ?? lightThemeVars?.['--be-navbar-color'] ?? 'primary';
+  darkModeColor =
+    darkModeColor ?? darkModeColor?.['--be-navbar-color'] ?? 'bg-alt';
 
   if (isDarkMode) {
     color = darkModeColor;
@@ -71,48 +80,41 @@ export function Navbar({
 
   return (
     <div
+      style={alwaysDarkMode ? darkThemeVars : undefined}
       className={clsx(
-        'flex items-center gap-10 py-8',
-        isMobile ? 'pl-14 pr-8' : 'px-20',
-        color === 'primary' &&
-          `bg-primary ${textColor || 'text-on-primary'} border-b-primary`,
-        color === 'bg' && `bg ${textColor || 'text-main'} border-b`,
-        color === 'bg-alt' && `bg-alt ${textColor || 'text-main'} border-b`,
-        color === 'transparent' &&
-          `bg-transparent ${textColor || 'text-white'}`,
+        getColorStyle(color, textColor),
         size === 'md' && 'h-64 py-8',
         size === 'sm' && 'h-54 py-4',
         size === 'xs' && 'h-48 py-4',
         border,
-        className
+        className,
       )}
     >
-      {!hideLogo && (
-        <Logo isMobile={isMobile} color={color} logoColor={logoColor} />
-      )}
-      {toggleButton}
-      {children}
-      {isMobile ? (
-        <MobileMenu position={menuPosition} />
-      ) : (
-        <DesktopMenu position={menuPosition} />
-      )}
       <div
         className={clsx(
-          'ml-auto flex items-center',
-          isMobile ? 'gap-4' : 'gap-14'
+          'flex h-full items-center justify-end gap-10 pl-14 pr-8 md:pl-20 md:pr-20',
+          wrapInContainer && 'container mx-auto',
         )}
       >
-        {rightChildren}
-        {showNotifButton && <NotificationDialogTrigger />}
-        {isLoggedIn ? (
-          <NavbarAuthUser items={authMenuItems} />
-        ) : (
-          <NavbarAuthButtons
-            navbarColor={color}
-            primaryButtonColor={primaryButtonColor}
-          />
+        {!hideLogo && (
+          <Logo isDarkMode={isDarkMode} color={color} logoColor={logoColor} />
         )}
+        {toggleButton}
+        {children}
+        <MobileMenu position={menuPosition} />
+        <DesktopMenu position={menuPosition} />
+        <div className="ml-auto flex items-center gap-4 md:gap-14">
+          {rightChildren}
+          {showNotifButton && <NotificationDialogTrigger />}
+          {isLoggedIn ? (
+            <NavbarAuthUser items={authMenuItems} />
+          ) : (
+            <NavbarAuthButtons
+              navbarColor={color}
+              primaryButtonColor={primaryButtonColor}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -124,11 +126,11 @@ interface DesktopMenuProps {
 function DesktopMenu({position}: DesktopMenuProps) {
   return (
     <CustomMenu
-      className="text-sm mx-14"
+      className="mx-14 text-sm max-md:hidden"
       itemClassName={isActive =>
         clsx(
           'opacity-90 hover:underline hover:opacity-100',
-          isActive && 'opacity-100'
+          isActive && 'opacity-100',
         )
       }
       menu={position}
@@ -157,7 +159,7 @@ function MobileMenu({position}: MobileMenuProps) {
 
   return (
     <MenuTrigger>
-      <IconButton>
+      <IconButton className="md:hidden" aria-label="Toggle menu">
         <MenuIcon />
       </IconButton>
       <Menu>
@@ -179,50 +181,17 @@ function MobileMenu({position}: MobileMenuProps) {
   );
 }
 
-interface LogoProps {
-  isMobile: boolean | null;
-  color: NavbarProps['color'];
-  logoColor: NavbarProps['logoColor'];
-}
-function Logo({color, isMobile, logoColor}: LogoProps) {
-  const {trans} = useTrans();
-  const {branding} = useSettings();
-  const isDarkMode = useIsDarkMode();
-
-  let desktopLogo: string;
-  let mobileLogo: string;
-  if (
-    isDarkMode ||
-    !branding.logo_dark ||
-    (logoColor !== 'dark' && (color === 'primary' || color === 'transparent'))
-  ) {
-    desktopLogo = branding.logo_light;
-    mobileLogo = branding.logo_light_mobile;
-  } else {
-    desktopLogo = branding.logo_dark;
-    mobileLogo = branding.logo_dark_mobile;
+function getColorStyle(color: string, textColor?: string): string {
+  switch (color) {
+    case 'primary':
+      return `bg-primary ${textColor || 'text-on-primary'} border-b-primary`;
+    case 'bg':
+      return `bg ${textColor || 'text-main'} border-b`;
+    case 'bg-alt':
+      return `bg-alt ${textColor || 'text-main'} border-b`;
+    case 'transparent':
+      return `bg-transparent ${textColor || 'text-white'}`;
+    default:
+      return `${color} ${textColor}`;
   }
-
-  const logoUrl = isMobile ? mobileLogo || desktopLogo : desktopLogo;
-  if (!logoUrl) {
-    return null;
-  }
-
-  return (
-    <Link
-      to="/"
-      className={clsx(
-        'block mr-4 md:mr-24 flex-shrink-0 h-full',
-        isMobile ? 'max-h-26' : 'max-h-36'
-      )}
-      aria-label={trans({message: 'Go to homepage'})}
-    >
-      <img
-        className="block w-auto h-full"
-        data-logo="navbar"
-        src={logoUrl}
-        alt={trans({message: 'Site logo'})}
-      />
-    </Link>
-  );
 }

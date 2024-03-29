@@ -20,11 +20,16 @@ export interface UpdateLyricPayload extends CreateLyricPayload {
 
 export function useUpdateLyric(form: UseFormReturn<UpdateLyricPayload>) {
   const {trans} = useTrans();
-  return useMutation((props: UpdateLyricPayload) => updateGenre(props), {
+  return useMutation({
+    mutationFn: (props: UpdateLyricPayload) => updateGenre(props),
     onSuccess: () => {
       toast(trans(message('Lyric updated')));
-      queryClient.invalidateQueries(DatatableDataQueryKey('lyrics'));
-      queryClient.invalidateQueries(DatatableDataQueryKey('tracks'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('lyrics'),
+      });
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('tracks'),
+      });
     },
     onError: err => onFormQueryError(err, form),
   });

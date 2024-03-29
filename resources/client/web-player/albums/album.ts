@@ -1,7 +1,7 @@
-import {Track} from '../tracks/track';
 import {Genre} from '../genres/genre';
 import {Artist} from '../artists/artist';
 import {Tag} from '@common/tags/tag';
+import {Track} from '@app/web-player/tracks/track';
 
 export const ALBUM_MODEL = 'album';
 

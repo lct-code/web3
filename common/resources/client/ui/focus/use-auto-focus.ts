@@ -13,12 +13,14 @@ export function useAutoFocus(
 
   useEffect(() => {
     if (autoFocusRef.current && ref.current) {
-      ref.current?.focus();
-      if (autoSelectText && ref.current.nodeName.toLowerCase() === 'input') {
-        requestAnimationFrame(() => {
+      // run inside animation frame to prevent issues when opening
+      // dialog with via keyboard shortcut and focusing input
+      requestAnimationFrame(() => {
+        ref.current?.focus();
+        if (autoSelectText && ref.current?.nodeName.toLowerCase() === 'input') {
           (ref.current as HTMLInputElement).select();
-        });
-      }
+        }
+      });
     }
     autoFocusRef.current = false;
   }, [ref, autoSelectText]);

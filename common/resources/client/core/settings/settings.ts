@@ -15,6 +15,7 @@ export interface Settings {
   };
   menus: MenuConfig[];
   base_url: string;
+  asset_url?: string;
   html_base_uri: string;
   cookie_notice: {
     enable: boolean;
@@ -24,7 +25,7 @@ export interface Settings {
   logging: {
     sentry_public?: string;
   };
-  themes: {
+  themes?: {
     default_id?: number | string | null;
     user_change: boolean;
   };
@@ -45,6 +46,7 @@ export interface Settings {
     integrated: boolean;
   };
   billing: {
+    integrated: boolean;
     enable: boolean;
     accepted_cards?: string | string[];
     paypal_test_mode: boolean;
@@ -91,6 +93,7 @@ export interface Settings {
     facebook: {
       enable: boolean;
     };
+    compact_buttons: boolean;
   };
   workspaces: {
     integrated: boolean;
@@ -119,9 +122,6 @@ export interface Settings {
   analytics?: {
     tracking_code?: string;
     gchart_api_key?: string;
-  };
-  envato: {
-    enable: boolean;
   };
 }
 

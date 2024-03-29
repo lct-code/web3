@@ -1,4 +1,11 @@
-import {Children, cloneElement, forwardRef, isValidElement, useId, useRef} from 'react';
+import {
+  Children,
+  cloneElement,
+  forwardRef,
+  isValidElement,
+  useId,
+  useRef,
+} from 'react';
 import {RadioGroupProps} from '../radio-group/radio-group';
 import {SegmentedRadioProps} from './segmented-radio';
 import {ActiveIndicator} from './active-indicator';
@@ -10,6 +17,7 @@ export interface SegmentedRadioGroupProps
   value?: string;
   onChange?: (value: string) => void;
   defaultValue?: string;
+  width?: string;
 }
 export const SegmentedRadioGroup = forwardRef<
   HTMLFieldSetElement,
@@ -24,12 +32,12 @@ export const SegmentedRadioGroup = forwardRef<
   const [selectedValue, setSelectedValue] = useControlledState(
     props.value,
     props.defaultValue,
-    props.onChange
+    props.onChange,
   );
 
   return (
-    <fieldset ref={ref} className={clsx(className, 'w-min')}>
-      <div className="flex bg-chip rounded p-4 isolate relative">
+    <fieldset ref={ref} className={clsx(className, props.width ?? 'w-min')}>
+      <div className="relative isolate flex rounded bg-chip p-4">
         <ActiveIndicator selectedValue={selectedValue} labelsRef={labelsRef} />
         {Children.map(children, (child, index) => {
           if (isValidElement<SegmentedRadioProps>(child)) {

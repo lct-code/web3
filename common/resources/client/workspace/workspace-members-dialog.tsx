@@ -50,7 +50,7 @@ export function WorkspaceMembersDialog({
       </DialogHeader>
       <DialogBody>
         {isLoading ? (
-          <div className="flex items-center justify-center min-h-[238px]">
+          <div className="flex min-h-[238px] items-center justify-center">
             <ProgressCircle isIndeterminate aria-label="Loading workspace..." />
           </div>
         ) : (
@@ -65,16 +65,18 @@ interface ManagerProps {
   workspace: Workspace;
 }
 function Manager({workspace}: ManagerProps) {
+  const {user} = useAuth();
   const can = usePermissions(workspace);
   const members: (WorkspaceMember | WorkspaceInvite)[] = [
     ...(workspace.members || []),
     ...(workspace.invites || []),
   ];
+  const shouldHideOtherMembers = !can.update && !can.delete;
 
   return (
     <div>
       {can.invite && <InviteChipField workspace={workspace} />}
-      <div className="flex items-center gap-10 mb-14 text-base">
+      <div className="mb-14 flex items-center gap-10 text-base">
         <GroupIcon className="icon-sm" />
         <Trans
           message="Members of `:workspace`"
@@ -82,13 +84,26 @@ function Manager({workspace}: ManagerProps) {
         />
       </div>
       <AnimatePresence initial={false}>
-        {members.map(member => (
-          <MemberListItem
-            key={`${member.model_type}.${member.id}`}
-            workspace={workspace}
-            member={member}
-          />
-        ))}
+        {members.map(member => {
+          if (shouldHideOtherMembers && member.id !== user?.id) {
+            return null;
+          }
+          return (
+            <MemberListItem
+              key={`${member.model_type}.${member.id}`}
+              workspace={workspace}
+              member={member}
+            />
+          );
+        })}
+        {shouldHideOtherMembers && (
+          <div className="text-muted">
+            <Trans
+              message="And [one one other member|:count other members]"
+              values={{count: members.length}}
+            />
+          </div>
+        )}
       </AnimatePresence>
     </div>
   );
@@ -105,16 +120,16 @@ function MemberListItem({workspace, member}: MemberListItemProps) {
       animate={{x: 0, opacity: 1}}
       exit={{x: '100%', opacity: 0}}
       transition={{type: 'tween', duration: 0.125}}
-      className="flex items-start text-sm gap-14 mb-20"
+      className="mb-20 flex items-start gap-14 text-sm"
       key={`${member.model_type}.${member.id}`}
     >
       <img
-        className="w-36 h-36 rounded flex-shrink-0"
+        className="h-36 w-36 flex-shrink-0 rounded"
         src={member.avatar}
         alt=""
       />
-      <div className="md:flex flex-auto items-center justify-between gap-14 min-w-0">
-        <div className="overflow-hidden mb-10 md:mb-0 md:mr-10">
+      <div className="min-w-0 flex-auto items-center justify-between gap-14 md:flex">
+        <div className="mb-10 overflow-hidden md:mb-0 md:mr-10">
           <div className="flex items-center justify-start gap-6">
             <div className="overflow-hidden text-ellipsis whitespace-nowrap">
               {member.display_name}
@@ -140,7 +155,7 @@ function usePermissions(workspace: Workspace) {
       response[permission] =
         authMember.is_owner ||
         !!authMember.permissions?.find(
-          p => p.name === `workspace_members.${permission}`
+          p => p.name === `workspace_members.${permission}`,
         );
     });
   }
@@ -164,7 +179,7 @@ function MemberActions({workspace, member}: MemberActionsProps) {
 
   const roleSelector =
     !can.update || isOwner || isCurrentUser ? (
-      <div className="text-muted ml-auto first:capitalize">
+      <div className="ml-auto text-muted first:capitalize">
         <Trans message={member.role_name} />
       </div>
     ) : (
@@ -172,7 +187,7 @@ function MemberActions({workspace, member}: MemberActionsProps) {
         className="ml-auto flex-shrink-0"
         size="xs"
         value={selectedRole}
-        isDisabled={changeRole.isLoading}
+        isDisabled={changeRole.isPending}
         onChange={roleId => {
           setSelectedRole(roleId);
           changeRole.mutate({
@@ -235,14 +250,14 @@ function InviteChipField({workspace}: InviteChipFieldProps) {
         placeholder={trans({message: 'Enter email addresses'})}
         label={<Trans message="Invite people" />}
       />
-      <div className="flex items-center gap-14 justify-between mt-14">
+      <div className="mt-14 flex items-center justify-between gap-14">
         <RoleMenuTrigger onChange={setSelectedRole} value={selectedRole} />
         {chips.length && selectedRole ? (
           <Button
             variant="flat"
             color="primary"
             size="sm"
-            disabled={inviteMembers.isLoading || !allEmailsValid}
+            disabled={inviteMembers.isPending || !allEmailsValid}
             onClick={() => {
               inviteMembers.mutate(
                 {
@@ -254,7 +269,7 @@ function InviteChipField({workspace}: InviteChipFieldProps) {
                   onSuccess: () => {
                     setChips([]);
                   },
-                }
+                },
               );
             }}
           >
@@ -297,8 +312,8 @@ function RemoveMemberButton({
     >
       <IconButton
         size="md"
-        className="text-muted flex-shrink-0"
-        disabled={removeMember.isLoading}
+        className="flex-shrink-0 text-muted"
+        disabled={removeMember.isPending}
       >
         {type === 'leave' ? <ExitToAppIcon /> : <CloseIcon />}
       </IconButton>
@@ -325,7 +340,7 @@ function RemoveMemberConfirmation({member}: RemoveMemberConfirmationProps) {
             message="Are you sure you want to remove `:name`?"
             values={{name: member.display_name}}
           />
-          <div className="font-semibold mt-8">
+          <div className="mt-8 font-semibold">
             <Trans
               message="All workspace resources created by `:name` will be transferred to workspace owner."
               values={{
@@ -445,7 +460,7 @@ function ResendInviteDialogTrigger({
         variant="link"
         size="sm"
         color="primary"
-        disabled={resendInvite.isLoading}
+        disabled={resendInvite.isPending}
       >
         <Trans message="Resend invite" />
       </Button>

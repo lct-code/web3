@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers\Search;
 
-use App\Artist;
-use Auth;
+use App\Models\Artist;
 use Common\Core\BaseController;
+use Illuminate\Support\Facades\Auth;
 
 class ArtistSearchSuggestionsController extends BaseController
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function show($modelId)
     {
         $this->authorize('index', Artist::class);

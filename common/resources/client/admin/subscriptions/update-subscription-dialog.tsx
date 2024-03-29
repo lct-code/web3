@@ -7,7 +7,10 @@ import {Button} from '../../ui/buttons/button';
 import {useDialogContext} from '../../ui/overlays/dialog/dialog-context';
 import {useForm} from 'react-hook-form';
 import {Subscription} from '../../billing/subscription';
-import {UpdateSubscriptionPayload, useUpdateSubscription} from './requests/use-update-subscription';
+import {
+  UpdateSubscriptionPayload,
+  useUpdateSubscription,
+} from './requests/use-update-subscription';
 import {CrupdateSubscriptionForm} from './crupdate-subscription-form';
 
 interface UpdateSubscriptionDialogProps {
@@ -40,7 +43,7 @@ export function UpdateSubscriptionDialog({
           formId={formId}
           form={form as any}
           onSubmit={values => {
-            updateSubscription.mutate((values as UpdateSubscriptionPayload), {
+            updateSubscription.mutate(values as UpdateSubscriptionPayload, {
               onSuccess: () => {
                 close();
               },
@@ -58,7 +61,7 @@ export function UpdateSubscriptionDialog({
         </Button>
         <Button
           form={formId}
-          disabled={updateSubscription.isLoading}
+          disabled={updateSubscription.isPending}
           variant="flat"
           color="primary"
           type="submit"

@@ -2,7 +2,7 @@
 
 namespace App\Services\Tracks\Queries;
 
-use App\Track;
+use App\Models\Track;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 
@@ -15,7 +15,7 @@ class LibraryTracksQuery extends BaseTrackQuery
         return $this->baseQuery()
             ->join('likes', 'tracks.id', '=', 'likes.likeable_id')
             ->where('likes.user_id', $userId)
-            ->where('likes.likeable_type', Track::class)
+            ->where('likes.likeable_type', Track::MODEL_TYPE)
             ->select('tracks.*', 'likes.created_at as added_at');
     }
 

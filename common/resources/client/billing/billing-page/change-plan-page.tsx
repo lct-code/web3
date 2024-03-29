@@ -4,7 +4,10 @@ import {Trans} from '../../i18n/trans';
 import {useNavigate} from '../../utils/hooks/use-navigate';
 import {BillingPlanPanel} from './billing-plan-panel';
 import {Product} from '../product';
-import {findBestPrice, UpsellBillingCycle} from '../pricing-table/find-best-price';
+import {
+  findBestPrice,
+  UpsellBillingCycle,
+} from '../pricing-table/find-best-price';
 import {Fragment, useState} from 'react';
 import {FormattedPrice} from '../../i18n/formatted-price';
 import {Button} from '../../ui/buttons/button';
@@ -30,7 +33,7 @@ export function ChangePlanPage() {
           <Trans message="Plans" />
         </BreadcrumbItem>
       </Breadcrumb>
-      <h1 className="text-3xl font-bold my-32 md:my-64">
+      <h1 className="my-32 text-3xl font-bold md:my-64">
         <Trans message="Change your plan" />
       </h1>
       <BillingPlanPanel title={<Trans message="Available plans" />}>
@@ -62,17 +65,17 @@ function PlanList() {
       />
       {query.data?.products.map(plan => {
         const price = findBestPrice(selectedCycle, plan.prices);
-        if ( ! price) return null;
+        if (!price || plan.hidden) return null;
         return (
           <m.div
             {...opacityAnimation}
             key={plan.id}
-            className="md:flex gap-40 justify-between py-32 border-b"
+            className="justify-between gap-40 border-b py-32 md:flex"
           >
             <div className="mb-40 md:mb-0">
               <div className="text-xl font-bold">{plan.name}</div>
               <FormattedPrice price={price} className="text-lg" />
-              <div className="text-base mt-12">{plan.description}</div>
+              <div className="mt-12 text-base">{plan.description}</div>
               <FeatureList plan={plan} />
             </div>
             <ContinueButton product={plan} price={price} />
@@ -90,7 +93,7 @@ function FeatureList({plan}: FeatureListProps) {
   if (!plan.feature_list.length) return null;
   return (
     <div className="mt-32">
-      <div className="text-sm mb-10 font-semibold">
+      <div className="mb-10 text-sm font-semibold">
         <Trans message="What's included" />
       </div>
       {plan.feature_list.map(feature => (
@@ -116,7 +119,7 @@ function ContinueButton({product, price}: ContinueButtonProps) {
     subscription.price_id === price.id
   ) {
     return (
-      <div className="flex items-center justify-center gap-10 w-[168px] text-muted">
+      <div className="flex w-[168px] items-center justify-center gap-10 text-muted">
         <CheckIcon size="md" />
         <Trans message="Current plan" />
       </div>
@@ -142,7 +145,7 @@ function PlanSkeleton() {
     <m.div
       key="plan-skeleton"
       {...opacityAnimation}
-      className="text-2xl border-b py-32"
+      className="border-b py-32 text-2xl"
     >
       <Skeleton className="mb-8" />
       <Skeleton className="mb-14" />

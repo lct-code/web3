@@ -60,7 +60,7 @@ export const TracksUploader = forwardRef<UploaderActions, UploaderProps>(
         uploadTracks,
         validateUploads,
       }),
-      [openFilePicker, uploadTracks, validateUploads]
+      [openFilePicker, uploadTracks, validateUploads],
     );
 
     return (
@@ -72,14 +72,14 @@ export const TracksUploader = forwardRef<UploaderActions, UploaderProps>(
             onCreate={createdTrack => {
               // hide upload form for this track
               setTracks(prev =>
-                prev.filter(t => t.uploadId !== track.uploadId)
+                prev.filter(t => t.uploadId !== track.uploadId),
               );
               onCreate(createdTrack);
             }}
             onRemove={() => {
               setTracks(prev => {
                 const newTracks = prev.filter(
-                  t => t.uploadId !== track.uploadId
+                  t => t.uploadId !== track.uploadId,
                 );
                 // only invoke "onCancel" if every uploaded track has been removed, so upload mode can be unlocked
                 if (!newTracks.length) {
@@ -93,7 +93,7 @@ export const TracksUploader = forwardRef<UploaderActions, UploaderProps>(
         ))}
       </div>
     );
-  }
+  },
 );
 
 interface TrackUploadItemProps {
@@ -108,7 +108,7 @@ const TrackUploadItem = memo(
     });
     const createTrack = useCreateTrack(form);
     const activeUpload = useFileUploadStore(s =>
-      s.fileUploads.get(track.uploadId)
+      s.fileUploads.get(track.uploadId),
     );
     const {isUploading, status} = useTrackUpload(track.uploadId);
 
@@ -139,11 +139,11 @@ const TrackUploadItem = memo(
           type="submit"
           variant="flat"
           color="primary"
-          disabled={createTrack.isLoading || !form.watch('src')}
+          disabled={createTrack.isPending || !form.watch('src')}
         >
           <Trans message="Save" />
         </Button>
       </Form>
     );
-  }
+  },
 );

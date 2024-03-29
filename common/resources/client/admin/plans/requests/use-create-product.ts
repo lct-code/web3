@@ -21,20 +21,18 @@ export interface CreateProductPayload
 export function useCreateProduct(form: UseFormReturn<CreateProductPayload>) {
   const {trans} = useTrans();
   const navigate = useNavigate();
-  return useMutation(
-    (payload: CreateProductPayload) => createProduct(payload),
-    {
-      onSuccess: () => {
-        toast(trans(message('Plan created')));
-        queryClient.invalidateQueries([endpoint]);
-        queryClient.invalidateQueries(
-          DatatableDataQueryKey('billing/products')
-        );
-        navigate('/admin/plans');
-      },
-      onError: err => onFormQueryError(err, form),
-    }
-  );
+  return useMutation({
+    mutationFn: (payload: CreateProductPayload) => createProduct(payload),
+    onSuccess: () => {
+      toast(trans(message('Plan created')));
+      queryClient.invalidateQueries({queryKey: [endpoint]});
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('billing/products'),
+      });
+      navigate('/admin/plans');
+    },
+    onError: err => onFormQueryError(err, form),
+  });
 }
 
 function createProduct(payload: CreateProductPayload): Promise<Response> {

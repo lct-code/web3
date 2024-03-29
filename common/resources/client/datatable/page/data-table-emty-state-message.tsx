@@ -9,6 +9,7 @@ export interface DataTableEmptyStateMessageProps {
   title: ReactNode;
   filteringTitle?: ReactNode;
   image: string;
+  size?: 'sm' | 'md';
   className?: string;
 }
 export function DataTableEmptyStateMessage({
@@ -16,15 +17,19 @@ export function DataTableEmptyStateMessage({
   title,
   filteringTitle,
   image,
+  size,
   className,
 }: DataTableEmptyStateMessageProps) {
   const isMobile = useIsMobileMediaQuery();
+  if (!size) {
+    size = isMobile ? 'sm' : 'md';
+  }
 
   // allow user to disable filtering message variation by not passing in "filteringTitle"
   return (
     <IllustratedMessage
       className={className}
-      size={isMobile ? 'sm' : 'md'}
+      size={size}
       image={<SvgImage src={image} />}
       title={isFiltering && filteringTitle ? filteringTitle : title}
       description={

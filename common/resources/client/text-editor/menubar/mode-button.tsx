@@ -20,7 +20,7 @@ export function ModeButton({editor}: ModeButtonProps) {
       }}
     >
       <Button variant="text" startIcon={<CodeIcon />}>
-        <Trans message="Source code" />
+        <Trans message="Source" />
       </Button>
       <AceDialog
         title={<Trans message="Source code" />}

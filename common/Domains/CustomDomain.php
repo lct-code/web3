@@ -2,18 +2,17 @@
 
 namespace Common\Domains;
 
-use App\User;
-use Common\Search\Searchable;
+use App\Models\User;
+use Common\Core\BaseModel;
 use Common\Workspaces\Traits\BelongsToWorkspace;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class CustomDomain extends Model
+class CustomDomain extends BaseModel
 {
-    use Searchable, HasFactory, BelongsToWorkspace;
+    use HasFactory, BelongsToWorkspace;
 
     protected $guarded = ['id'];
     const MODEL_TYPE = 'customDomain';
@@ -25,7 +24,7 @@ class CustomDomain extends Model
     ];
 
     protected $appends = ['model_type'];
-    
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -41,7 +40,16 @@ class CustomDomain extends Model
      */
     public function scopeForUser(Builder $query, int $userId): Builder
     {
-        return $query->where('user_id', $userId)->orWhere('global', true);
+        return $query
+            ->leftJoin(
+                'workspace_user',
+                'workspace_user.workspace_id',
+                '=',
+                'custom_domains.workspace_id',
+            )
+            ->where($query->qualifyColumn('user_id'), $userId)
+            ->orWhere($query->qualifyColumn('global'), true)
+            ->orWhere('workspace_user.user_id', $userId);
     }
 
     public function getHostAttribute(?string $value): ?string
@@ -54,6 +62,15 @@ class CustomDomain extends Model
     public function setHostAttribute(string $value)
     {
         $this->attributes['host'] = trim($value, '/');
+    }
+
+    public function toNormalizedArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->host,
+            'model_type' => self::MODEL_TYPE,
+        ];
     }
 
     public function toSearchableArray(): array

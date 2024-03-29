@@ -1,4 +1,11 @@
-import React, {HTMLAttributes, ReactElement, ReactNode, Ref, useContext, useEffect} from 'react';
+import React, {
+  HTMLAttributes,
+  ReactElement,
+  ReactNode,
+  Ref,
+  useContext,
+  useEffect,
+} from 'react';
 import {useFocusManager} from '@react-aria/focus';
 import {TreeContext} from './tree-context';
 import {createEventHandler} from '../../utils/dom/create-event-handler';
@@ -9,7 +16,7 @@ import {renderTree} from './render-tree';
 import {TreeLabel} from './tree-label';
 
 export type TreeItemRenderer<T extends TreeNode> = (
-  node: any
+  node: any,
 ) => ReactElement<TreeItemProps<T>>;
 
 export interface TreeItemProps<T extends TreeNode>
@@ -87,7 +94,7 @@ export function TreeItem<T extends TreeNode>({
         if (!isExpanded) {
           setExpandedKeys([...expandedKeys, focusedNode]);
         } else {
-          focusManager.focusNext();
+          focusManager?.focusNext();
         }
         break;
 
@@ -114,28 +121,28 @@ export function TreeItem<T extends TreeNode>({
       case 'ArrowDown':
         e.stopPropagation();
         e.preventDefault();
-        focusManager.focusNext();
+        focusManager?.focusNext();
         break;
 
       // focus previous visible node, recursively
       case 'ArrowUp':
         e.stopPropagation();
         e.preventDefault();
-        focusManager.focusPrevious();
+        focusManager?.focusPrevious();
         break;
 
       // focus first visible node
       case 'Home':
         e.stopPropagation();
         e.preventDefault();
-        focusManager.focusFirst();
+        focusManager?.focusFirst();
         break;
 
       // focus last visible node
       case 'End':
         e.stopPropagation();
         e.preventDefault();
-        focusManager.focusLast();
+        focusManager?.focusLast();
         break;
 
       // expand all sibling nodes
@@ -183,7 +190,7 @@ export function TreeItem<T extends TreeNode>({
         'outline-none',
         // focus direct .tree-label child when this element has :focus-visible
         '[&>.tree-label]:focus-visible:ring [&>.tree-label]:focus-visible:ring-2 [&>.tree-label]:focus-visible:ring-inset',
-        className
+        className,
       )}
     >
       <TreeLabel

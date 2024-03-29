@@ -24,7 +24,6 @@ export const DataTableAddItemButton = React.forwardRef<
         ref={ref}
         variant="flat"
         color="primary"
-        radius="rounded"
         className="flex-shrink-0"
         size="sm"
         to={to}

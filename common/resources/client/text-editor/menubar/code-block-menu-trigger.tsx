@@ -8,6 +8,8 @@ import {
   MenuItem,
   MenuTrigger,
 } from '../../ui/navigation/menu/menu-trigger';
+import {Tooltip} from '@common/ui/tooltip/tooltip';
+import {Trans} from '@common/i18n/trans';
 
 export function CodeBlockMenuTrigger({editor, size}: MenubarButtonProps) {
   const language = editor.getAttributes('codeBlock').language || '';
@@ -19,14 +21,15 @@ export function CodeBlockMenuTrigger({editor, size}: MenubarButtonProps) {
         editor.commands.toggleCodeBlock({language: key as string});
       }}
     >
-      <IconButton
-        className={clsx('flex-shrink-0')}
-        size={size}
-        color={language ? 'primary' : null}
-        radius="rounded"
-      >
-        <CodeIcon />
-      </IconButton>
+      <Tooltip label={<Trans message="Codeblock" />}>
+        <IconButton
+          className={clsx('flex-shrink-0')}
+          size={size}
+          color={language ? 'primary' : null}
+        >
+          <CodeIcon />
+        </IconButton>
+      </Tooltip>
       <Menu>
         <MenuItem value="html">HTML</MenuItem>
         <MenuItem value="javascript">JavaScript</MenuItem>

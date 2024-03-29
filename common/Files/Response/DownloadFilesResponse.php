@@ -5,7 +5,7 @@ namespace Common\Files\Response;
 use Carbon\Carbon;
 use Common\Files\FileEntry;
 use Illuminate\Support\Collection;
-use ZipStream\Option\Archive;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use ZipStream\ZipStream;
 
 class DownloadFilesResponse
@@ -13,6 +13,7 @@ class DownloadFilesResponse
     // basename with extension => count
     // for incrementing file names in zip for files that have duplicate name
     protected array $filesInZip = [];
+    protected int $totalSize = 0;
 
     public function __construct(
         protected FileResponseFactory $fileResponseFactory,
@@ -31,24 +32,34 @@ class DownloadFilesResponse
                 'attachment',
             );
         } else {
-            $this->streamZip($entries);
+            return $this->streamZip($entries);
         }
     }
 
-    private function streamZip(Collection $entries): void
+    private function streamZip(Collection $entries): StreamedResponse
     {
-        header('X-Accel-Buffering: no');
-        $options = new Archive();
-        $options->setSendHttpHeaders(true);
+        return new StreamedResponse(
+            function () use ($entries) {
+                $timestamp = Carbon::now()->getTimestamp();
+                $zip = new ZipStream(
+                    // downloading multiple files from s3 will error out without this
+                    defaultEnableZeroHeader: true,
+                    contentType: 'application/octet-stream',
+                    sendHttpHeaders: true,
+                    outputName: "download-$timestamp.zip",
+                );
 
-        // downloading multiple files from s3 will error out without this
-        $options->setZeroHeader(true);
-
-        $timestamp = Carbon::now()->getTimestamp();
-        $zip = new ZipStream("download-$timestamp.zip", $options);
-
-        $this->fillZip($zip, $entries);
-        $zip->finish();
+                $this->fillZip($zip, $entries);
+                $zip->finish();
+            },
+            200,
+            [
+                'X-Accel-Buffering' => 'no',
+                'Pragma' => 'public',
+                'Cache-Control' => 'no-cache',
+                'Content-Transfer-Encoding' => 'binary',
+            ],
+        );
     }
 
     private function fillZip(ZipStream $zip, Collection $entries): void

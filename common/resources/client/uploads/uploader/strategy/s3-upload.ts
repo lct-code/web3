@@ -1,6 +1,6 @@
 import {UploadStrategy, UploadStrategyConfig} from './upload-strategy';
 import {UploadedFile} from '../../uploaded-file';
-import axios from 'axios';
+import axios, {AxiosProgressEvent} from 'axios';
 import {FileEntry} from '../../file-entry';
 import {getAxiosErrorMessage} from '@common/utils/http/get-axios-error-message';
 import {apiClient} from '@common/http/query-client';
@@ -74,11 +74,11 @@ export class S3Upload implements UploadStrategy {
           'Content-Type': this.file.mime,
           'x-amz-acl': acl,
         },
-        onUploadProgress: (e: ProgressEvent) => {
-          if (e.lengthComputable) {
+        onUploadProgress: (e: AxiosProgressEvent) => {
+          if (e.event.lengthComputable) {
             this.config.onProgress?.({
               bytesUploaded: e.loaded,
-              bytesTotal: e.total,
+              bytesTotal: e.total || 0,
             });
           }
         },

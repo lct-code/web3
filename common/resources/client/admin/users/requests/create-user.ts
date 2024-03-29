@@ -20,10 +20,11 @@ export interface CreateUserPayload
 
 export function useCreateUser(form: UseFormReturn<CreateUserPayload>) {
   const navigate = useNavigate();
-  return useMutation((props: CreateUserPayload) => createUser(props), {
+  return useMutation({
+    mutationFn: (props: CreateUserPayload) => createUser(props),
     onSuccess: () => {
       toast(message('User created'));
-      queryClient.invalidateQueries([DatatableDataQueryKey('users')]);
+      queryClient.invalidateQueries({queryKey: DatatableDataQueryKey('users')});
       navigate('/admin/users');
     },
     onError: r => onFormQueryError(r, form),

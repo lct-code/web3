@@ -1,41 +1,32 @@
-import {cloneElement, forwardRef, ReactElement, ReactNode} from 'react';
+import {ReactNode} from 'react';
 import clsx from 'clsx';
 
-interface BadgeProps {
-  children: ReactElement;
-  // don't override child props, as child props are passed through
-  badgeLabel?: ReactNode;
-  badgeClassName?: string;
+export interface BadgeProps {
+  children: ReactNode;
+  className?: string;
   withBorder?: boolean;
-  badgeIsVisible?: boolean;
+  top?: string;
+  right?: string;
 }
-export const Badge = forwardRef<HTMLDivElement, BadgeProps>(
-  (
-    {
-      children,
-      badgeLabel,
-      badgeClassName,
-      withBorder = true,
-      badgeIsVisible = true,
-      ...childProps
-    },
-    ref
-  ) => {
-    return (
-      <div className={clsx('relative', badgeClassName)}>
-        {cloneElement(children, {...childProps, ref})}
-        {badgeIsVisible && (
-          <div
-            className={clsx(
-              'absolute top-2 right-4 bg-warning text-white text-xs font-bold whitespace-nowrap rounded-full flex items-center justify-center shadow',
-              withBorder && 'border-2 border-white',
-              badgeLabel ? 'w-18 h-18' : 'w-12 h-12'
-            )}
-          >
-            {badgeLabel}
-          </div>
-        )}
-      </div>
-    );
-  }
-);
+export function Badge({
+  children,
+  className,
+  withBorder = true,
+  top = 'top-2',
+  right = 'right-4',
+}: BadgeProps) {
+  return (
+    <span
+      className={clsx(
+        'absolute flex items-center justify-center whitespace-nowrap rounded-full bg-warning text-xs font-bold text-white shadow',
+        withBorder && 'border-2 border-white',
+        children ? 'h-18 w-18' : 'h-12 w-12',
+        className,
+        top,
+        right
+      )}
+    >
+      {children}
+    </span>
+  );
+}

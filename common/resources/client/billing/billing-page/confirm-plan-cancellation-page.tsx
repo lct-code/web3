@@ -48,7 +48,7 @@ export function ConfirmPlanCancellationPage() {
           invalidateBillingUserQuery();
           navigate('/billing');
         },
-      }
+      },
     );
   };
 
@@ -86,7 +86,7 @@ export function ConfirmPlanCancellationPage() {
                 size="md"
                 className="w-full mb-16"
                 onClick={handleSubscriptionCancel}
-                disabled={cancelSubscription.isLoading}
+                disabled={cancelSubscription.isPending}
               >
                 <Trans message="Cancel plan" />
               </Button>

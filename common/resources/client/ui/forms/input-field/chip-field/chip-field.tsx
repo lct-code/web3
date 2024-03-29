@@ -15,7 +15,7 @@ import clsx from 'clsx';
 import {mergeProps, useLayoutEffect, useObjectRef} from '@react-aria/utils';
 import {useControlledState} from '@react-stately/utils';
 import {ChipList} from './chip-list';
-import {Field} from '../field';
+import {Field, FieldProps} from '../field';
 import {Input} from '../input';
 import {Chip, ChipProps} from './chip';
 import {NormalizedModel} from '@common/datatable/filters/normalized-model';
@@ -64,7 +64,7 @@ export type ChipFieldProps<T> = Omit<
 
 function ChipFieldInner<T>(
   props: ChipFieldProps<T>,
-  ref: Ref<HTMLInputElement>
+  ref: Ref<HTMLInputElement>,
 ) {
   const fieldRef = useRef<HTMLDivElement>(null);
   const inputRef = useObjectRef(ref);
@@ -79,7 +79,7 @@ function ChipFieldInner<T>(
     onItemSelected,
     placeholder,
     onOpenChange,
-    chipSize = 'md',
+    chipSize = 'sm',
     openMenuOnFocus = true,
     showEmptyMessage,
     value: propsValue,
@@ -117,7 +117,7 @@ function ChipFieldInner<T>(
     <Field fieldClassNames={fieldClassNames} {...fieldProps}>
       <Input
         ref={fieldRef}
-        className={clsx('flex items-center flex-wrap', fieldClassNames.input)}
+        className={clsx('flex flex-wrap items-center', fieldClassNames.input)}
         onClick={() => {
           // refocus input when clicking outside it, but while still inside chip field
           inputRef.current?.focus();
@@ -131,6 +131,7 @@ function ChipFieldInner<T>(
           chipSize={chipSize}
         />
         <ChipInput
+          size={props.size}
           showEmptyMessage={showEmptyMessage}
           inputProps={inputProps}
           inputValue={inputValue}
@@ -180,12 +181,15 @@ function ListWrapper({
       }
       return newItems;
     },
-    [items, setItems]
+    [items, setItems],
   );
 
   return (
     <ChipList
-      className="flex-shrink-0 flex-wrap max-w-full my-8"
+      className={clsx(
+        'max-w-full flex-shrink-0 flex-wrap',
+        chipSize === 'xs' ? 'my-6' : 'my-8',
+      )}
       size={chipSize}
       selectable
     >
@@ -199,10 +203,10 @@ function ListWrapper({
             const newItems = removeItem(item.id);
             if (newItems.length) {
               // focus previous chip
-              manager.focusPrevious({tabbable: true});
+              manager?.focusPrevious({tabbable: true});
             } else {
               // focus input
-              manager.focusLast();
+              manager?.focusLast();
             }
           }}
         >
@@ -231,6 +235,7 @@ interface ChipInputProps<T> {
   setListboxIsOpen: (value: boolean) => void;
   allowCustomValue: boolean;
   children: ListBoxChildren<T>['children'];
+  size: FieldProps['size'];
 }
 function ChipInput<T>(props: ChipInputProps<T>) {
   const {
@@ -246,8 +251,9 @@ function ChipInput<T>(props: ChipInputProps<T>) {
     listboxIsOpen,
     setListboxIsOpen,
     allowCustomValue,
+    isLoading,
+    size,
   } = props;
-  const inputClassName = 'outline-none text-sm mx-8 my-4 h-30 flex-auto';
   const manager = useFocusManager();
 
   const addItems = useCallback(
@@ -264,7 +270,7 @@ function ChipInput<T>(props: ChipInputProps<T>) {
       }
       setChips([...chips, ...items]);
     },
-    [chips, setChips, validateWith]
+    [chips, setChips, validateWith],
   );
 
   const listbox = useListbox<T>({
@@ -332,6 +338,7 @@ function ChipInput<T>(props: ChipInputProps<T>) {
     <Listbox
       listbox={listbox}
       mobileOverlay={Popover}
+      isLoading={isLoading}
       onPointerDown={e => {
         // prevent focus from leaving input when scrolling listbox via mouse
         e.preventDefault();
@@ -339,7 +346,10 @@ function ChipInput<T>(props: ChipInputProps<T>) {
     >
       <input
         type="text"
-        className={clsx(inputClassName, 'bg-transparent')}
+        className={clsx(
+          'mx-8 my-4 min-w-30 flex-[1_1_60px] bg-transparent text-sm outline-none',
+          size === 'xs' ? 'h-20' : 'h-30',
+        )}
         placeholder={placeholder}
         {...mergeProps(inputProps, {
           ref: inputRef,
@@ -348,7 +358,7 @@ function ChipInput<T>(props: ChipInputProps<T>) {
           onPaste: e => {
             const paste = e.clipboardData.getData('text');
             const emails = paste.match(
-              /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi
+              /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi,
             );
             if (emails) {
               e.preventDefault();
@@ -409,7 +419,7 @@ function ChipInput<T>(props: ChipInputProps<T>) {
               activeIndex == null &&
               chips.length
             ) {
-              manager.focusPrevious({tabbable: true});
+              manager?.focusPrevious({tabbable: true});
               return;
             }
 
@@ -449,18 +459,18 @@ function useChipFieldValueState({
       const newValue = valueKey ? value.map(v => v[valueKey]) : value;
       onChange?.(newValue as any);
     },
-    [onChange, valueKey]
+    [onChange, valueKey],
   );
 
   return useControlledState<ChipValue[]>(
     !propsValue ? undefined : propsValue,
     propsDefaultValue || [],
-    handleChange
+    handleChange,
   );
 }
 
 function mixedValueToChipValue(
-  value?: (string | number | ChipValue)[] | null
+  value?: (string | number | ChipValue)[] | null,
 ): ChipValue[] | undefined {
   if (value == null) {
     return undefined;
@@ -472,5 +482,5 @@ function mixedValueToChipValue(
 }
 
 export const ChipField = React.forwardRef(ChipFieldInner) as <T>(
-  props: ChipFieldProps<T> & {ref?: Ref<HTMLInputElement>}
+  props: ChipFieldProps<T> & {ref?: Ref<HTMLInputElement>},
 ) => ReactElement;

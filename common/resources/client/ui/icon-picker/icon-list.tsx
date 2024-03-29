@@ -7,13 +7,53 @@ import {iconGridStyle} from './icon-grid-style';
 import {useFilter} from '../../i18n/use-filter';
 import clsx from 'clsx';
 import {Trans} from '../../i18n/trans';
+import {YoutubeIcon} from '@common/icons/social/youtube';
+import {AmazonIcon} from '@common/icons/social/amazon';
+import {AppleIcon} from '@common/icons/social/apple';
+import {BandcampIcon} from '@common/icons/social/bandcamp';
+import {EnvatoIcon} from '@common/icons/social/envato';
+import {FacebookIcon} from '@common/icons/social/facebook';
+import {InstagramIcon} from '@common/icons/social/instagram';
+import {LinkedinIcon} from '@common/icons/social/linkedin';
+import {PatreonIcon} from '@common/icons/social/patreon';
+import {PinterestIcon} from '@common/icons/social/pinterest';
+import {SnapchatIcon} from '@common/icons/social/snapchat';
+import {SoundcloudIcon} from '@common/icons/social/soundcloud';
+import {SpotifyIcon} from '@common/icons/social/spotify';
+import {TelegramIcon} from '@common/icons/social/telegram';
+import {TiktokIcon} from '@common/icons/social/tiktok';
+import {TwitchIcon} from '@common/icons/social/twitch';
+import {TwitterIcon} from '@common/icons/social/twitter';
+import {WhatsappIcon} from '@common/icons/social/whatsapp';
 
-const entries = Object.entries(Icons).map(([name, cmp]) => {
-  const prettyName = name
-    .replace('Icon', '')
-    .replace(/[A-Z]/g, letter => ` ${letter.toLowerCase()}`);
-  return [prettyName, cmp] as [string, ComponentType<SvgIconProps>];
-});
+const socialIcons: [string, ComponentType<SvgIconProps>][] = [
+  ['amazon', AmazonIcon],
+  ['apple', AppleIcon],
+  ['bandcamp', BandcampIcon],
+  ['envato', EnvatoIcon],
+  ['facebook', FacebookIcon],
+  ['instagram', InstagramIcon],
+  ['linkedin', LinkedinIcon],
+  ['patreon', PatreonIcon],
+  ['pinterest', PinterestIcon],
+  ['snapchat', SnapchatIcon],
+  ['soundcloud', SoundcloudIcon],
+  ['spotify', SpotifyIcon],
+  ['telegram', TelegramIcon],
+  ['tiktok', TiktokIcon],
+  ['twitch', TwitchIcon],
+  ['twitter', TwitterIcon],
+  ['whatsapp', WhatsappIcon],
+  ['youtube', YoutubeIcon],
+];
+const entries = Object.entries(Icons)
+  .map(([name, cmp]) => {
+    const prettyName = name
+      .replace('Icon', '')
+      .replace(/[A-Z]/g, letter => ` ${letter.toLowerCase()}`);
+    return [prettyName, cmp] as [string, ComponentType<SvgIconProps>];
+  })
+  .concat(socialIcons);
 
 interface IconListProps {
   onIconSelected: (icon: IconTree[] | null) => void;
@@ -49,8 +89,8 @@ export default function IconList({onIconSelected, searchQuery}: IconListProps) {
             onIconSelected(svgTree.child as IconTree[]);
           }}
         >
-          <Icon className="icon-lg block text-muted" />
-          <span className="block mt-16 text-xs whitespace-normal capitalize">
+          <Icon className="block text-muted icon-lg" />
+          <span className="mt-16 block whitespace-normal text-xs capitalize">
             {name}
           </span>
         </ButtonBase>

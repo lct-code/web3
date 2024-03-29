@@ -6,16 +6,6 @@ use Illuminate\Filesystem\Filesystem;
 class LocalizationsRepository
 {
     /**
-     * @var Filesystem
-     */
-    private $fs;
-
-    /**
-     * @var Localization
-     */
-    private $localization;
-
-    /**
      * Path to files with default localization language lines.
      */
     const DEFAULT_TRANS_PATHS = [
@@ -23,10 +13,10 @@ class LocalizationsRepository
         'server-translations.json',
     ];
 
-    public function __construct(Filesystem $fs, Localization $localization)
-    {
-        $this->fs = $fs;
-        $this->localization = $localization;
+    public function __construct(
+        protected Filesystem $fs,
+        protected Localization $localization,
+    ) {
     }
 
     public function getByNameOrCode(
@@ -150,7 +140,7 @@ class LocalizationsRepository
         }
     }
 
-    public function makeLocalizationLinesPath(Localization $localization)
+    public function makeLocalizationLinesPath(Localization $localization): string
     {
         return resource_path("lang/$localization->language.json");
     }

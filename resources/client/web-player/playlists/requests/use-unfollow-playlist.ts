@@ -11,12 +11,13 @@ interface Response extends BackendResponse {
 }
 
 export function useUnfollowPlaylist(playlist: Playlist) {
-  return useMutation(() => unfollowPlaylist(playlist.id), {
+  return useMutation({
+    mutationFn: () => unfollowPlaylist(playlist.id),
     onSuccess: () => {
       toast(
-        message('Stopped following :name', {values: {name: playlist.name}})
+        message('Stopped following :name', {values: {name: playlist.name}}),
       );
-      queryClient.invalidateQueries(['playlists']);
+      queryClient.invalidateQueries({queryKey: ['playlists']});
     },
     onError: r => showHttpErrorToast(r),
   });

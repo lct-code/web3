@@ -6,7 +6,7 @@ import {
   RefObject,
 } from 'react';
 import {FocusScopeProps} from '@react-aria/focus';
-import {VirtualElement} from '@floating-ui/react-dom';
+import {Placement, VirtualElement} from '@floating-ui/react-dom';
 
 export interface OverlayProps
   extends Omit<FocusScopeProps, 'children' | 'contain'> {
@@ -21,4 +21,5 @@ export interface OverlayProps
   arrowStyle?: CSSProperties;
   onPointerLeave?: PointerEventHandler<HTMLElement>;
   onPointerEnter?: PointerEventHandler<HTMLElement>;
+  placement?: Placement;
 }

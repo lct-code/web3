@@ -23,7 +23,7 @@ export function CreatePlanPage() {
         createProduct.mutate(values);
       }}
       title={<Trans message="Create new plan" />}
-      isLoading={createProduct.isLoading}
+      isLoading={createProduct.isPending}
     >
       <CrupdatePlanForm />
     </CrupdateResourceLayout>

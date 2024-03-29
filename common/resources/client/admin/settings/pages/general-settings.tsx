@@ -46,7 +46,7 @@ function SiteUrlSection() {
   const isInvalid = server.newAppUrl && server.newAppUrl !== server.app_url;
   if (isInvalid) {
     append = (
-      <div className="text-sm text-danger mt-20">
+      <div className="mt-20 text-sm text-danger">
         <Trans
           values={{
             baseUrl: server.app_url,
@@ -96,13 +96,13 @@ function HomepageSection() {
           </Option>
         ))}
         {data?.menuItemCategories?.map(category => (
-          <Option key={category.name} value={category.name.toLowerCase()}>
+          <Option key={category.type} value={category.type}>
             {category.name}
           </Option>
         ))}
       </FormSelect>
       {data?.menuItemCategories?.map(category => {
-        return selectedType === category.name.toLowerCase() ? (
+        return selectedType === category.type ? (
           <FormSelect
             className="mt-24"
             name="client.homepage.value"
@@ -173,14 +173,14 @@ function SitemapSection() {
         variant="outline"
         size="xs"
         color="primary"
-        disabled={generateSitemap.isLoading}
+        disabled={generateSitemap.isPending}
         onClick={() => {
           generateSitemap.mutate();
         }}
       >
         <Trans message="Generate sitemap" />
       </Button>
-      <div className="text-sm text-muted mt-14">
+      <div className="mt-14 text-sm text-muted">
         <Trans
           message="Once generated, sitemap url will be: :url"
           values={{

@@ -11,7 +11,8 @@ export interface ChangeLocaleResponse extends BackendResponse {
 
 export function useChangeLocale() {
   const {mergeBootstrapData} = useBootstrapData();
-  return useMutation((props: {locale?: string}) => changeLocale(props), {
+  return useMutation({
+    mutationFn: (props: {locale?: string}) => changeLocale(props),
     onSuccess: response => {
       mergeBootstrapData({
         i18n: response.locale,

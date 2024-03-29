@@ -15,6 +15,8 @@ import {Dialog} from '../../ui/overlays/dialog/dialog';
 import {DialogHeader} from '../../ui/overlays/dialog/dialog-header';
 import {DialogBody} from '../../ui/overlays/dialog/dialog-body';
 import {Trans} from '../../i18n/trans';
+import {Tooltip} from '@common/ui/tooltip/tooltip';
+import {insertLinkIntoTextEditor} from '@common/text-editor/insert-link-into-text-editor';
 
 interface FormValue {
   href: string;
@@ -25,13 +27,11 @@ interface FormValue {
 export function LinkButton({editor, size}: MenubarButtonProps) {
   return (
     <DialogTrigger type="modal">
-      <IconButton
-        size={size}
-        radius="rounded"
-        className={clsx('flex-shrink-0')}
-      >
-        <LinkIcon />
-      </IconButton>
+      <Tooltip label={<Trans message="Insert link" />}>
+        <IconButton size={size} className={clsx('flex-shrink-0')}>
+          <LinkIcon />
+        </IconButton>
+      </Tooltip>
       <LinkDialog editor={editor} />
     </DialogTrigger>
   );
@@ -42,10 +42,11 @@ function LinkDialog({editor}: MenubarButtonProps) {
   const previousText = editor.state.doc.textBetween(
     editor.state.selection.from,
     editor.state.selection.to,
-    ''
+    '',
   );
+
   const form = useForm<FormValue>({
-    defaultValues: {href: previousUrl, text: previousText},
+    defaultValues: {href: previousUrl, text: previousText, target: '_blank'},
   });
   const {formId, close} = useDialogContext();
   return (
@@ -58,30 +59,7 @@ function LinkDialog({editor}: MenubarButtonProps) {
           form={form}
           id={formId}
           onSubmit={value => {
-            // no selection, insert new link with specified text
-            if (editor.state.selection.empty && value.text) {
-              editor.commands.insertContent(
-                `<a href="${value.href}" target="${value.target}">${value.text}</a>`
-              );
-            } else if (!editor.state.selection.empty) {
-              // no href provided, remove link from selection
-              if (!value.href) {
-                editor
-                  .chain()
-                  .focus()
-                  .extendMarkRange('link')
-                  .unsetLink()
-                  .run();
-              } else {
-                // add link to selection
-                editor
-                  .chain()
-                  .focus()
-                  .extendMarkRange('link')
-                  .setLink({href: value.href, target: value.target})
-                  .run();
-              }
-            }
+            insertLinkIntoTextEditor(editor, value);
             close();
           }}
         >

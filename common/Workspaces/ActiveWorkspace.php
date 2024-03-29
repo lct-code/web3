@@ -2,7 +2,7 @@
 
 namespace Common\Workspaces;
 
-use App\User;
+use App\Models\User;
 use Auth;
 
 class ActiveWorkspace

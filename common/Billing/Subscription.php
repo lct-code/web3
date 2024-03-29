@@ -1,6 +1,6 @@
 <?php namespace Common\Billing;
 
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Common\Billing\Gateways\Contracts\CommonSubscriptionGatewayActions;
 use Common\Billing\Gateways\Paypal\Paypal;
@@ -8,15 +8,16 @@ use Common\Billing\Gateways\Stripe\Stripe;
 use Common\Billing\Models\Price;
 use Common\Billing\Models\Product;
 use Common\Billing\Subscriptions\SubscriptionFactory;
-use Common\Search\Searchable;
+use Common\Core\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use LogicException;
 
-class Subscription extends Model
+class Subscription extends BaseModel
 {
-    use HasFactory, Searchable;
+    use HasFactory;
+
+    public const MODEL_TYPE = 'subscription';
 
     protected $guarded = ['id'];
 
@@ -33,6 +34,9 @@ class Subscription extends Model
         'price_id' => 'integer',
         'product_id' => 'integer',
         'quantity' => 'integer',
+        'trial_ends_at' => 'datetime',
+        'ends_at' => 'datetime',
+        'renews_at' => 'datetime',
     ];
 
     public function getOnGracePeriodAttribute(): bool
@@ -59,13 +63,6 @@ class Subscription extends Model
     {
         return $this->cancelled();
     }
-    protected $dates = [
-        'trial_ends_at',
-        'ends_at',
-        'renews_at',
-        'created_at',
-        'updated_at',
-    ];
 
     public function user(): BelongsTo
     {
@@ -126,7 +123,7 @@ class Subscription extends Model
 
     public function changePlan(Product $newProduct, Price $newPrice): self
     {
-        $isSuccess = $this->gateway()->changePlan(
+        $isSuccess = $this->gateway()?->changePlan(
             $this,
             $newProduct,
             $newPrice,
@@ -242,6 +239,15 @@ class Subscription extends Model
         return null;
     }
 
+    public function toNormalizedArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->this->gateway_name,
+            'model_type' => self::MODEL_TYPE,
+        ];
+    }
+
     public function toSearchableArray(): array
     {
         return [
@@ -278,5 +284,10 @@ class Subscription extends Model
     protected static function newFactory()
     {
         return SubscriptionFactory::new();
+    }
+
+    public static function getModelTypeAttribute(): string
+    {
+        return self::MODEL_TYPE;
     }
 }

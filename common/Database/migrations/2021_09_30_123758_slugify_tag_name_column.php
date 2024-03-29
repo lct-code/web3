@@ -12,22 +12,19 @@ class SlugifyTagNameColumn extends Migration
      */
     public function up()
     {
-        Tag::withoutSyncingToSearch(function () {
-            /** @var Tag $tag */
-            foreach (Tag::cursor() as $tag) {
-                $slugName = slugify($tag->name);
+        Tag::lazyById(100)->each(function (Tag $tag) {
+            $slugName = slugify($tag->name);
 
-                if (!$tag->display_name) {
-                    $tag->display_name = $tag->name;
-                }
-
-                if ($slugName !== $tag->name) {
-                    $tag->name = $slugName;
-                    Tag::where('name', $slugName)->delete();
-                }
-
-                $tag->save();
+            if (!$tag->display_name) {
+                $tag->display_name = $tag->name;
             }
+
+            if ($slugName !== $tag->name) {
+                $tag->name = $slugName;
+                Tag::where('name', $slugName)->delete();
+            }
+
+            $tag->save();
         });
     }
 

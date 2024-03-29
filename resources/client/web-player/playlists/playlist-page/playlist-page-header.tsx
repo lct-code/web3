@@ -93,7 +93,7 @@ function EditableImage({playlist, size, className}: ImageContainerProps) {
   if (!canEdit) {
     return (
       <PlaylistImage
-        className={`${size} ${className} object-cover rounded`}
+        className={`${size} ${className} rounded object-cover`}
         playlist={playlist}
       />
     );
@@ -137,7 +137,7 @@ function ActionButtons({playlist, hasTracks, queueId}: ActionButtonsProps) {
         playlist={playlist}
         className={actionButtonClassName()}
       />
-      <DialogTrigger type="popover">
+      <DialogTrigger type="popover" mobileType="tray">
         <Button
           variant="outline"
           radius="rounded-full"

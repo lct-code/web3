@@ -21,6 +21,7 @@ class FileEntriesController extends BaseController
         protected Request $request,
         protected FileEntry $entry,
     ) {
+        $this->middleware('auth')->only(['index']);
     }
 
     public function index()
@@ -51,6 +52,13 @@ class FileEntriesController extends BaseController
         } catch (FileNotFoundException $e) {
             abort(404);
         }
+    }
+
+    public function showModel(FileEntry $fileEntry)
+    {
+        $this->authorize('show', $fileEntry);
+
+        return $this->success(['fileEntry' => $fileEntry]);
     }
 
     public function store()

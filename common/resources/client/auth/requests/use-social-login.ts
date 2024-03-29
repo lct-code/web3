@@ -47,7 +47,7 @@ export function useSocialLogin() {
           return e;
       }
     },
-    [trans, setBootstrapData]
+    [trans, setBootstrapData],
   );
 
   return {
@@ -55,7 +55,7 @@ export function useSocialLogin() {
     setIsRequestingPassword,
     loginWithSocial: async (serviceName: SocialService) => {
       const event = await openNewSocialAuthWindow(
-        `secure/auth/social/${serviceName}/login`
+        `secure/auth/social/${serviceName}/login`,
       );
       return handleSocialLoginCallback(event);
     },
@@ -82,7 +82,7 @@ function openNewSocialAuthWindow(url: string): Promise<SocialMessageEvent> {
     win = window.open(
       url,
       'Authenticate Account',
-      `menubar=0, location=0, toolbar=0, titlebar=0, status=0, scrollbars=1, width=${windowWidth}, height=${windowHeight}, left=${left}, top=${top}`
+      `menubar=0, location=0, toolbar=0, titlebar=0, status=0, scrollbars=1, width=${windowWidth}, height=${windowHeight}, left=${left}, top=${top}`,
     );
 
     const messageListener = (e: MessageEvent) => {

@@ -35,8 +35,10 @@ class StripePlans
 
         // create any local product prices on stripe, that don't exist there already
         $product->prices->each(function (Price $price) use ($product) {
-            // todo: check if stripe actually exist on stripe (when switching from test to live will not work otherwise)
-            if (!$price->stripe_id) {
+            if (
+                !$price->stripe_id ||
+                !$this->priceExistsOnStripe($price->stripe_id)
+            ) {
                 $this->createPrice($product, $price);
             }
         });
@@ -81,5 +83,15 @@ class StripePlans
     public function getAll(): array
     {
         return $this->client->products->all()->toArray();
+    }
+
+    protected function priceExistsOnStripe(string $stripePriceId): bool
+    {
+        try {
+            $this->client->prices->retrieve($stripePriceId);
+            return true;
+        } catch (InvalidRequestException $e) {
+            return false;
+        }
     }
 }

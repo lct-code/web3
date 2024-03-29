@@ -2,7 +2,6 @@
 
 namespace Common\Search\Drivers\Mysql;
 
-use Common\Search\Searchable;
 use Illuminate\Support\Facades\DB;
 
 class MysqlFullTextIndexer
@@ -17,9 +16,6 @@ class MysqlFullTextIndexer
 
     public function createOrUpdateIndex(string $model): void
     {
-        /**
-         * @var Searchable $model
-         */
         $model = new $model();
         $this->tableName =
             config('database.connections.mysql.prefix') . $model->getTable();

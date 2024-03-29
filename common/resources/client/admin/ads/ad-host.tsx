@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import {useSettings} from '../../core/settings/use-settings';
 import dot from 'dot-object';
 import {Settings} from '@common/core/settings/settings';
+import {getScrollParent} from '@react-aria/utils';
 
 interface AdHostProps {
   slot: keyof Omit<NonNullable<Settings['ads']>, 'disable'>;
@@ -45,14 +46,32 @@ const InvariantAd = memo(
       };
     }, [adCode, id]);
 
+    // remove height modifications added by adsense
+    useEffect(() => {
+      if (ref.current) {
+        const scrollParent = getScrollParent(ref.current) as HTMLElement;
+        if (scrollParent) {
+          const observer = new MutationObserver(function () {
+            scrollParent.style.height = '';
+            scrollParent.style.minHeight = '';
+          });
+          observer.observe(scrollParent, {
+            attributes: true,
+            attributeFilter: ['style'],
+          });
+          return () => observer.disconnect();
+        }
+      }
+    }, []);
+
     return (
       <div
         ref={ref}
         id={id}
         className={clsx(
-          'ad-host flex items-center justify-center w-full max-w-full overflow-hidden min-h-90 max-h-[600px]',
+          'ad-host flex max-h-[600px] min-h-90 w-full max-w-full items-center justify-center overflow-hidden',
           `${slot.replace(/\./g, '-')}-host`,
-          className
+          className,
         )}
         dangerouslySetInnerHTML={{__html: getAdHtml(adCode)}}
       ></div>
@@ -61,7 +80,7 @@ const InvariantAd = memo(
   () => {
     // never re-render
     return false;
-  }
+  },
 );
 
 function getAdHtml(adCode: string) {

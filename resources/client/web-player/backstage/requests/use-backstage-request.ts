@@ -10,9 +10,10 @@ interface Response extends BackendResponse {
 
 export function useBackstageRequest() {
   const {requestId} = useParams();
-  return useQuery(['backstage-request', +requestId!], () =>
-    fetchBackstageRequest(requestId!)
-  );
+  return useQuery({
+    queryKey: ['backstage-request', +requestId!],
+    queryFn: () => fetchBackstageRequest(requestId!),
+  });
 }
 
 function fetchBackstageRequest(trackId: number | string) {

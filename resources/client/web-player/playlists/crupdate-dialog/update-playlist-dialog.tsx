@@ -57,7 +57,7 @@ export function UpdatePlaylistDialog({playlist}: UpdatePlaylistDialogProps) {
           type="submit"
           variant="flat"
           color="primary"
-          disabled={updatePlaylist.isLoading}
+          disabled={updatePlaylist.isPending}
         >
           <Trans message="Update" />
         </Button>

@@ -29,13 +29,16 @@ interface Options {
 
 export function useUpdateTrack(
   form: UseFormReturn<UpdateTrackPayload>,
-  options: Options = {}
+  options: Options = {},
 ) {
   const {trans} = useTrans();
-  return useMutation((payload: UpdateTrackPayload) => updateChannel(payload), {
+  return useMutation({
+    mutationFn: (payload: UpdateTrackPayload) => updateChannel(payload),
     onSuccess: response => {
       toast(trans(message('Track updated')));
-      queryClient.invalidateQueries(DatatableDataQueryKey('tracks'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('tracks'),
+      });
       options.onSuccess?.(response);
     },
     onError: err => onFormQueryError(err, form),

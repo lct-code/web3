@@ -12,7 +12,9 @@ interface Props {
   enabled: boolean;
 }
 export function useUserIsFromEu({enabled}: Props) {
-  return useQuery([endpoint], () => checkIfFromEu(), {
+  return useQuery({
+    queryKey: [endpoint],
+    queryFn: () => checkIfFromEu(),
     staleTime: Infinity,
     enabled,
   });
@@ -23,7 +25,7 @@ function checkIfFromEu(): Promise<Response> {
     .get(endpoint)
     .then(response => {
       const userIsFromEu = COOKIE_LAW_COUNTRIES.includes(
-        response.data.country_code
+        response.data.country_code,
       );
       return {userIsFromEu};
     })

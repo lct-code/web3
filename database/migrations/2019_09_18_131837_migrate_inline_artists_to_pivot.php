@@ -1,9 +1,8 @@
 <?php
 
-use App\Artist;
-use App\Services\Artists\ArtistSaver;
+use App\Models\Artist;
+use App\Models\Track;
 use App\Services\Providers\SaveOrUpdate;
-use App\Track;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Migrations\Migration;
 

@@ -22,16 +22,16 @@ export function RestoreCommentsButton({
       variant={variant}
       size={size}
       className="mr-10"
-      disabled={restoreComments.isLoading}
+      disabled={restoreComments.isPending}
       color="primary"
       onClick={() => {
         restoreComments.mutate(
           {commentIds},
           {
             onSuccess: () => {
-              queryClient.invalidateQueries(['comment']);
+              queryClient.invalidateQueries({queryKey: ['comment']});
             },
-          }
+          },
         );
       }}
     >

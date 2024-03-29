@@ -17,7 +17,7 @@ class SettingsController extends BaseController
     public function __construct(
         protected Request $request,
         protected Settings $settings,
-        protected DotEnvEditor $dotEnv
+        protected DotEnvEditor $dotEnv,
     ) {
     }
 
@@ -104,7 +104,7 @@ class SettingsController extends BaseController
 
     private function validateSettings(
         array $serverSettings,
-        array $clientSettings
+        array $clientSettings,
     ) {
         // flatten "client" and "server" arrays into single array
         $values = array_merge(

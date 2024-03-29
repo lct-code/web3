@@ -26,22 +26,20 @@ export function useUpdatePlaylist({
   if (params.playlistId && !playlistId) {
     playlistId = params.playlistId;
   }
-  return useMutation(
-    (props: Partial<CreatePlaylistPayload>) =>
+  return useMutation({
+    mutationFn: (props: Partial<CreatePlaylistPayload>) =>
       updatePlaylist(playlistId!, props),
-    {
-      onSuccess: () => {
-        toast(message('Playlist updated'));
-        queryClient.invalidateQueries(['playlists']);
-      },
-      onError: r => (form ? onFormQueryError(r, form) : showHttpErrorToast(r)),
-    }
-  );
+    onSuccess: () => {
+      toast(message('Playlist updated'));
+      queryClient.invalidateQueries({queryKey: ['playlists']});
+    },
+    onError: r => (form ? onFormQueryError(r, form) : showHttpErrorToast(r)),
+  });
 }
 
 function updatePlaylist(
   playlistId: number | string,
-  payload: Partial<CreatePlaylistPayload>
+  payload: Partial<CreatePlaylistPayload>,
 ): Promise<Response> {
   return apiClient.put(`playlists/${playlistId}`, payload).then(r => r.data);
 }

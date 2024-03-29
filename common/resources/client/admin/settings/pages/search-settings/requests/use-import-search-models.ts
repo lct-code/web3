@@ -12,7 +12,8 @@ interface Payload {
 
 export function useImportSearchModels() {
   const {trans} = useTrans();
-  return useMutation((payload: Payload) => importModels(payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => importModels(payload),
     onSuccess: () => {
       toast(trans(message('Imported search models')));
     },

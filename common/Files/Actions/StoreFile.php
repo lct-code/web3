@@ -8,9 +8,9 @@ use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File as FileFacade;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use League\Flysystem\Local\LocalFilesystemAdapter;
-use Storage;
 use Symfony\Component\Mime\MimeTypes;
 
 class StoreFile

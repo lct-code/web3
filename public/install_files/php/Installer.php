@@ -1,6 +1,6 @@
 <?php
 
-use App\User;
+use App\Models\User;
 use Common\Admin\Appearance\GenerateFavicon;
 use Common\Auth\Permissions\Permission;
 use Common\Database\MigrateAndSeed;
@@ -283,19 +283,25 @@ class Installer
 
     protected function onInstallApplication()
     {
+        $appKey = 'base64:' . base64_encode(random_bytes(32));
+        $envContents = file_get_contents(
+            "{$this->baseDirectory}/{$this->envFileName()}",
+        );
+        $envContents = preg_replace(
+            '/APP_KEY=(.*)/',
+            "APP_KEY=$appKey",
+            $envContents,
+        );
+        file_put_contents(
+            "{$this->baseDirectory}/{$this->envFileName()}",
+            $envContents,
+        );
+
         $this->bootFramework();
+        Cache::flush();
 
         // Fix "index is too long" issue on MariaDB and older mysql versions
         Schema::defaultStringLength(191);
-
-        // Generate key
-        $appKey =
-            'base64:' .
-            base64_encode(Encrypter::generateKey(config('app.cipher')));
-
-        app(DotEnvEditor::class)->write([
-            'app_key' => $appKey,
-        ]);
 
         app(MigrateAndSeed::class)->execute(function () {
             $this->createAdminAccount();
@@ -324,7 +330,7 @@ class Installer
         $user = app(User::class)->firstOrNew(['email' => $email]);
         $user->username = $this->post('username');
         $user->email = $email;
-        $user->password = Hash::make($this->post('password'));
+        $user->password = $this->post('password');
         $user->email_verified_at = now();
         $user->save();
         $adminPermission = app(Permission::class)->firstOrCreate(

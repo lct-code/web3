@@ -16,7 +16,8 @@ function deleteFileEntries(payload: Payload): Promise<Response> {
 }
 
 export function useDeleteFileEntries() {
-  return useMutation((props: Payload) => deleteFileEntries(props), {
+  return useMutation({
+    mutationFn: (props: Payload) => deleteFileEntries(props),
     onError: err => showHttpErrorToast(err),
   });
 }

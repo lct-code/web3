@@ -125,7 +125,7 @@ function DeleteProductButton({product}: DeleteProductButtonProps) {
         <IconButton
           size="md"
           className="text-muted"
-          disabled={deleteProduct.isLoading}
+          disabled={deleteProduct.isPending}
         >
           <DeleteIcon />
         </IconButton>
@@ -147,9 +147,8 @@ function Actions() {
         <IconButton
           color="primary"
           variant="outline"
-          radius="rounded"
           size="sm"
-          disabled={syncPlans.isLoading}
+          disabled={syncPlans.isPending}
           onClick={() => {
             syncPlans.mutate();
           }}

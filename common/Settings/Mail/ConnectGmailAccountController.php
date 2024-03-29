@@ -39,7 +39,7 @@ class ConnectGmailAccountController extends BaseController
 
         try {
             $data = json_decode(File::get(GmailClient::tokenPath()), true);
-            return $data['email'];
+            return $data['email'] ?? null;
         } catch (FileNotFoundException $e) {
             return null;
         }

@@ -43,7 +43,7 @@ export function DateSegmentList({
       const limits = getSegmentLimits(
         value,
         segment.type,
-        formatter.resolvedOptions()
+        formatter.resolvedOptions(),
       );
       const textValue =
         isPlaceholder && segment.type !== 'literal'

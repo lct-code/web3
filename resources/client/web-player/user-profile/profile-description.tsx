@@ -1,6 +1,7 @@
 import {UserProfile} from '@app/web-player/user-profile/user-profile';
 import {UserLink} from '@app/web-player/user-profile/user-link';
 import {ProfileLinks} from '@app/web-player/user-profile/profile-links';
+import {useLinkifiedString} from '@common/utils/hooks/use-linkified-string';
 
 interface Props {
   profile?: UserProfile;
@@ -8,23 +9,22 @@ interface Props {
   shortDescription?: boolean;
 }
 export function ProfileDescription({profile, links, shortDescription}: Props) {
+  const description = useLinkifiedString(profile?.description) || '';
   if (!profile) return null;
   return (
-    <div className="text-sm">
+    <div className="min-w-0 text-sm">
       {profile.description && (
         <div
-          className="p-10 rounded bg-alt/80 dark:bg text-secondary max-w-720"
+          className="text-secondary max-w-720 rounded bg-alt/80 p-10 dark:bg"
           dangerouslySetInnerHTML={{
-            __html: shortDescription
-              ? profile.description.slice(0, 300)
-              : profile.description,
+            __html: shortDescription ? description?.slice(0, 300) : description,
           }}
         />
       )}
       {profile.city || profile.country || links?.length ? (
-        <div className="flex items-center gap-24 justify-between mt-20">
+        <div className="mt-20 flex items-center justify-between gap-24">
           {(profile.city || profile.country) && (
-            <div className="p-10 rounded bg-alt/80 dark:bg text-secondary w-max">
+            <div className="text-secondary rounded bg-alt/80 p-10 dark:bg md:w-max">
               {profile.city}
               {profile.city && ','} {profile.country}
             </div>

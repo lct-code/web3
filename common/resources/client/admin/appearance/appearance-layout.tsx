@@ -1,5 +1,5 @@
 import {Link, Navigate, Outlet, useLocation} from 'react-router-dom';
-import {Fragment, useEffect, useRef} from 'react';
+import {useEffect, useRef} from 'react';
 import {IconButton} from '../../ui/buttons/icon-button';
 import {CloseIcon} from '../../icons/material/Close';
 import {Button} from '../../ui/buttons/button';
@@ -14,8 +14,6 @@ import {SectionHeader} from './section-header';
 import {FileUploadProvider} from '../../uploads/uploader/file-upload-provider';
 import {useAppearanceEditorMode} from './commands/use-appearance-editor-mode';
 import {StaticPageTitle} from '../../seo/static-page-title';
-import {useIsMobileMediaQuery} from '../../utils/hooks/is-mobile-media-query';
-import clsx from 'clsx';
 import {useSettings} from '../../core/settings/use-settings';
 
 export function AppearanceLayout() {
@@ -24,7 +22,6 @@ export function AppearanceLayout() {
   const {base_url} = useSettings();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const {pathname} = useLocation();
-  const isMobile = useIsMobileMediaQuery();
 
   useEffect(() => {
     // only set defaults snapshot once on route init
@@ -50,15 +47,15 @@ export function AppearanceLayout() {
   }
 
   return (
-    <div className="md:flex items-center h-full">
+    <div className="h-screen items-center md:flex">
       <StaticPageTitle>
         <Trans message="Appearance" />
       </StaticPageTitle>
       <Sidebar values={data?.values} />
-      <div className="flex-auto h-full relative">
+      <div className="relative h-full flex-auto">
         <iframe
           ref={iframeRef}
-          className={clsx('w-full h-full', isMobile && 'hidden')}
+          className="h-full w-full max-md:hidden"
           src={`${base_url}?appearanceEditor=true`}
         />
       </div>
@@ -71,23 +68,22 @@ interface SidebarProps {
 }
 function Sidebar({values}: SidebarProps) {
   const spinner = (
-    <div className="flex items-center justify-center flex-auto h-full">
+    <div className="flex h-full flex-auto items-center justify-center">
       <ProgressCircle isIndeterminate aria-label="Loading editor" />
     </div>
   );
 
   return (
-    <Fragment>
-      <div className="bg relative w-full md:w-320 shadow-lg border-r h-full z-10">
-        {values ? <AppearanceForm defaultValues={values} /> : spinner}
-      </div>
-    </Fragment>
+    <div className="relative z-10 h-full w-full border-r bg shadow-lg @container md:w-320">
+      {values ? <AppearanceForm defaultValues={values} /> : spinner}
+    </div>
   );
 }
 
 interface AppearanceFormProps {
   defaultValues: AppearanceValues;
 }
+
 function AppearanceForm({defaultValues}: AppearanceFormProps) {
   const form = useForm<AppearanceValues>({defaultValues});
   const {watch, reset} = form;
@@ -102,7 +98,7 @@ function AppearanceForm({defaultValues}: AppearanceFormProps) {
 
   return (
     <Form
-      className="h-full flex flex-col"
+      className="flex h-full flex-col"
       form={form}
       onSubmit={values => {
         saveChanges.mutate(values, {
@@ -110,9 +106,9 @@ function AppearanceForm({defaultValues}: AppearanceFormProps) {
         });
       }}
     >
-      <Header isLoading={saveChanges.isLoading} />
+      <Header isLoading={saveChanges.isPending} />
       <SectionHeader />
-      <div className="px-14 py-20 flex-auto overflow-y-auto">
+      <div className="flex-auto overflow-y-auto px-14 py-20">
         <FileUploadProvider>
           <Outlet />
         </FileUploadProvider>
@@ -130,7 +126,7 @@ function Header({isLoading}: HeaderProps) {
   } = useFormContext<AppearanceValues>();
   const isDirty = Object.keys(dirtyFields).length;
   return (
-    <div className="border-b flex items-center h-50 pr-10 flex-shrink-0">
+    <div className="flex h-50 flex-shrink-0 items-center border-b pr-10">
       <IconButton
         border="border-r"
         className="text-muted"
@@ -145,7 +141,7 @@ function Header({isLoading}: HeaderProps) {
       <Button
         variant="flat"
         color="primary"
-        className="block ml-auto"
+        className="ml-auto block"
         disabled={!isDirty || isLoading}
         type="submit"
       >

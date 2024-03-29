@@ -18,7 +18,7 @@ export const DialogBody = forwardRef<HTMLDivElement, DialogBodyProps>(
         className={clsx(
           className,
           getPadding(props),
-          'overflow-y-auto overflow-x-hidden text-sm flex-auto'
+          'overflow-y-auto overflow-x-hidden overscroll-contain text-sm flex-auto'
         )}
       >
         {children}

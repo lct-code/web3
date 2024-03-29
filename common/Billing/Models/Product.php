@@ -4,19 +4,17 @@ namespace Common\Billing\Models;
 
 use Common\Auth\Permissions\Traits\HasPermissionsRelation;
 use Common\Billing\Subscription;
+use Common\Core\BaseModel;
 use Common\Files\Traits\SetsAvailableSpaceAttribute;
-use Common\Search\Searchable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Product extends Model
+class Product extends BaseModel
 {
     use HasFactory,
         HasPermissionsRelation,
-        SetsAvailableSpaceAttribute,
-        Searchable;
+        SetsAvailableSpaceAttribute;
 
     protected $guarded = ['id'];
 
@@ -27,6 +25,8 @@ class Product extends Model
         'available_space' => 'float',
         'hidden' => 'boolean',
     ];
+
+    public const MODEL_TYPE = 'product';
 
     protected function featureList(): Attribute
     {
@@ -61,12 +61,21 @@ class Product extends Model
         return $this->hasMany(Subscription::class, 'product_id');
     }
 
+    public function toNormalizedArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'model_type' => self::MODEL_TYPE,
+        ];
+    }
+
     public function toSearchableArray(): array
     {
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'feature_list' => $this->feature_list,
+            'feature_list' => implode(', ', $this->feature_list),
             'created_at' => $this->created_at->timestamp ?? '_null',
             'updated_at' => $this->updated_at->timestamp ?? '_null',
         ];
@@ -75,5 +84,10 @@ class Product extends Model
     public static function filterableFields(): array
     {
         return ['id', 'created_at', 'updated_at'];
+    }
+
+    public static function getModelTypeAttribute(): string
+    {
+       return static::MODEL_TYPE;
     }
 }

@@ -16,12 +16,12 @@ export function ActivePlanPanel() {
 
   return (
     <BillingPlanPanel title={<Trans message="Current plan" />}>
-      <div className="flex gap-20 justify-between mt-24">
+      <div className="mt-24 flex justify-between gap-20">
         <div>
-          <div className="text-xl font-bold mb-2">
+          <div className="mb-2 text-xl font-bold">
             {subscription.product.name}
           </div>
-          <FormattedPrice className="text-xl mb-2" price={subscription.price} />
+          <FormattedPrice className="mb-2 text-xl" price={subscription.price} />
           <div className="text-base">
             <Trans
               message="Your plan renews on :date"
@@ -34,9 +34,10 @@ export function ActivePlanPanel() {
             variant="flat"
             color="primary"
             size="md"
-            className="w-full mb-12"
+            className="mb-12 w-full"
             elementType={Link}
             to="/billing/change-plan"
+            disabled={subscription.gateway_name === 'none'}
           >
             <Trans message="Change plan" />
           </Button>

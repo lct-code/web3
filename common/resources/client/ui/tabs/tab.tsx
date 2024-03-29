@@ -13,6 +13,8 @@ export interface TabProps {
   elementType?: 'button' | 'a' | JSXElementConstructor<any>;
   to?: LinkProps['to'];
   relative?: LinkProps['relative'];
+  replace?: LinkProps['replace'];
+  width?: string;
 }
 export function Tab({
   index,
@@ -23,6 +25,7 @@ export function Tab({
   elementType = 'button',
   to,
   relative,
+  width = 'min-w-min',
 }: TabProps) {
   const {
     selectedTab,
@@ -37,27 +40,28 @@ export function Tab({
 
   const mergedClassname = clsx(
     'tracking-wide overflow-hidden capitalize text-sm flex items-center justify-center outline-none transition-colors',
-    'focus-visible:ring focus-visible:ring-2 ring-inset rounded whitespace-nowrap min-w-min',
+    'focus-visible:ring focus-visible:ring-2 ring-inset rounded whitespace-nowrap cursor-pointer',
+    width,
     textColor({isDisabled, isSelected}),
     className,
     size === 'md' && `${padding} h-48`,
     size === 'sm' && `${padding} h-32`,
-    !isDisabled && 'cursor-pointer'
+    isDisabled && 'pointer-events-none',
   );
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     switch (e.key) {
       case 'ArrowLeft':
-        focusManager.focusPrevious();
+        focusManager?.focusPrevious();
         break;
       case 'ArrowRight':
-        focusManager.focusNext();
+        focusManager?.focusNext();
         break;
       case 'Home':
-        focusManager.focusFirst();
+        focusManager?.focusFirst();
         break;
       case 'End':
-        focusManager.focusLast();
+        focusManager?.focusLast();
         break;
     }
   };

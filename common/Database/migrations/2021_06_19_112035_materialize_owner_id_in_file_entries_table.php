@@ -13,15 +13,17 @@ class MaterializeOwnerIdInFileEntriesTable extends Migration
      */
     public function up()
     {
-        $entries = FileEntry::with(['users' => function(MorphToMany $builder) {
-            $builder->where('owner', true)->limit(1);
-        }])->cursor();
-
-        foreach ($entries as $entry) {
-            if ($owner = $entry->users->first()) {
-                $entry->update(['owner_id' => $owner->id]);
-            }
-        }
+        FileEntry::with([
+            'users' => function (MorphToMany $builder) {
+                $builder->where('owner', true)->limit(1);
+            },
+        ])
+            ->lazyById(100)
+            ->each(function ($entry) {
+                if ($owner = $entry->users->first()) {
+                    $entry->update(['owner_id' => $owner->id]);
+                }
+            });
     }
 
     /**

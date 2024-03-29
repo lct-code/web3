@@ -17,7 +17,7 @@ export function CheckoutProductSummary({
 }: CheckoutProductSummaryProps) {
   const {status, product, price} = useCheckoutProduct();
 
-  if (status === 'error' || (status !== 'loading' && (!product || !price))) {
+  if (status === 'error' || (status !== 'pending' && (!product || !price))) {
     return null;
   }
 
@@ -26,7 +26,7 @@ export function CheckoutProductSummary({
       <h2 className="text-2xl mb-30">
         <Trans message="Summary" />
       </h2>
-      {status === 'loading' ? (
+      {status === 'pending' ? (
         <LoadingSkeleton key="loading-skeleton" />
       ) : (
         <ProductSummary

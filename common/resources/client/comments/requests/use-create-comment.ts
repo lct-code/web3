@@ -1,8 +1,8 @@
 import {BackendResponse} from '@common/http/backend-response/backend-response';
-import {useMutation} from '@tanstack/react-query';
+import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {toast} from '@common/ui/toast/toast';
 import {message} from '@common/i18n/message';
-import {apiClient, queryClient} from '@common/http/query-client';
+import {apiClient} from '@common/http/query-client';
 import {showHttpErrorToast} from '@common/utils/http/show-http-error-toast';
 import {Commentable} from '@common/comments/commentable';
 import {Comment} from '@common/comments/comment';
@@ -18,13 +18,17 @@ export interface CreateCommentPayload {
 }
 
 export function useCreateComment() {
-  return useMutation((props: CreateCommentPayload) => createComment(props), {
-    onSuccess: (response, props) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (props: CreateCommentPayload) => createComment(props),
+    onSuccess: async (response, props) => {
+      await queryClient.invalidateQueries({
+        queryKey: [
+          'comment',
+          `${props.commentable.id}-${props.commentable.model_type}`,
+        ],
+      });
       toast(message('Comment posted'));
-      queryClient.invalidateQueries([
-        'comment',
-        `${props.commentable.id}-${props.commentable.model_type}`,
-      ]);
     },
     onError: err => showHttpErrorToast(err),
   });

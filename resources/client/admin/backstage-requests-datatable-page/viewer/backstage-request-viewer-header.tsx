@@ -56,7 +56,7 @@ function DeleteButton({request}: Props) {
         }
       }}
     >
-      <Button disabled={deleteRequest.isLoading} variant="outline">
+      <Button disabled={deleteRequest.isPending} variant="outline">
         <Trans message="Delete" />
       </Button>
       <ConfirmationDialog

@@ -51,7 +51,7 @@ class AppearanceValues
         $defaultSettings = collect(config('common.default-settings'))
             ->mapWithKeys(fn($item) => [$item['name'] => $item['value']])
             ->toArray();
-        $defaults['settings'] = app(Settings::class)->getUnflattened(
+        $defaults['settings'] = settings()->getUnflattened(
             false,
             $defaultSettings,
         );

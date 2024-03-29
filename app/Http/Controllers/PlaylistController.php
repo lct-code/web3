@@ -1,9 +1,8 @@
 <?php namespace App\Http\Controllers;
 
-use App;
-use App\Actions\IncrementModelViews;
 use App\Http\Requests\ModifyPlaylist;
-use App\Playlist;
+use App\Models\Playlist;
+use App\Services\IncrementModelViews;
 use App\Services\Playlists\DeletePlaylists;
 use App\Services\Playlists\PaginatePlaylists;
 use App\Services\Playlists\PlaylistTracksPaginator;
@@ -45,14 +44,21 @@ class PlaylistController extends BaseController
 
         $this->authorize('show', $playlist);
 
-        $totalDuration = $playlist->tracks()->sum('tracks.duration');
+        $loader = request('loader', 'playlistPage');
+        $data = [
+            'playlist' => $playlist,
+            'tracks' => $this->tracksPaginator->paginate($playlist->id),
+            'totalDuration' => (int) $playlist
+                ->tracks()
+                ->sum('tracks.duration'),
+            'loader' => $loader,
+        ];
 
         app(IncrementModelViews::class)->execute($playlist->id, 'playlist');
 
-        return $this->success([
-            'playlist' => $playlist->toArray(),
-            'tracks' => $this->tracksPaginator->paginate($playlist->id),
-            'totalDuration' => (int) $totalDuration,
+        return $this->renderClientOrApi([
+            'pageName' => $loader === 'playlistPage' ? 'playlist-page' : null,
+            'data' => $data,
         ]);
     }
 

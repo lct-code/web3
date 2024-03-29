@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\TrackPlay;
+use App\Models\TrackPlay;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Arr;

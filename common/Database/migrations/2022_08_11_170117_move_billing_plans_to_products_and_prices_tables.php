@@ -21,7 +21,9 @@ class MoveBillingPlansToProductsAndPricesTables extends Migration
                     'position' => $plan->position,
                     'uuid' => $plan->uuid,
                     'feature_list' => $plan->features
-                        ? json_encode($plan->features)
+                        ? (!is_string($plan->features)
+                            ? json_encode($plan->features)
+                            : $plan->features)
                         : null,
                     'created_at' => $plan->created_at,
                     'updated_at' => $plan->updated_at,
@@ -44,7 +46,12 @@ class MoveBillingPlansToProductsAndPricesTables extends Migration
 
         // create prices for products from child plans
         $plans->each(function ($plan) use ($products) {
-            $productId = $products[$plan->parent_id ?? $plan->id]->id;
+            $product = $products[$plan->parent_id ?? $plan->id] ?? null;
+            if (!$product) {
+                return;
+            }
+
+            $productId = $product->id;
             $price = Price::create([
                 'amount' => $plan->amount ?? 1,
                 'currency' => $plan->currency,

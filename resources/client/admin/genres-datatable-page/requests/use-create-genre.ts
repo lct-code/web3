@@ -21,10 +21,13 @@ export interface CreateGenrePayload {
 
 export function useCreateGenre(form: UseFormReturn<CreateGenrePayload>) {
   const {trans} = useTrans();
-  return useMutation((props: CreateGenrePayload) => createNewTag(props), {
+  return useMutation({
+    mutationFn: (props: CreateGenrePayload) => createNewTag(props),
     onSuccess: () => {
       toast(trans(message('Genre created')));
-      queryClient.invalidateQueries(DatatableDataQueryKey('genres'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('genres'),
+      });
     },
     onError: err => onFormQueryError(err, form),
   });

@@ -2,11 +2,11 @@
 
 namespace App\Services\Admin;
 
-use App\Album;
-use App\Artist;
-use App\Like;
-use App\Track;
-use App\User;
+use App\Models\Album;
+use App\Models\Artist;
+use App\Models\Like;
+use App\Models\Track;
+use App\Models\User;
 use Common\Admin\Analytics\Actions\GetAnalyticsHeaderDataAction;
 use Common\Database\Metrics\ValueMetric;
 

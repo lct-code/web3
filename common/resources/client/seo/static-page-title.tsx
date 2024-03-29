@@ -3,7 +3,11 @@ import {ReactElement} from 'react';
 import {MessageDescriptor} from '../i18n/message-descriptor';
 import {useSettings} from '../core/settings/use-settings';
 
-type TitleChild = string | ReactElement<MessageDescriptor> | MessageDescriptor;
+type TitleChild =
+  | string
+  | null
+  | ReactElement<MessageDescriptor>
+  | MessageDescriptor;
 export type TitleMetaTagChildren = TitleChild | TitleChild[];
 
 interface StaticPageTitleProps {
@@ -18,7 +22,7 @@ export function StaticPageTitle({children}: StaticPageTitleProps) {
       {children ? (
         // @ts-ignore
         <title>
-          {children} - {site_name}
+          {children as any} - {site_name}
         </title>
       ) : undefined}
     </Helmet>

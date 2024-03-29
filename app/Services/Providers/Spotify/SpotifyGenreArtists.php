@@ -2,8 +2,8 @@
 
 namespace App\Services\Providers\Spotify;
 
-use App\Artist;
-use App\Genre;
+use App\Models\Artist;
+use App\Models\Genre;
 use App\Services\Providers\ContentProvider;
 use App\Services\Providers\SaveOrUpdate;
 

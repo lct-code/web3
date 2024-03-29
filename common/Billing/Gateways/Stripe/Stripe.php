@@ -1,6 +1,6 @@
 <?php namespace Common\Billing\Gateways\Stripe;
 
-use App\User;
+use App\Models\User;
 use Common\Billing\Gateways\Contracts\CommonSubscriptionGatewayActions;
 use Common\Billing\Models\Price;
 use Common\Billing\Models\Product;

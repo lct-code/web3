@@ -16,6 +16,7 @@ export function HeaderCell({index}: HeaderCellProps) {
 
   const style = useTableCellStyle({
     index: index,
+    isHeader: true,
   });
 
   const [isHovered, setIsHovered] = useState(false);

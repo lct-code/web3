@@ -11,7 +11,7 @@ interface Props extends ComponentPropsWithoutRef<'div'> {
 export function BackstageLayout({children, ...domProps}: Props) {
   const isDarkMode = useIsDarkMode();
   return (
-    <div className="h-full flex flex-col" {...domProps}>
+    <div className="h-screen flex flex-col" {...domProps}>
       <Navbar className="flex-shrink-0" color="bg" darkModeColor="bg" />
       <div
         className="overflow-y-auto flex-auto bg-cover relative"

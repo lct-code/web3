@@ -26,7 +26,6 @@ import {usePlayerActions} from '@common/player/hooks/use-player-actions';
 import {tracksToMediaItems} from '@app/web-player/tracks/utils/track-to-media-item';
 import {WaveformWithComments} from '@app/web-player/tracks/track-list/track-list-item';
 import {TrackActionsBar} from '@app/web-player/tracks/track-actions-bar';
-import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 
 interface Props {
   album: Album;
@@ -49,8 +48,6 @@ export const AlbumListItem = memo(
   }: Props) => {
     const queueId = queueGroupId(album);
     const {player} = useSettings();
-    const isMobile = useIsMobileMediaQuery();
-    hideArtwork = hideArtwork || !!isMobile;
     const {managesAlbum} = useAlbumPermissions(album);
     const tracks = album?.tracks || [];
 
@@ -66,22 +63,22 @@ export const AlbumListItem = memo(
         key={album.id}
         className={clsx(
           'overflow-hidden',
-          !hideArtwork && 'flex gap-24',
+          !hideArtwork && 'md:flex md:gap-24',
           className,
-          maxHeight
+          maxHeight,
         )}
       >
         {!hideArtwork && (
           <AlbumImage
             album={album}
-            className="flex-shrink-0 rounded"
+            className="flex-shrink-0 rounded max-md:hidden"
             size="w-184 h-184"
           />
         )}
         <div
           className={clsx(
-            'flex-auto min-w-0',
-            maxHeight && 'flex flex-col h-full'
+            'min-w-0 flex-auto',
+            maxHeight && 'flex h-full flex-col',
           )}
         >
           <div className="flex-shrink-0">
@@ -97,7 +94,7 @@ export const AlbumListItem = memo(
                 equalizerColor="white"
               />
               <div>
-                <div className="text-sm text-muted flex items-center gap-6">
+                <div className="flex items-center gap-6 text-sm text-muted">
                   <ArtistLinks
                     artists={album.artists}
                     target={linksInNewTab ? '_blank' : undefined}
@@ -170,7 +167,7 @@ export const AlbumListItem = memo(
         </div>
       </div>
     );
-  }
+  },
 );
 
 interface TrackItemProps {
@@ -186,15 +183,15 @@ function TrackItem({track, index, isLast, isActive, album}: TrackItemProps) {
     <div
       key={track.id}
       className={clsx(
-        'flex items-center text-[13px] gap-8 p-8 cursor-pointer hover:bg-hover',
+        'flex cursor-pointer items-center gap-8 p-8 text-[13px] hover:bg-hover',
         !isLast && 'border-b',
-        isActive && 'text-primary'
+        isActive && 'text-primary',
       )}
       onClick={() => {
         if (album.tracks?.length) {
           playerActions.overrideQueueAndPlay(
             tracksToMediaItems(album.tracks),
-            index
+            index,
           );
         }
       }}
@@ -204,7 +201,7 @@ function TrackItem({track, index, isLast, isActive, album}: TrackItemProps) {
       <div className="mx-10 flex-auto">{track.name}</div>
       {track.plays && track.plays > 0 ? (
         <Fragment>
-          <PlayArrowFilledIcon size="xs" className="text-muted ml-auto" />
+          <PlayArrowFilledIcon size="xs" className="ml-auto text-muted" />
           <div className="text-muted">
             <FormattedNumber value={track.plays} />
           </div>

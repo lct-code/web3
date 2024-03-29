@@ -32,7 +32,7 @@ export function CreateArtistPage({wrapInContainer, showExternalFields}: Props) {
         });
       }}
       title={<Trans message="Add new artist" />}
-      isLoading={createArtist.isLoading}
+      isLoading={createArtist.isPending}
       disableSaveWhenNotDirty
       wrapInContainer={wrapInContainer}
     >

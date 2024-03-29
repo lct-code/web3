@@ -13,7 +13,6 @@ import {IllustratedMessage} from '../ui/images/illustrated-message';
 import {SvgImage} from '../ui/images/svg-image/svg-image';
 import teamSvg from '../admin/roles/team.svg';
 import {useDialogContext} from '../ui/overlays/dialog/dialog-context';
-import {USER_MODEL} from '../auth/user';
 import {useNormalizedModels} from './queries/use-normalized-models';
 
 interface SelectUserDialogProps {
@@ -24,7 +23,7 @@ export function SelectUserDialog({onUserSelected}: SelectUserDialogProps) {
   const {close} = useDialogContext();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const {trans} = useTrans();
-  const query = useNormalizedModels(USER_MODEL, {
+  const query = useNormalizedModels('normalized-models/user', {
     query: searchTerm,
     perPage: 14,
   });
@@ -84,7 +83,7 @@ function UserListItem({user, onUserSelected}: UserListItemProps) {
   return (
     <div
       key={user.id}
-      className="flex items-center gap-10 outline-none focus-visible:ring ring-offset-4 hover:bg-hover p-10 rounded"
+      className="flex items-center gap-10 rounded p-10 outline-none ring-offset-4 hover:bg-hover focus-visible:ring"
       role="button"
       tabIndex={0}
       onClick={() => {
@@ -99,8 +98,8 @@ function UserListItem({user, onUserSelected}: UserListItemProps) {
     >
       <Avatar src={user.image} />
       <div className="overflow-hidden">
-        <div className="text-ellipsis overflow-hidden">{user.name}</div>
-        <div className="text-muted text-ellipsis overflow-hidden">
+        <div className="overflow-hidden text-ellipsis">{user.name}</div>
+        <div className="overflow-hidden text-ellipsis text-muted">
           {user.description}
         </div>
       </div>

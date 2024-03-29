@@ -1,6 +1,6 @@
 <?php namespace Common\Core\Policies;
 
-use App\User;
+use App\Models\User;
 
 class UserPolicy extends BasePolicy
 {

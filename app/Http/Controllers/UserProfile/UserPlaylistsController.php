@@ -1,12 +1,11 @@
 <?php namespace App\Http\Controllers\UserProfile;
 
-use App;
-use App\Playlist;
+use App\Models\Playlist;
+use App\Models\User;
 use App\Services\Playlists\PaginatePlaylists;
-use App\User;
 use Common\Core\BaseController;
-use Common\Database\Datasource\Datasource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class UserPlaylistsController extends BaseController
@@ -22,9 +21,15 @@ class UserPlaylistsController extends BaseController
     {
         $this->authorize('show', $user);
 
+        $builder = $user->playlists();
+
+        if ($user->id !== Auth::id()) {
+            $builder->where('public', true);
+        }
+
         $pagination = app(PaginatePlaylists::class)->execute(
             array_merge($this->request->all(), ['compact' => true]),
-            $user->playlists(),
+            $builder,
         );
 
         return $this->success(['pagination' => $pagination]);

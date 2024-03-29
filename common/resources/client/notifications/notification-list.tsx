@@ -73,7 +73,7 @@ export function NotificationListItem({
   return (
     <div
       onClick={() => {
-        if (!markAsRead.isLoading && !notification.read_at) {
+        if (!markAsRead.isPending && !notification.read_at) {
           markAsRead.mutate({ids: [notification.id]});
         }
         if (mainAction?.action) {
@@ -90,7 +90,7 @@ export function NotificationListItem({
         mainAction?.action && 'cursor-pointer',
         !notification.read_at
           ? 'bg-paper hover:bg-primary/10'
-          : 'hover:bg-hover'
+          : 'hover:bg-hover',
       )}
       title={mainAction?.label ? mainAction.label : undefined}
     >
@@ -126,7 +126,7 @@ interface ButtonActionsProps {
   notification: DatabaseNotification;
   onActionClick?: (
     e: React.MouseEvent,
-    action: DatabaseNotificationAction
+    action: DatabaseNotificationAction,
   ) => void;
 }
 function ButtonActions({notification, onActionClick}: ButtonActionsProps) {

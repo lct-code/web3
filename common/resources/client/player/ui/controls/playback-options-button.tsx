@@ -16,14 +16,17 @@ import {MediaPlaybackSpeedCircleIcon} from '@common/icons/media/media-playback-s
 import {MediaSettingsMenuIcon} from '@common/icons/media/media-settings-menu';
 import {MediaClosedCaptionsIcon} from '@common/icons/media/media-closed-captions';
 import {MediaArrowLeftIcon} from '@common/icons/media/media-arrow-left';
+import {MediaLanguageIcon} from '@common/icons/media/media-language';
+import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 
-type OptionsPanel = 'rate' | 'quality' | 'captions' | 'options';
+type OptionsPanel = 'rate' | 'quality' | 'captions' | 'options' | 'language';
 
 const Panels = {
   rate: PlaybackRatePanel,
   quality: PlaybackQualityPanel,
   options: OptionsListPanel,
   captions: CaptionsPanel,
+  language: LanguagePanel,
 };
 
 interface Props {
@@ -39,8 +42,14 @@ export function PlaybackOptionsButton({
   className,
 }: Props) {
   const darkThemeVars = useDarkThemeVariables();
+  const isMobile = useIsMobileMediaQuery();
   return (
-    <DialogTrigger type="popover" placement="top-end">
+    <DialogTrigger
+      type="popover"
+      mobileType="tray"
+      placement="top-end"
+      usePortal={!!isMobile}
+    >
       <IconButton
         color={color}
         size={size}
@@ -80,9 +89,14 @@ function OptionsListPanel({onActivePanelChange}: OptionsPanelProps) {
   const activeRate = usePlayerStore(s => s.playbackRate);
   const availableQualities = usePlayerStore(s => s.playbackQualities);
   const activeQuality = usePlayerStore(s => s.playbackQuality);
+
   const availableTextTracks = usePlayerStore(s => s.textTracks);
   const textTrackId = usePlayerStore(s => s.currentTextTrack);
   const currentTextTrack = availableTextTracks[textTrackId];
+
+  const availableAudioTracks = usePlayerStore(s => s.audioTracks);
+  const audioTrackId = usePlayerStore(s => s.currentAudioTrack);
+  const currentAudioTrack = availableAudioTracks[audioTrackId];
 
   return (
     <m.div
@@ -134,6 +148,24 @@ function OptionsListPanel({onActivePanelChange}: OptionsPanelProps) {
         >
           <Trans message="Subtitles/CC" />
         </ListItem>
+        {availableAudioTracks.length > 1 && (
+          <ListItem
+            startIcon={<MediaLanguageIcon />}
+            endSection={
+              <div className="flex items-center gap-2 capitalize">
+                {currentAudioTrack ? (
+                  currentAudioTrack.label
+                ) : (
+                  <Trans message="None" />
+                )}
+                <ArrowRightIcon size="sm" />
+              </div>
+            }
+            onSelected={() => onActivePanelChange('language')}
+          >
+            <Trans message="Language" />
+          </ListItem>
+        )}
       </List>
     </m.div>
   );
@@ -236,6 +268,36 @@ function CaptionsPanel({activePanel, onActivePanelChange}: OptionsPanelProps) {
             isSelected={currentTextTrack === index}
             onSelected={() => {
               player.setCurrentTextTrack(index);
+              onActivePanelChange('options');
+            }}
+          >
+            {track.label}
+          </ListItem>
+        ))}
+      </List>
+    </PanelLayout>
+  );
+}
+
+function LanguagePanel({activePanel, onActivePanelChange}: OptionsPanelProps) {
+  const currentAudioTrack = usePlayerStore(s => s.currentAudioTrack);
+  const audioTracks = usePlayerStore(s => s.audioTracks);
+  const player = usePlayerActions();
+
+  return (
+    <PanelLayout
+      activePanel={activePanel}
+      onActivePanelChange={onActivePanelChange}
+      title={<Trans message="Language" />}
+    >
+      <List>
+        {audioTracks.map((track, index) => (
+          <ListItem
+            key={index}
+            showCheckmark
+            isSelected={currentAudioTrack === index}
+            onSelected={() => {
+              player.setCurrentAudioTrack(index);
               onActivePanelChange('options');
             }}
           >

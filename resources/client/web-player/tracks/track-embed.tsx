@@ -8,14 +8,17 @@ import {Track} from '@app/web-player/tracks/track';
 import {trackToMediaItem} from '@app/web-player/tracks/utils/track-to-media-item';
 import {PlayerStoreOptions} from '@common/player/state/player-store-options';
 import {PlayerOutlet} from '@common/player/ui/player-outlet';
+import {PlayerPoster} from '@common/player/ui/controls/player-poster';
 
 export function TrackEmbed() {
-  const {data} = useTrack({
-    autoUpdate: false,
-  });
+  const {data} = useTrack({loader: 'trackPage'});
   return (
-    <div className="rounded border bg-alt p-14 h-[174px]">
-      {!data?.track ? <FullPageLoader /> : <EmbedContent track={data.track} />}
+    <div className="h-[174px] rounded border bg-alt p-14">
+      {!data?.track ? (
+        <FullPageLoader screen={false} />
+      ) : (
+        <EmbedContent track={data.track} />
+      )}
     </div>
   );
 }
@@ -40,8 +43,9 @@ function EmbedContent({track}: EmbedContentProps) {
   return (
     <PlayerContext id="web-player" options={options}>
       <div className="flex gap-24">
-        <div className="flex-shrink-0 rounded bg-black overflow-hidden">
-          <PlayerOutlet className="w-144 h-144" />
+        <div className="relative h-144 w-144 flex-shrink-0 overflow-hidden rounded bg-black">
+          <PlayerPoster className="absolute inset-0" />
+          <PlayerOutlet className="h-full w-full" />
         </div>
         <TrackListItem
           track={track}

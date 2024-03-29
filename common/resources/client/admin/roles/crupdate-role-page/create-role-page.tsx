@@ -21,7 +21,7 @@ export function CreateRolePage() {
         });
       }}
       title={<Trans message="Add new role" />}
-      isLoading={createRole.isLoading}
+      isLoading={createRole.isPending}
     >
       <CrupdateRolePageSettingsPanel />
     </CrupdateResourceLayout>

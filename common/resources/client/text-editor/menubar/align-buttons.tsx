@@ -54,7 +54,6 @@ export function AlignButtons({editor, size}: MenubarButtonProps) {
       <IconButton
         size={size}
         color={activeKey ? 'primary' : null}
-        radius="rounded"
         className={clsx('flex-shrink-0')}
       >
         <ActiveIcon />

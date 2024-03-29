@@ -13,7 +13,7 @@ import {EditIcon} from '@common/icons/material/Edit';
 import {Playlist} from '@app/web-player/playlists/playlist';
 import {PlaylistLink} from '@app/web-player/playlists/playlist-link';
 import {UserProfileLink} from '@app/web-player/users/user-profile-link';
-import playlistImage from './../channels-datatable-page/playlist.svg';
+import playlistImage from '@app/admin/channels/playlist.svg';
 import {CheckIcon} from '@common/icons/material/Check';
 import {CloseIcon} from '@common/icons/material/Close';
 import {FormattedNumber} from '@common/i18n/formatted-number';
@@ -61,9 +61,9 @@ const columnConfig: ColumnConfig<Playlist>[] = [
     header: () => <Trans message="Public" />,
     body: entry =>
       entry.public ? (
-        <CheckIcon className="icon-md text-positive" />
+        <CheckIcon className="text-positive icon-md" />
       ) : (
-        <CloseIcon className="icon-md text-danger" />
+        <CloseIcon className="text-danger icon-md" />
       ),
   },
   {
@@ -73,9 +73,9 @@ const columnConfig: ColumnConfig<Playlist>[] = [
     header: () => <Trans message="Collaborative" />,
     body: entry =>
       entry.collaborative ? (
-        <CheckIcon className="icon-md text-positive" />
+        <CheckIcon className="text-positive icon-md" />
       ) : (
-        <CloseIcon className="icon-md text-danger" />
+        <CloseIcon className="text-danger icon-md" />
       ),
   },
   {
@@ -159,7 +159,6 @@ function Actions() {
             <IconButton
               variant="outline"
               color="primary"
-              radius="rounded"
               className="flex-shrink-0"
               size="sm"
             >
@@ -187,5 +186,5 @@ function Actions() {
 }
 
 function invalidateQuery() {
-  queryClient.invalidateQueries(DatatableDataQueryKey('playlists'));
+  queryClient.invalidateQueries({queryKey: DatatableDataQueryKey('playlists')});
 }

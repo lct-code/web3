@@ -10,7 +10,8 @@ import {NotificationSubscriptionGroup} from './notification-subscription';
 import {toast} from '../../ui/toast/toast';
 import {Trans} from '../../i18n/trans';
 import {message} from '../../i18n/message';
-import {useIsMobileMediaQuery} from '../../utils/hooks/is-mobile-media-query';
+import {useSettings} from '@common/core/settings/use-settings';
+import {Navigate} from 'react-router-dom';
 
 type Selection = Record<string, ChannelSelection>;
 
@@ -18,6 +19,7 @@ type Selection = Record<string, ChannelSelection>;
 type ChannelSelection = Record<string, boolean>;
 
 export function NotificationSettingsPage() {
+  const {notif} = useSettings();
   const updateSettings = useUpdateNotificationSettings();
   const {data, isFetched} = useNotificationSubscriptions();
   const [selection, setSelection] = useState<Selection>();
@@ -33,7 +35,7 @@ export function NotificationSettingsPage() {
       data.subscriptions.forEach(group => {
         group.subscriptions.forEach(subscription => {
           const backendValue = data.user_selections.find(
-            s => s.notif_id === subscription.notif_id
+            s => s.notif_id === subscription.notif_id,
           );
           initialSelection[subscription.notif_id] = backendValue?.channels || {
             ...initialValue,
@@ -44,8 +46,12 @@ export function NotificationSettingsPage() {
     }
   }, [data, selection]);
 
+  if (!notif.subs.integrated || (data && data.subscriptions.length === 0)) {
+    return <Navigate to="/" replace />;
+  }
+
   return (
-    <div className="bg-alt min-h-full">
+    <div className="min-h-screen bg-alt">
       <Navbar menuPosition="notifications-page" />
       {!isFetched || !data || !selection ? (
         <div className="container mx-auto my-100 flex justify-center">
@@ -56,8 +62,8 @@ export function NotificationSettingsPage() {
           />
         </div>
       ) : (
-        <div className="container px-10 md:px-20 my-20 md: my-40 mx-auto">
-          <div className="px-20 pt-20 pb-30 rounded border bg-paper">
+        <div className="container mx-auto my-20 px-10 md:my-40 md:px-20">
+          <div className="rounded border bg-paper px-20 pb-30 pt-20">
             {data.subscriptions.map(group => (
               <div key={group.group_name} className="mb-10 text-sm">
                 <GroupRow
@@ -79,15 +85,15 @@ export function NotificationSettingsPage() {
               </div>
             ))}
             <Button
-              className="mt-20 ml-10"
+              className="ml-10 mt-20"
               variant="flat"
               color="primary"
-              disabled={updateSettings.isLoading}
+              disabled={updateSettings.isPending}
               onClick={() => {
                 updateSettings.mutate(
                   Object.entries(selection).map(([notifId, channels]) => {
                     return {notif_id: notifId, channels};
-                  })
+                  }),
                 );
               }}
             >
@@ -112,7 +118,6 @@ function GroupRow({
   selection,
   setSelection,
 }: GroupRowProps) {
-  const isMobile = useIsMobileMediaQuery();
   const toggleAll = (channelName: string, value: boolean) => {
     const nextState = produce(selection, draftState => {
       Object.keys(selection).forEach(notifId => {
@@ -123,7 +128,7 @@ function GroupRow({
   };
 
   const checkboxes = (
-    <div className="ml-auto flex items-center gap-40">
+    <div className="ml-auto flex items-center gap-40 max-md:hidden">
       {allChannels.map(channelName => {
         const allSelected = Object.values(selection).every(s => s[channelName]);
         const someSelected =
@@ -151,11 +156,11 @@ function GroupRow({
   );
 
   return (
-    <div className="flex items-center p-10 border-b">
+    <div className="flex items-center border-b p-10">
       <div className="font-medium">
         <Trans message={group.group_name} />
       </div>
-      {!isMobile && checkboxes}
+      {checkboxes}
     </div>
   );
 }
@@ -182,8 +187,8 @@ function SubscriptionRow({
   };
 
   return (
-    <div className="md:flex items-center py-10 pl-8 md:pl-20 pr-10 border-b">
-      <div className="pb-14 md:pb-0 font-semibold md:font-normal">
+    <div className="items-center border-b py-10 pl-8 pr-10 md:flex md:pl-20">
+      <div className="pb-14 font-semibold md:pb-0 md:font-normal">
         <Trans message={subscription.name} />
       </div>
       <div className="ml-auto flex items-center gap-40">
@@ -220,8 +225,8 @@ function requestBrowserPermission(): Promise<boolean> {
   if (Notification.permission === 'denied') {
     toast.danger(
       message(
-        'Notifications blocked. Please enable them for this site from browser settings.'
-      )
+        'Notifications blocked. Please enable them for this site from browser settings.',
+      ),
     );
     return Promise.resolve(false);
   }

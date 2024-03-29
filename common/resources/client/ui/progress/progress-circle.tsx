@@ -7,7 +7,7 @@ export interface ProgressCircleProps extends ComponentPropsWithoutRef<'div'> {
   value?: number;
   minValue?: number;
   maxValue?: number;
-  size?: 'sm' | 'md' | 'lg' | string;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | string;
   isIndeterminate?: boolean;
   className?: string;
   position?: string;
@@ -75,10 +75,10 @@ export const ProgressCircle = React.forwardRef<
         className
       )}
     >
-      <div className={clsx(circleSize, trackColor, 'border-4 rounded-full')} />
+      <div className={clsx(circleSize, trackColor, 'rounded-full border-4')} />
       <div
         className={clsx(
-          'fills absolute w-full h-full top-0 left-0',
+          'fills absolute left-0 top-0 h-full w-full',
           isIndeterminate && 'progress-circle-fills-animate'
         )}
       >
@@ -125,13 +125,13 @@ function FillMask({
   return (
     <div
       className={clsx(
-        'w-1/2 h-full origin-[100%] absolute overflow-hidden',
+        'absolute h-full w-1/2 origin-[100%] overflow-hidden',
         className
       )}
     >
       <div
         className={clsx(
-          'w-full h-full origin-[100%] overflow-hidden rotate-180',
+          'h-full w-full origin-[100%] rotate-180 overflow-hidden',
           !isIndeterminate && 'transition-transform duration-100',
           subMaskClassName
         )}
@@ -145,6 +145,8 @@ function FillMask({
 
 function getCircleStyle(size: ProgressCircleProps['size']) {
   switch (size) {
+    case 'xs':
+      return 'w-20 h-20';
     case 'sm':
       return 'w-24 h-24';
     case 'md':

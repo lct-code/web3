@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Track;
-use App\User;
+use App\Models\Track;
+use App\Models\User;
 use Common\Core\Policies\BasePolicy;
 use Common\Settings\Settings;
 use Illuminate\Database\Eloquent\Builder;

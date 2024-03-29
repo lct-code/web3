@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {loadScript} from '@paypal/paypal-js';
-import {useProducts} from '../../pricing-table/use-products';
-import {useSettings} from '../../../core/settings/use-settings';
+import {useProducts} from '@common/billing/pricing-table/use-products';
+import {useSettings} from '@common/core/settings/use-settings';
 
 interface UsePaypalProps {
   productId?: string;
@@ -24,10 +24,10 @@ export function usePaypal({productId, priceId}: UsePaypalProps) {
   useEffect(() => {
     if (!paypalEnabled || !public_key || paypalLoadStarted.current) return;
     loadScript({
-      'client-id': public_key,
+      clientId: public_key,
       intent: 'subscription',
       vault: true,
-      'disable-funding': stripeEnabled ? 'card' : undefined,
+      disableFunding: stripeEnabled ? 'card' : undefined,
     }).then(() => {
       setPaypalIsLoaded(true);
     });

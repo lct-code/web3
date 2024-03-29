@@ -175,7 +175,7 @@ function ImportRecordsPanel() {
         </span>
       }
       actions={
-        <div className="pt-14 mt-10 border-t">
+        <div className="mt-10 border-t pt-14">
           <Select
             selectionMode="single"
             label={<Trans message="What to import?" />}
@@ -196,8 +196,8 @@ function ImportRecordsPanel() {
           <Button
             variant="flat"
             color="primary"
-            className="mt-24 mb-8"
-            disabled={importModels.isLoading}
+            className="mb-8 mt-24"
+            disabled={importModels.isPending}
             onClick={() => {
               importModels.mutate({
                 model: selectedModel,

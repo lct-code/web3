@@ -21,31 +21,30 @@ export function ImageZoomDialog(props: Props) {
   const [activeIndex, setActiveIndex] = useControlledState(
     props.activeIndex,
     props.defaultActiveIndex,
-    props.onActiveIndexChange
+    props.onActiveIndexChange,
   );
   const src = image || images?.[activeIndex];
 
   return (
     <Dialog size="fullscreenTakeover" background="bg-black/80">
-      <DialogBody padding="p-0" className="w-full h-full">
+      <DialogBody padding="p-0" className="h-full w-full">
         <IconButton
           size="lg"
           color="paper"
-          className="absolute top-0 right-0 text-white z-20"
+          className="absolute right-0 top-0 z-20 text-white"
           onClick={() => {
             close();
           }}
         >
           <CloseIcon />
         </IconButton>
-        <div className="relative p-40 flex items-center justify-center w-full h-full">
+        <div className="relative flex h-full w-full items-center justify-center p-40">
           {images?.length ? (
             <IconButton
               size="lg"
-              color="paper"
+              color="white"
               variant="flat"
-              className="absolute my-auto top-0 bottom-0 left-20"
-              radius="rounded"
+              className="absolute bottom-0 left-20 top-0 my-auto"
               disabled={activeIndex < 1}
               onClick={() => {
                 setActiveIndex(activeIndex - 1);
@@ -57,15 +56,14 @@ export function ImageZoomDialog(props: Props) {
           <img
             src={src}
             alt=""
-            className="max-h-full w-auto shadow object-contain"
+            className="max-h-full w-auto object-contain shadow"
           />
           {images?.length ? (
             <IconButton
               size="lg"
-              color="paper"
+              color="white"
               variant="flat"
-              className="absolute my-auto top-0 bottom-0 right-20"
-              radius="rounded"
+              className="absolute bottom-0 right-20 top-0 my-auto"
               disabled={activeIndex + 1 === images?.length}
               onClick={() => {
                 setActiveIndex(activeIndex + 1);

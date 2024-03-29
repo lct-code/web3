@@ -17,19 +17,20 @@ interface Payload {
 }
 
 export function useAddTracksToPlaylist() {
-  return useMutation((payload: Payload) => addTracks(payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => addTracks(payload),
     onSuccess: (response, {tracks}) => {
       toast(
         message('Added [one 1 track|other :count tracks] to playlist', {
           values: {count: tracks.length},
-        })
+        }),
       );
-      queryClient.invalidateQueries(['playlists', response.playlist.id]);
-      queryClient.invalidateQueries([
-        'tracks',
-        'playlist',
-        response.playlist.id,
-      ]);
+      queryClient.invalidateQueries({
+        queryKey: ['playlists', response.playlist.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['tracks', 'playlist', response.playlist.id],
+      });
     },
     onError: r => showHttpErrorToast(r),
   });

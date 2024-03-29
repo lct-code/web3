@@ -1,7 +1,6 @@
 <?php namespace App\Services\Artists;
 
-use App;
-use App\Artist;
+use App\Models\Artist;
 use App\Services\HttpClient;
 use Common\Settings\Settings;
 use Illuminate\Support\Arr;

@@ -18,12 +18,13 @@ interface Payload {
 
 export function useCancelSubscription() {
   const {trans} = useTrans();
-  return useMutation((props: Payload) => cancelSubscription(props), {
+  return useMutation({
+    mutationFn: (props: Payload) => cancelSubscription(props),
     onSuccess: (response, payload) => {
       toast(
         payload.delete
           ? trans(message('Subscription deleted.'))
-          : trans(message('Subscription cancelled.'))
+          : trans(message('Subscription cancelled.')),
       );
     },
     onError: err => showHttpErrorToast(err),

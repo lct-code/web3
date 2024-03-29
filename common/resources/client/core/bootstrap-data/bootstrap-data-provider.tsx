@@ -14,11 +14,11 @@ interface BootstrapDataProviderProps {
   children: any;
 }
 export function BootstrapDataProvider({children}: BootstrapDataProviderProps) {
-  const data = useBackendBootstrapData();
+  const {data} = useBackendBootstrapData();
 
   const value: BoostrapDataContextValue = useMemo(() => {
     return {
-      data,
+      data: data,
       setBootstrapData: setBootstrapData,
       mergeBootstrapData: mergeBootstrapData,
       invalidateBootstrapData: invalidateBootstrapData,

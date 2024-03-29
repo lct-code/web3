@@ -16,15 +16,15 @@ export const getLocalWithLinesQueryKey = (localeId?: number | string) => {
 };
 
 export function useLocaleWithLines(localeId: number | string) {
-  return useQuery(
-    getLocalWithLinesQueryKey(localeId),
-    () => fetchLocaleWithLines(localeId),
-    {staleTime: Infinity}
-  );
+  return useQuery({
+    queryKey: getLocalWithLinesQueryKey(localeId),
+    queryFn: () => fetchLocaleWithLines(localeId),
+    staleTime: Infinity,
+  });
 }
 
 function fetchLocaleWithLines(
-  localeId: number | string
+  localeId: number | string,
 ): Promise<FetchLocaleWithLinesResponse> {
   return apiClient
     .get(`localizations/${localeId}`)

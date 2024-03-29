@@ -9,7 +9,7 @@ class HomeController extends BaseController
 {
     public function __construct(
         protected BootstrapData $bootstrapData,
-        protected Settings $settings
+        protected Settings $settings,
     ) {
     }
 
@@ -25,8 +25,10 @@ class HomeController extends BaseController
             return $response;
         }
 
+        $this->bootstrapData->init();
+
         $view = view('app')
-            ->with('bootstrapData', $this->bootstrapData->init())
+            ->with('bootstrapData', $this->bootstrapData)
             ->with('htmlBaseUri', app(AppUrl::class)->htmlBaseUri)
             ->with('settings', $this->settings)
             ->with(
@@ -43,5 +45,13 @@ class HomeController extends BaseController
         }
 
         return response($view);
+    }
+
+    /**
+     * Render basic client side page with optional SSR when page has no data or seo tags.
+     * (contact page, login, register, etc.)
+     */
+    public function render() {
+        return $this->renderClientOrApi([]);
     }
 }

@@ -18,19 +18,17 @@ export interface DenyBackstageRequestPayload {
 
 export function useDenyBackstageRequest() {
   const navigate = useNavigate();
-  return useMutation(
-    (payload: DenyBackstageRequestPayload) => denyRequest(payload),
-    {
-      onSuccess: () => {
-        toast(message('Request denied'));
-        navigate('/admin/backstage-requests');
-        queryClient.invalidateQueries(
-          DatatableDataQueryKey('backstage-request')
-        );
-      },
-      onError: err => showHttpErrorToast(err),
-    }
-  );
+  return useMutation({
+    mutationFn: (payload: DenyBackstageRequestPayload) => denyRequest(payload),
+    onSuccess: () => {
+      toast(message('Request denied'));
+      navigate('/admin/backstage-requests');
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('backstage-request'),
+      });
+    },
+    onError: err => showHttpErrorToast(err),
+  });
 }
 
 function denyRequest({requestId, ...payload}: DenyBackstageRequestPayload) {

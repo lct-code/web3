@@ -44,6 +44,7 @@ class DropboxServiceProvider extends ServiceProvider
                             'refresh_token' => $this->config['refresh_token'],
                         ],
                     );
+                    $response->throw();
 
                     app(DotEnvEditor::class)->write([
                         'STORAGE_DROPBOX_ACCESS_TOKEN' =>

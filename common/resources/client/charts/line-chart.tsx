@@ -1,5 +1,5 @@
 import {BaseChart, BaseChartProps} from './base-chart';
-import {ReportMetric} from '../admin/analytics/report-metric';
+import {DatasetItem, ReportMetric} from '../admin/analytics/report-metric';
 import {useMemo} from 'react';
 import {formatReportData} from './data/format-report-data';
 import {useSelectedLocale} from '../i18n/selected-locale';
@@ -30,7 +30,7 @@ const LineChartOptions: ChartOptions<'line'> = {
 };
 
 interface LineChartProps extends Omit<BaseChartProps<'line'>, 'type' | 'data'> {
-  data?: ReportMetric;
+  data?: ReportMetric<DatasetItem>;
 }
 export function LineChart({data, className, ...props}: LineChartProps) {
   const {localeCode} = useSelectedLocale();

@@ -9,9 +9,11 @@ import {useAuthClickCapture} from '@app/web-player/use-auth-click-capture';
 
 interface ToggleInLibraryMenuButtonProps {
   items: Likeable[];
+  modelType?: 'track' | 'album' | 'artist';
 }
 export function ToggleInLibraryMenuButton({
   items,
+  modelType,
 }: ToggleInLibraryMenuButtonProps) {
   const authHandler = useAuthClickCapture();
   const {close: closeMenu} = useDialogContext();
@@ -20,6 +22,12 @@ export function ToggleInLibraryMenuButton({
   const allInLibrary = useLibraryStore(s => s.has(items));
 
   if (allInLibrary) {
+    const label =
+      modelType === 'artist' ? (
+        <Trans message="Following" />
+      ) : (
+        <Trans message="Remove from your music" />
+      );
     return (
       <ContextMenuButton
         onClickCapture={authHandler}
@@ -28,11 +36,17 @@ export function ToggleInLibraryMenuButton({
           removeFromLibrary.mutate({likeables: items});
         }}
       >
-        <Trans message="Remove from your music" />
+        {label}
       </ContextMenuButton>
     );
   }
 
+  const label =
+    modelType === 'artist' ? (
+      <Trans message="Follow" />
+    ) : (
+      <Trans message="Add to your music" />
+    );
   return (
     <ContextMenuButton
       onClickCapture={authHandler}
@@ -41,7 +55,7 @@ export function ToggleInLibraryMenuButton({
         addToLibrary.mutate({likeables: items});
       }}
     >
-      <Trans message="Add to your music" />
+      {label}
     </ContextMenuButton>
   );
 }

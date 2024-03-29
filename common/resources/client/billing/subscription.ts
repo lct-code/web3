@@ -8,7 +8,7 @@ export interface Subscription {
   product_id: number;
   user_id: number;
   on_grace_period?: boolean;
-  gateway_name: string;
+  gateway_name: 'stripe' | 'paypal' | 'none';
   gateway_id: string;
   valid?: boolean;
   active?: boolean;

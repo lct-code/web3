@@ -2,19 +2,20 @@
 
 namespace App\Console\Commands;
 
-use App\Album;
-use App\Artist;
-use App\Genre;
-use App\ProfileLink;
+use App\Models\Album;
+use App\Models\Artist;
+use App\Models\Genre;
+use App\Models\ProfileLink;
+use App\Models\Track;
+use App\Models\TrackPlay;
+use App\Models\User;
+use App\Models\UserProfile;
 use App\Services\Providers\SaveOrUpdate;
-use App\Track;
-use App\TrackPlay;
-use App\User;
-use App\UserProfile;
 use Artisan;
 use Carbon\Carbon;
 use Common\Auth\Permissions\Permission;
 use Common\Auth\Roles\Role;
+use Common\Channels\UpdateAllChannelsContent;
 use Common\Comments\Comment;
 use Common\Database\MigrateAndSeed;
 use Common\Files\Traits\HandlesEntryPaths;
@@ -23,7 +24,6 @@ use Common\Settings\Settings;
 use Common\Tags\Tag;
 use DB;
 use File;
-use Hash;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Support\Arr;
@@ -108,7 +108,7 @@ class SeedSampleData extends Command
         $this->loadSampleData();
 
         $this->artists = $this->createArtists();
-        $this->attachGenresToModels($this->artists, Artist::class);
+        $this->attachGenresToModels($this->artists, Artist::MODEL_TYPE);
 
         $this->commentUsers = $this->createUsers();
         $this->createFollows();
@@ -133,7 +133,7 @@ class SeedSampleData extends Command
             ->whereIn('temp_id', $this->albumTempIds)
             ->chunkById(100, function (Collection $albums) use ($bar) {
                 $this->createLikesAndReposts($albums);
-                $this->attachGenresToModels($albums, Album::class);
+                $this->attachGenresToModels($albums, Album::MODEL_TYPE);
                 $this->createModelComments($albums);
                 $bar->advance();
             });
@@ -153,7 +153,7 @@ class SeedSampleData extends Command
                 $this->createModelComments($tracks);
                 $this->createTrackPlays($tracks);
                 $this->createLikesAndReposts($tracks);
-                $this->attachGenresToModels($tracks, Track::class);
+                $this->attachGenresToModels($tracks, Track::MODEL_TYPE);
                 $this->attachTagsToTracks($tracks);
                 $bar->advance();
             });
@@ -174,7 +174,7 @@ class SeedSampleData extends Command
             storage_path('app/waves'),
         );
 
-        Artisan::call('channels:update');
+        Artisan::call(UpdateAllChannelsContent::class);
 
         (new ImportRecordsIntoScout())->execute();
 
@@ -212,7 +212,7 @@ class SeedSampleData extends Command
             ->random(rand(7, $this->commentUsers->count()))
             ->map(function (User $user) use ($artist) {
                 return [
-                    'likeable_type' => Artist::class,
+                    'likeable_type' => Artist::MODEL_TYPE,
                     'likeable_id' => $artist->id,
                     'user_id' => $user->id,
                     'created_at' => Carbon::now(),
@@ -299,7 +299,7 @@ class SeedSampleData extends Command
                 return $users->map(function (User $user) use ($likeable) {
                     return [
                         'likeable_id' => $likeable->id,
-                        'likeable_type' => get_class($likeable),
+                        'likeable_type' => $likeable::MODEL_TYPE,
                         'user_id' => $user->id,
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now(),
@@ -315,7 +315,7 @@ class SeedSampleData extends Command
                 return $users->map(function (User $user) use ($likeable) {
                     return [
                         'repostable_id' => $likeable->id,
-                        'repostable_type' => get_class($likeable),
+                        'repostable_type' => $likeable::MODEL_TYPE,
                         'user_id' => $user->id,
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now(),
@@ -432,19 +432,19 @@ class SeedSampleData extends Command
                 return [
                     [
                         'linkeable_id' => $artist->id,
-                        'linkeable_type' => Artist::class,
+                        'linkeable_type' => Artist::MODEL_TYPE,
                         'url' => 'https://facebook.com',
                         'title' => 'Facebook',
                     ],
                     [
                         'linkeable_id' => $artist->id,
-                        'linkeable_type' => Artist::class,
+                        'linkeable_type' => Artist::MODEL_TYPE,
                         'url' => 'https://twitter.com',
                         'title' => 'Twitter',
                     ],
                     [
                         'linkeable_id' => $artist->id,
-                        'linkeable_type' => Artist::class,
+                        'linkeable_type' => Artist::MODEL_TYPE,
                         'url' => 'https://bandcamp.com',
                         'title' => 'Bandcamp',
                     ],
@@ -499,19 +499,19 @@ class SeedSampleData extends Command
                 return [
                     [
                         'linkeable_id' => $user->id,
-                        'linkeable_type' => User::class,
+                        'linkeable_type' => User::MODEL_TYPE,
                         'url' => 'https://facebook.com',
                         'title' => 'Facebook',
                     ],
                     [
                         'linkeable_id' => $user->id,
-                        'linkeable_type' => User::class,
+                        'linkeable_type' => User::MODEL_TYPE,
                         'url' => 'https://twitter.com',
                         'title' => 'Twitter',
                     ],
                     [
                         'linkeable_id' => $user->id,
-                        'linkeable_type' => User::class,
+                        'linkeable_type' => User::MODEL_TYPE,
                         'url' => 'https://bandcamp.com',
                         'title' => 'Bandcamp',
                     ],
@@ -545,8 +545,8 @@ class SeedSampleData extends Command
                 $comment['commentable_id'] = $model->id;
                 $comment['commentable_type'] =
                     $model['model_type'] === Track::MODEL_TYPE
-                        ? Track::class
-                        : Album::class;
+                        ? Track::MODEL_TYPE
+                        : Album::MODEL_TYPE;
                 $this->lastCommentId = $this->lastCommentId + 1;
                 return $comment;
             }, array_fill(0, 40, []));
@@ -625,7 +625,7 @@ class SeedSampleData extends Command
             ['email_verified_at' => now()],
         );
         $demoAdmin->username = 'admin';
-        $demoAdmin->password = Hash::make('admin');
+        $demoAdmin->password = 'admin';
         $demoAdmin->save();
         $adminPermission = app(Permission::class)->firstOrCreate(
             ['name' => 'admin'],
@@ -643,7 +643,7 @@ class SeedSampleData extends Command
 
         $admin = User::create([
             'email' => 'Ic0OdCIodqz8q1r@demo.com',
-            'password' => Hash::make(env('DEMO_ADMIN_PASSWORD')),
+            'password' => env('DEMO_ADMIN_PASSWORD'),
         ]);
         $admin->permissions()->attach($adminPermission->id);
         $admin->roles()->attach($userRole->id);
@@ -656,9 +656,7 @@ class SeedSampleData extends Command
                 return $this->tags->map(function ($tag) use ($taggable) {
                     return [
                         'tag_id' => $tag->id,
-                        'taggable_type' => modelTypeToNamespace(
-                            $taggable['model_type'],
-                        ),
+                        'taggable_type' => $taggable['model_type'],
                         'taggable_id' => $taggable['id'],
                     ];
                 });

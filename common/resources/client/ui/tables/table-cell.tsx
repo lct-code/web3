@@ -31,6 +31,7 @@ export function TableCell({
 
   const style = useTableCellStyle({
     index: index,
+    isHeader: false,
   });
 
   return (

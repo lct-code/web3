@@ -2,9 +2,9 @@ import {getBootstrapData} from '../core/bootstrap-data/use-backend-bootstrap-dat
 import {getLocalTimeZone} from '@internationalized/date';
 
 export function getUserTimezone(): string {
-  const defaultTimezone = getBootstrapData().settings.dates.default_timezone;
+  const defaultTimezone = getBootstrapData()?.settings.dates.default_timezone;
   const preferredTimezone =
-    getBootstrapData().user?.timezone || defaultTimezone || 'auto';
+    getBootstrapData()?.user?.timezone || defaultTimezone || 'auto';
 
   if (!preferredTimezone || preferredTimezone === 'auto') {
     return getLocalTimeZone();

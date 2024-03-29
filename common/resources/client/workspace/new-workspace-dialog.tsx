@@ -50,7 +50,7 @@ export function NewWorkspaceDialog() {
           color="primary"
           type="submit"
           form={formId}
-          disabled={createWorkspace.isLoading}
+          disabled={createWorkspace.isPending}
         >
           <Trans message="Create" />
         </Button>

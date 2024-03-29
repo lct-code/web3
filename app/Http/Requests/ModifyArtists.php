@@ -1,19 +1,13 @@
 <?php namespace App\Http\Requests;
 
 use Common\Core\BaseFormRequest;
-use Illuminate\Validation\Rule;
 
 class ModifyArtists extends BaseFormRequest
 {
     public function rules(): array
     {
-        $artist = $this->route('artist');
-
         $rules = [
-            'name' => [
-                'required', 'string', 'min:1', 'max:255',
-                Rule::unique('artists')->ignore($artist)
-            ],
+            'name' => ['required', 'string', 'min:1', 'max:255'],
             'country' => 'nullable|string|min:2|max:100',
             'city' => 'nullable|string|min:2|max:100',
             'spotify_popularity' => 'integer|min:1|max:100|nullable',
@@ -37,7 +31,8 @@ class ModifyArtists extends BaseFormRequest
                 'albums.*.tracks.*.number' => 'required|integer|min:1',
                 'albums.*.tracks.*.duration' => 'required|integer|min:1',
                 'albums.*.tracks.*.artists' => 'string|nullable',
-                'albums.*.tracks.*.spotify_popularity' => 'integer|min:1|max:100',
+                'albums.*.tracks.*.spotify_popularity' =>
+                    'integer|min:1|max:100',
                 'albums.*.tracks.*.album_id' => 'integer|min:1',
                 'albums.*.tracks.*.src' => 'string|min:1|max:255',
             ]);

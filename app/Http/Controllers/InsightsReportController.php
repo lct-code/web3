@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\BuildInsightsReport;
+use App\Services\BuildInsightsReport;
 use Common\Core\BaseController;
 
 class InsightsReportController extends BaseController
@@ -15,9 +15,7 @@ class InsightsReportController extends BaseController
 
     public function __invoke()
     {
-        $report = app(BuildInsightsReport::class)->execute(
-            request()->all(),
-        );
+        $report = app(BuildInsightsReport::class)->execute(request()->all());
 
         return $this->success(['report' => $report]);
     }

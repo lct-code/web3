@@ -53,7 +53,7 @@ export function UpdateTagDialog({tag}: UpdateTagDialogProps) {
         </Button>
         <Button
           form={formId}
-          disabled={updateTag.isLoading}
+          disabled={updateTag.isPending}
           variant="flat"
           color="primary"
           type="submit"

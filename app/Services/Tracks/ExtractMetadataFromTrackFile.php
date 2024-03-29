@@ -2,7 +2,7 @@
 
 namespace App\Services\Tracks;
 
-use App\Artist;
+use App\Models\Artist;
 use Carbon\Carbon;
 use Common\Files\Actions\CreateFileEntry;
 use Common\Files\Actions\StoreFile;

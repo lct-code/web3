@@ -25,7 +25,7 @@ import {TrackImage} from '@app/web-player/tracks/track-image/track-image';
 import {AlbumImage} from '@app/web-player/albums/album-image/album-image';
 import {useSettings} from '@common/core/settings/use-settings';
 import {FormattedNumber} from '@common/i18n/formatted-number';
-import {TruncatedDescription} from '@app/web-player/tracks/truncated-description';
+import {TruncatedDescription} from '@common/ui/truncated-description';
 import {Waveform} from '@app/web-player/tracks/waveform/waveform';
 import {CommentBarContextProvider} from '@app/web-player/tracks/waveform/comment-bar-context';
 import {CommentBarNewCommentForm} from '@app/web-player/tracks/waveform/comment-bar-new-comment-form';
@@ -38,19 +38,19 @@ import {ChipList} from '@common/ui/forms/input-field/chip-field/chip-list';
 import {Link} from 'react-router-dom';
 import {FocusScope} from '@react-aria/focus';
 import {trackIsLocallyUploaded} from '@app/web-player/tracks/utils/track-is-locally-uploaded';
-import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 import {AdHost} from '@common/admin/ads/ad-host';
 import {useCommentPermissions} from '@app/web-player/tracks/hooks/use-comment-permissions';
+import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 
 export function TrackPage() {
   const {canView: showComments, canCreate: allowCommenting} =
     useCommentPermissions();
-  const query = useTrack({autoUpdate: true});
+  const query = useTrack({loader: 'trackPage'});
   const {canEdit} = useTrackPermissions([query.data?.track]);
 
   if (query.data) {
     return (
-      <Fragment>
+      <div>
         <CommentBarContextProvider>
           <PageMetaTags query={query} />
           <AdHost slot="general_top" className="mb-44" />
@@ -75,7 +75,7 @@ export function TrackPage() {
         ) : null}
         <TruncatedDescription
           description={query.data.track.description}
-          className="text-sm mt-24"
+          className="mt-24 text-sm"
         />
         {showComments ? (
           <CommentList
@@ -88,11 +88,17 @@ export function TrackPage() {
           <AlbumTrackTable album={query.data.track.album} />
         )}
         <AdHost slot="general_bottom" className="mt-44" />
-      </Fragment>
+      </div>
     );
   }
 
-  return <PageStatus query={query} loaderClassName="absolute inset-0 m-auto" />;
+  return (
+    <PageStatus
+      query={query}
+      loaderIsScreen={false}
+      loaderClassName="absolute inset-0 m-auto"
+    />
+  );
 }
 
 interface AlbumTrackTableProps {
@@ -100,11 +106,11 @@ interface AlbumTrackTableProps {
 }
 function AlbumTrackTable({album}: AlbumTrackTableProps) {
   const {data, sortDescriptor, onSortChange} = useSortableTableData(
-    album.tracks
+    album.tracks,
   );
   return (
     <div className="mt-44">
-      <div className="flex items-center gap-16 bg-hover rounded overflow-hidden mb-14">
+      <div className="mb-14 flex items-center gap-16 overflow-hidden rounded bg-hover">
         <AlbumImage
           album={album}
           className="flex-shrink-0 rounded"
@@ -114,7 +120,7 @@ function AlbumTrackTable({album}: AlbumTrackTableProps) {
           <div className="text-sm">
             <Trans message="From the album" />
           </div>
-          <div className="font-semibold text-sm">{album.name}</div>
+          <div className="text-sm font-semibold">{album.name}</div>
         </div>
       </div>
       <TrackTable
@@ -208,7 +214,11 @@ function TrackPageHeader({track}: TrackPageHeaderProps) {
             />
           </TrackActionsBar>
         }
-        footer={showWave ? <Waveform track={track} /> : undefined}
+        footer={
+          showWave ? (
+            <Waveform track={track} className="max-md:hidden" />
+          ) : undefined
+        }
       />
     </Fragment>
   );

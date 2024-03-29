@@ -2,6 +2,8 @@ import {useContext, useMemo} from 'react';
 import {PlayerStoreContext} from '@common/player/player-context';
 import {MediaItem} from '@common/player/media-item';
 
+export type PlayerActions = ReturnType<typeof usePlayerActions>;
+
 export function usePlayerActions() {
   const store = useContext(PlayerStoreContext);
 
@@ -40,6 +42,7 @@ export function usePlayerActions() {
       exitPip: s.exitPip,
       setTextTrackVisibility: s.setTextTrackVisibility,
       setCurrentTextTrack: s.setCurrentTextTrack,
+      setCurrentAudioTrack: s.setCurrentAudioTrack,
       setIsSeeking: s.setIsSeeking,
       setControlsVisible: s.setControlsVisible,
       cue: s.cue,

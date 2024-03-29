@@ -2,12 +2,9 @@
 
 namespace Common\Notifications;
 
-use App\User;
-use Common\Settings\Settings;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Arr;
 
 class ErrorNotification extends Notification

@@ -18,21 +18,26 @@ class EnsureFrontendRequestsAreStateful extends LaravelMiddleware
             return false;
         }
 
-        $domain = Str::replaceFirst('https://', '', $domain);
-        $domain = Str::replaceFirst('http://', '', $domain);
-        $domain = Str::replaceFirst('www.', '', $domain);
-        $domain = Str::endsWith($domain, '/') ? $domain : "{$domain}/";
-
-        $stateful = array_filter(config('sanctum.stateful', []));
-
         // make sure api calls from api docs page are not considered stateful to avoid 419 errors on POST requests
-        if (Str::contains($domain, '/api-docs/')) {
+        if (Str::contains($domain, '/api-docs')) {
             return false;
         }
 
+        $domain = parse_url($domain, PHP_URL_HOST);
+        $domain = Str::replaceFirst('www.', '', $domain);
+        $domain = Str::endsWith($domain, '/') ? $domain : "{$domain}/";
+
+        $stateful = [
+            ...array_filter(config('sanctum.stateful', [])),
+            parse_url(config('app.url'), PHP_URL_HOST),
+        ];
+
         return Str::is(
             Collection::make($stateful)
-                ->map(fn($uri) => trim($uri) . '/*')
+                ->map(
+                    fn($uri) => Str::replaceFirst('www.', '', trim($uri)) .
+                        '/*',
+                )
                 ->all(),
             $domain,
         );

@@ -11,13 +11,15 @@ import {PowerPointFileIcon} from './icons/power-point-file-icon';
 import {WordFileIcon} from './icons/word-file-icon';
 import {SpreadsheetFileIcon} from './icons/spreadsheet-file-icon';
 import {SharedFolderFileIcon} from './icons/shared-folder-file-icon';
+import {IconSize} from '@common/icons/svg-icon';
 
 interface Props {
   type?: string;
   mime?: string | null;
   className?: string;
+  size?: IconSize;
 }
-export function FileTypeIcon({type, mime, className}: Props) {
+export function FileTypeIcon({type, mime, className, size}: Props) {
   if (!type && mime) {
     type = mime.split('/')[0];
   }
@@ -25,6 +27,7 @@ export function FileTypeIcon({type, mime, className}: Props) {
   const Icon = FileTypeIcons[type] || FileTypeIcons.default;
   return (
     <Icon
+      size={size}
       className={clsx(className, `${type}-file-color`)}
       viewBox="0 0 64 64"
     />

@@ -27,6 +27,7 @@ return new class extends Migration {
         $this->migrateThemes();
         $this->migrateAds();
         $this->migrateGenreImages();
+        $this->migrateLogos();
 
         Setting::where('name', 'homepage.type')
             ->where('value', 'Channel')
@@ -35,7 +36,10 @@ return new class extends Migration {
 
     protected function migrateGenreImages()
     {
-        if (Schema::hasTable('genres')) {
+        if (
+            Schema::hasTable('genres') &&
+            Schema::hasColumn('genres', 'image')
+        ) {
             DB::table('genres')->update([
                 'image' => DB::raw(
                     'REPLACE(image, "client/assets/images/", "images/")',
@@ -46,21 +50,54 @@ return new class extends Migration {
 
     protected function migrateLandingPage()
     {
+        $landing = Setting::where('name', 'landing.appearance')->first();
+        if ($landing) {
+            Setting::insert([
+                'name' => 'homepage.appearance',
+                'value' => $landing['value'],
+            ]);
+            Setting::where('name', 'landing.appearance')->delete();
+        }
+
         $homepage = Setting::where('name', 'homepage.appearance')->first();
         if (!$homepage) {
             return;
         }
 
-        $value = $homepage['value'];
+        $value = json_encode($homepage['value']);
         $value = str_replace('client\/assets\/images\/', 'images\/', $value);
         $value = str_replace('client/assets/images/', 'images/', $value);
         $value = str_replace('landing-bg.svg', 'landing-bg.jpg', $value);
+        $value = str_replace(
+            'images/landing.jpg',
+            'images/landing/landing.jpg',
+            $value,
+        );
+        $value = str_replace(
+            'headerOverlayColor":',
+            'headerOverlayColor1":',
+            $value,
+        );
 
         foreach ($this->svgToPrefix as $svg) {
             $value = str_replace($svg, "images/landing/$svg", $value);
         }
 
-        if ( ! isset($home))
+        // migrate cta actions
+        if (isset($value['actions']['cta1']) && is_string($value['actions']['cta1'])) {
+            $value['actions']['cta1'] = [
+                'type' => 'route',
+                'label' => $value['actions']['cta1'],
+                'action' => '/login'
+            ];
+        }
+        if (isset($value['actions']['cta2']) && is_string($value['actions']['cta2'])) {
+            $value['actions']['cta2'] = [
+                'type' => 'link',
+                'label' => $value['actions']['cta2'],
+                'action' => '#secondary-features'
+            ];
+        }
 
         Setting::where('name', 'homepage.appearance')->update([
             'value' => $value,
@@ -74,7 +111,7 @@ return new class extends Migration {
             return;
         }
 
-        $menus = json_decode($menus['value'], true);
+        $menus = $menus['value'];
 
         // convert menus "position" string to "positions" array
         foreach ($menus as $menuKey => $menu) {
@@ -100,6 +137,46 @@ return new class extends Migration {
 
                 if (!isset($item['id'])) {
                     $menus[$menuKey]['items'][$itemKey]['id'] = Str::random(6);
+                }
+
+                if ($item['action'] === '/browse?type=movie') {
+                    $menus[$menuKey]['items'][$itemKey]['action'] = '/movies';
+                }
+
+                if ($item['action'] === '/browse?type=series') {
+                    $menus[$menuKey]['items'][$itemKey]['action'] = '/series';
+                }
+
+                if ($item['action'] === '/news') {
+                    $menus[$menuKey]['items'][$itemKey]['action'] =
+                        '/latest-news';
+                }
+
+                if ($item['action'] === '/help-center/tickets') {
+                    $menus[$menuKey]['items'][$itemKey]['action'] =
+                        '/hc/tickets';
+                    $menus[$menuKey]['items'][$itemKey]['roles'] = [2];
+                }
+
+                if ($item['action'] === '/mailbox/tickets') {
+                    $menus[$menuKey]['items'][$itemKey]['action'] =
+                        '/agent/tickets';
+                    $menus[$menuKey]['items'][$itemKey]['roles'] = [3];
+                }
+
+                if (
+                    isset($item['label']) &&
+                    $item['label'] === 'Agent mailbox'
+                ) {
+                    $menus[$menuKey]['items'][$itemKey]['action'] =
+                        '/agent/tickets';
+                    $menus[$menuKey]['items'][$itemKey]['roles'] = [3];
+                }
+
+                if (isset($item['label']) && $item['label'] === 'My tickets') {
+                    $menus[$menuKey]['items'][$itemKey]['action'] =
+                        '/hc/tickets';
+                    $menus[$menuKey]['items'][$itemKey]['roles'] = [2];
                 }
 
                 // migrate icons to svg path config from simple string
@@ -389,7 +466,7 @@ return new class extends Migration {
     {
         CssTheme::all()->each(function (CssTheme $theme) {
             $newColors = [];
-            $oldColors = $theme->colors;
+            $oldColors = json_decode($theme->getRawOriginal('colors'), true);
             $defaultColors = $theme->is_dark
                 ? config('common.themes.dark')
                 : config('common.themes.light');
@@ -536,6 +613,27 @@ return new class extends Migration {
                 $setting->save();
             }
         });
+    }
+
+    protected function migrateLogos(): void
+    {
+        $isSvg = file_exists(public_path('images/logo-light.svg'));
+
+        Setting::where('name', 'branding.logo_dark')
+            ->where('value', 'client/assets/images/logo-dark.png')
+            ->update([
+                'value' => $isSvg
+                    ? 'images/logo-dark.svg'
+                    : 'images/logo-dark.png',
+            ]);
+
+        Setting::where('name', 'branding.logo_light')
+            ->where('value', 'client/assets/images/logo-light.png')
+            ->update([
+                'value' => $isSvg
+                    ? 'images/logo-light.svg'
+                    : 'images/logo-light.png',
+            ]);
     }
 
     public function down()

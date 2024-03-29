@@ -44,7 +44,7 @@ export function Waveform({track, queue, className}: WaveformProps) {
           }
         });
       },
-      {root: document.body}
+      {root: document.body},
     );
     if (ref.current) {
       observer.observe(ref.current);
@@ -58,7 +58,7 @@ export function Waveform({track, queue, className}: WaveformProps) {
       drawWaveform(
         data.waveData,
         progressCanvasRef.current,
-        themeValueToHex(themeSelector.selectedTheme.colors['--be-primary'])
+        themeValueToHex(themeSelector.selectedTheme.values['--be-primary']),
       );
       setIsVisible(true);
     }
@@ -83,7 +83,7 @@ export function Waveform({track, queue, className}: WaveformProps) {
           className={clsx(
             'relative isolate h-70 cursor-pointer overflow-hidden transition-opacity duration-200 ease-in',
             isVisible ? 'opacity-100' : 'opacity-0',
-            className
+            className,
           )}
         >
           <output
@@ -100,7 +100,7 @@ export function Waveform({track, queue, className}: WaveformProps) {
               height={WAVE_HEIGHT + 25}
             />
             <div
-              className="absolute top-0 left-0 z-20 overflow-hidden w-0"
+              className="absolute left-0 top-0 z-20 w-0 overflow-hidden"
               style={{width: `${getThumbPercent(0) * 100}%`}}
             >
               <canvas

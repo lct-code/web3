@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Artist;
+use App\Models\Artist;
 use Common\Core\BaseController;
 
 class LandingPageController extends BaseController
@@ -13,11 +13,6 @@ class LandingPageController extends BaseController
             ->take(8)
             ->get();
 
-        $config = [
-            'prerender.view' => 'home.show',
-            'prerender.config' => 'home.show',
-        ];
-
-        return $this->success(['artists' => $artists], 200, $config);
+        return $this->success(['artists' => $artists]);
     }
 }

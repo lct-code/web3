@@ -2,7 +2,7 @@ import {Track} from '@app/web-player/tracks/track';
 import {Table, TableProps} from '@common/ui/tables/table';
 import {ColumnConfig} from '@common/datatable/column-config';
 import {Trans} from '@common/i18n/trans';
-import React, {ReactElement, useMemo} from 'react';
+import React, {useMemo} from 'react';
 import {AlbumLink} from '@app/web-player/albums/album-link';
 import {ScheduleIcon} from '@common/icons/material/Schedule';
 import {FormattedDuration} from '@common/i18n/formatted-duration';
@@ -19,10 +19,10 @@ import {TrendingUpIcon} from '@common/icons/material/TrendingUp';
 import {FormattedRelativeTime} from '@common/i18n/formatted-relative-time';
 import {trackToMediaItem} from '@app/web-player/tracks/utils/track-to-media-item';
 import {usePlayerActions} from '@common/player/hooks/use-player-actions';
-import {useIsMobileMediaQuery} from '@common/utils/hooks/is-mobile-media-query';
 import {TrackOptionsColumn} from '@app/web-player/tracks/track-table/track-options-column';
 import {TableDataItem} from '@common/ui/tables/types/table-data-item';
-import {TrackContextDialogProps} from '@app/web-player/tracks/context-dialog/track-context-dialog';
+import {useIsMobileDevice} from '@common/utils/hooks/is-mobile-device';
+import {Playlist} from '@app/web-player/playlists/playlist';
 
 const columnConfig: ColumnConfig<Track>[] = [
   {
@@ -62,7 +62,7 @@ const columnConfig: ColumnConfig<Track>[] = [
     width: 'flex-2',
     body: (track, row) => {
       if (row.isPlaceholder) {
-        return <Skeleton className="leading-3 max-w-4/5" />;
+        return <Skeleton className="max-w-4/5 leading-3" />;
       }
       return <ArtistLinks artists={track.artists} />;
     },
@@ -74,7 +74,7 @@ const columnConfig: ColumnConfig<Track>[] = [
     header: () => <Trans message="Album" />,
     body: (track, row) => {
       if (row.isPlaceholder) {
-        return <Skeleton className="leading-3 max-w-4/5" />;
+        return <Skeleton className="max-w-4/5 leading-3" />;
       }
       return track.album ? <AlbumLink album={track.album} /> : null;
     },
@@ -87,7 +87,7 @@ const columnConfig: ColumnConfig<Track>[] = [
     header: () => <Trans message="Date added" />,
     body: (track, row) => {
       if (row.isPlaceholder) {
-        return <Skeleton className="leading-3 max-w-4/5" />;
+        return <Skeleton className="max-w-4/5 leading-3" />;
       }
       return <FormattedRelativeTime date={track.added_at} />;
     },
@@ -135,10 +135,10 @@ const columnConfig: ColumnConfig<Track>[] = [
         return <Skeleton className="leading-3" />;
       }
       return (
-        <div className="h-6 w-full relative bg-chip">
+        <div className="relative h-6 w-full bg-chip">
           <div
             style={{width: `${track.popularity || 50}%`}}
-            className="h-full w-0 absolute top-0 left-0 bg-black/30 dark:bg-white/30"
+            className="absolute left-0 top-0 h-full w-0 bg-black/30 dark:bg-white/30"
           />
         </div>
       );
@@ -154,8 +154,8 @@ export interface TrackTableProps {
   hidePopularity?: boolean;
   hideAddedAtColumn?: boolean;
   hideHeaderRow?: boolean;
-  queueGroupId?: string;
-  contextDialog?: ReactElement<TrackContextDialogProps>;
+  queueGroupId?: string | number;
+  playlist?: Playlist;
   renderRowAs?: TableProps<Track>['renderRowAs'];
   sortDescriptor?: TableProps<Track>['sortDescriptor'];
   onSortChange?: TableProps<Track>['onSortChange'];
@@ -172,13 +172,13 @@ export function TrackTable({
   hidePopularity = true,
   hideAddedAtColumn = true,
   queueGroupId,
-  contextDialog,
   renderRowAs,
+  playlist,
   ...tableProps
 }: TrackTableProps) {
   const player = usePlayerActions();
-  const isMobile = useIsMobileMediaQuery();
-  hideHeaderRow = hideHeaderRow || !!isMobile;
+  const isMobile = useIsMobileDevice();
+  hideHeaderRow = hideHeaderRow || isMobile;
 
   const filteredColumns = useMemo(() => {
     return columnConfig.filter(col => {
@@ -199,8 +199,8 @@ export function TrackTable({
   }, [hideArtist, hideAlbum, hidePopularity, hideAddedAtColumn]);
 
   const meta: TrackTableMeta = useMemo(() => {
-    return {queueGroupId: queueGroupId, hideTrackImage};
-  }, [queueGroupId, hideTrackImage]);
+    return {queueGroupId: queueGroupId, hideTrackImage, playlist};
+  }, [queueGroupId, hideTrackImage, playlist]);
 
   return (
     <Table
@@ -212,10 +212,10 @@ export function TrackTable({
       columns={filteredColumns}
       data={tracks as Track[]}
       meta={meta}
-      hideBorder={!!isMobile}
+      hideBorder={isMobile}
       onAction={(track, index) => {
         const newQueue = tracks.map(d =>
-          trackToMediaItem(d as Track, queueGroupId)
+          trackToMediaItem(d as Track, queueGroupId),
         );
         player.overrideQueueAndPlay(newQueue, index);
       }}
@@ -234,7 +234,12 @@ function TrackTableRowWithContextMenu({
     return row;
   }
   return (
-    <DialogTrigger type="popover" triggerOnContextMenu placement="bottom-start">
+    <DialogTrigger
+      type="popover"
+      mobileType="tray"
+      triggerOnContextMenu
+      placement="bottom-start"
+    >
       {row}
       <TableTrackContextDialog />
     </DialogTrigger>

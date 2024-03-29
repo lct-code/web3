@@ -104,7 +104,7 @@ function AssignUserAction({role}: AssignUserActionProps) {
   const addUsers = useAddUsersToRole(role);
   return (
     <DialogTrigger type="modal">
-      <Button variant="flat" color="primary" disabled={addUsers.isLoading}>
+      <Button variant="flat" color="primary" disabled={addUsers.isPending}>
         <Trans message="Assign user" />
       </Button>
       <SelectUserDialog
@@ -113,11 +113,13 @@ function AssignUserAction({role}: AssignUserActionProps) {
             {userIds: [user.id as number]},
             {
               onSuccess: () => {
-                queryClient.invalidateQueries(
-                  DatatableDataQueryKey('users', {roleId: `${role.id}`})
-                );
+                queryClient.invalidateQueries({
+                  queryKey: DatatableDataQueryKey('users', {
+                    roleId: `${role.id}`,
+                  }),
+                });
               },
-            }
+            },
           );
         }}
       />
@@ -141,16 +143,18 @@ export function RemoveUsersAction({role}: RemoveUsersActionProps) {
             {userIds: selectedRows as number[]},
             {
               onSuccess: () => {
-                queryClient.invalidateQueries(
-                  DatatableDataQueryKey('users', {roleId: `${role.id}`})
-                );
+                queryClient.invalidateQueries({
+                  queryKey: DatatableDataQueryKey('users', {
+                    roleId: `${role.id}`,
+                  }),
+                });
               },
-            }
+            },
           );
         }
       }}
     >
-      <Button variant="flat" color="danger" disabled={removeUsers.isLoading}>
+      <Button variant="flat" color="danger" disabled={removeUsers.isPending}>
         <Trans message="Remove users" />
       </Button>
       <ConfirmationDialog

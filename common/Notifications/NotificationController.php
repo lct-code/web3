@@ -3,7 +3,6 @@
 namespace Common\Notifications;
 
 use Auth;
-use Carbon\Carbon;
 use Common\Core\BaseController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,7 +12,7 @@ class NotificationController extends BaseController
 {
     public function __construct(
         protected DatabaseNotification $notification,
-        protected Request $request
+        protected Request $request,
     ) {
         $this->middleware('auth');
     }
@@ -22,28 +21,31 @@ class NotificationController extends BaseController
     {
         $pagination = Auth::user()
             ->notifications()
-            ->paginate($this->request->get('perPage', 10));
+            ->simplePaginate(request('perPage', 10));
 
         return $this->success(['pagination' => $pagination]);
     }
 
     public function markAsRead()
     {
-        $this->validate($this->request, [
-            'ids' => 'required|array',
+        $data = $this->validate($this->request, [
+            'ids' => 'array|required_without:markAllAsUnread',
+            'markAllAsUnread' => 'boolean|required_without:ids',
         ]);
 
-        $now = Carbon::now();
-
-        $this->notification
-            ->whereIn('id', $this->request->get('ids'))
-            ->update(['read_at' => $now]);
+        Auth::user()
+            ->unreadNotifications()
+            ->when(
+                isset($data['ids']),
+                fn($q) => $q->whereIn('id', $data['ids']),
+            )
+            ->update(['read_at' => now()]);
 
         $unreadCount = Auth::user()
             ->unreadNotifications()
             ->count();
 
-        return $this->success(['unreadCount' => $unreadCount, 'date' => $now]);
+        return $this->success(['unreadCount' => $unreadCount, 'date' => now()]);
     }
 
     public function destroy($ids)

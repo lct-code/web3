@@ -10,7 +10,10 @@ interface GetAuthUserPlaylistsResponse extends BackendResponse {
 
 export function usePlaylists(userId: number) {
   const {isLoggedIn, user} = useAuth();
-  return useQuery(['playlists', 'user', userId], () => fetchPlaylists());
+  return useQuery({
+    queryKey: ['playlists', 'user', userId],
+    queryFn: () => fetchPlaylists(),
+  });
 }
 
 function fetchPlaylists(): Promise<GetAuthUserPlaylistsResponse> {

@@ -1,10 +1,9 @@
 <?php namespace App\Services;
 
-use App\Artist;
+use App\Models\Artist;
 use Common\Core\Bootstrap\BaseBootstrapData;
-use DB;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class AppBootstrapData extends BaseBootstrapData
 {
@@ -15,7 +14,6 @@ class AppBootstrapData extends BaseBootstrapData
         if (isset($this->data['user'])) {
             $this->getUserLikes();
             $this->loadUserPlaylists();
-            $this->loadUserFollowedUsers();
             $this->loadManagedArtists();
             $this->loadUserReposts();
         }
@@ -31,28 +29,14 @@ class AppBootstrapData extends BaseBootstrapData
     }
 
     /**
-     * Load users that current user is following.
-     */
-    private function loadUserFollowedUsers()
-    {
-        $this->data['user'] = $this->data['user']->load([
-            'followedUsers' => function (BelongsToMany $q) {
-                return $q->select('users.id', 'users.avatar');
-            },
-        ]);
-    }
-
-    /**
      * Get ids of all tracks in current user's library.
      */
-    private function getUserLikes()
+    private function getUserLikes(): void
     {
         $this->data['likes'] = DB::table('likes')
             ->where('user_id', $this->data['user']['id'])
             ->get(['likeable_id', 'likeable_type'])
-            ->groupBy(function ($likeable) {
-                return $likeable->likeable_type::MODEL_TYPE;
-            })
+            ->groupBy(fn($likeable) => $likeable->likeable_type)
             ->map(function (Collection $likeableGroup) {
                 return $likeableGroup->mapWithKeys(function ($likeable) {
                     return [$likeable->likeable_id => true];
@@ -60,7 +44,7 @@ class AppBootstrapData extends BaseBootstrapData
             });
     }
 
-    private function loadUserPlaylists()
+    private function loadUserPlaylists(): void
     {
         $this->data['playlists'] = $this->data['user']
             ->playlists()
@@ -71,7 +55,7 @@ class AppBootstrapData extends BaseBootstrapData
             ->toArray();
     }
 
-    private function loadManagedArtists()
+    private function loadManagedArtists(): void
     {
         $this->data['user']['artists'] = $this->data['user']
             ->artists()
@@ -83,12 +67,12 @@ class AppBootstrapData extends BaseBootstrapData
             });
     }
 
-    private function loadUserReposts()
+    private function loadUserReposts(): void
     {
         $this->data['reposts'] = DB::table('reposts')
             ->where('user_id', $this->data['user']['id'])
             ->get(['repostable_id', 'repostable_type'])
-            ->groupBy(fn($item) => $item->repostable_type::MODEL_TYPE)
+            ->groupBy(fn($item) => $item->repostable_type)
             ->map(function (Collection $likeableGroup) {
                 return $likeableGroup->mapWithKeys(
                     fn($item) => [$item->repostable_id => true],

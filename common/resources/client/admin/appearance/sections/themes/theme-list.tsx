@@ -46,7 +46,7 @@ export function ThemeList() {
             append({
               id: randomNumber(),
               name: trans(message('New theme')),
-              colors: lightThemeColors,
+              values: lightThemeColors,
             });
             navigate(`${fields.length + 1}`);
           }}

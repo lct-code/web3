@@ -28,7 +28,7 @@ export function LocaleSwitcher() {
       }}
     >
       <Button
-        disabled={changeLocale.isLoading}
+        disabled={changeLocale.isPending}
         className="capitalize"
         startIcon={<LanguageIcon />}
         endIcon={<KeyboardArrowDownIcon />}

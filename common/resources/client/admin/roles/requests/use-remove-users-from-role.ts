@@ -13,19 +13,18 @@ interface Payload {
 }
 
 export function useRemoveUsersFromRole(role: Role) {
-  return useMutation(
-    ({userIds}: Payload) => removeUsersFromRole({userIds, roleId: role.id}),
-    {
-      onSuccess: (response, payload) => {
-        toast(
-          message('Removed [one 1 user|other :count users] from “{role}“', {
-            values: {count: payload.userIds.length, role: role.name},
-          })
-        );
-      },
-      onError: err => showHttpErrorToast(err),
-    }
-  );
+  return useMutation({
+    mutationFn: ({userIds}: Payload) =>
+      removeUsersFromRole({userIds, roleId: role.id}),
+    onSuccess: (response, payload) => {
+      toast(
+        message('Removed [one 1 user|other :count users] from “{role}“', {
+          values: {count: payload.userIds.length, role: role.name},
+        }),
+      );
+    },
+    onError: err => showHttpErrorToast(err),
+  });
 }
 
 function removeUsersFromRole({

@@ -1,8 +1,8 @@
 <?php namespace App\Services\Artists;
 
-use App\Album;
-use App\Artist;
-use App\Genre;
+use App\Models\Album;
+use App\Models\Artist;
+use App\Models\Genre;
 use App\Services\Providers\SaveOrUpdate;
 use App\Services\Providers\Spotify\SpotifyTrackSaver;
 use Carbon\Carbon;

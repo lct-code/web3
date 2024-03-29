@@ -19,9 +19,9 @@ export function LiteralDateSegment({segment, domProps}: LiteralSegmentProps) {
       onPointerDown={e => {
         if (e.pointerType === 'mouse') {
           e.preventDefault();
-          const res = focusManager.focusNext({from: e.target as HTMLElement});
+          const res = focusManager?.focusNext({from: e.target as HTMLElement});
           if (!res) {
-            focusManager.focusPrevious({from: e.target as HTMLElement});
+            focusManager?.focusPrevious({from: e.target as HTMLElement});
           }
         }
       }}

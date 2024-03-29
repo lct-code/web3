@@ -14,37 +14,36 @@
 use App\Http\Controllers\AlbumController;
 use App\Http\Controllers\AppHomeController;
 use App\Http\Controllers\ArtistController;
-use App\Http\Controllers\ChannelController;
-use App\Http\Controllers\GenreController;
+use App\Http\Controllers\FallbackRouteController;
 use App\Http\Controllers\PlaylistController;
 use App\Http\Controllers\Search\SearchController;
 use App\Http\Controllers\TrackController as TrackControllerAlias;
-use Common\Auth\Controllers\UserController;
+use App\Http\Controllers\UserProfileController;
+use Common\Channels\ChannelController;
+use Common\Core\Controllers\HomeController;
 
 //FRONT-END ROUTES THAT NEED TO BE PRE-RENDERED
-Route::get('/', [AppHomeController::class, 'show'])->middleware('prerenderIfCrawler');
-Route::get('artist/{artist}', [ArtistController::class, 'show'])->middleware('prerenderIfCrawler');
-Route::get('artist/{artist}/{name}', [ArtistController::class, 'show'])->middleware('prerenderIfCrawler');
-Route::get('album/{album}/{artistName}/{albumName}', [AlbumController::class, 'show'])->middleware('prerenderIfCrawler');
-Route::get('track/{track}', [TrackControllerAlias::class, 'show'])->middleware('prerenderIfCrawler');
-Route::get('track/{track}/{name}', [TrackControllerAlias::class, 'show'])->middleware('prerenderIfCrawler');
-Route::get('playlist/{id}', [PlaylistController::class, 'show'])->middleware('prerenderIfCrawler');
-Route::get('playlist/{id}/{name}', [PlaylistController::class, 'show'])->middleware('prerenderIfCrawler');
-Route::get('user/{id}', [UserController::class, 'show'])->middleware('prerenderIfCrawler');
-Route::get('user/{id}/{name}', [UserController::class, 'show'])->middleware('prerenderIfCrawler');
-Route::get('genre/{name}', [GenreController::class, 'show'])->middleware('prerenderIfCrawler');
-Route::get('channel/{channel}', [ChannelController::class, 'show'])->middleware('prerenderIfCrawler');
-Route::get('search/{query}', [SearchController::class, 'index'])->middleware('prerenderIfCrawler');
-Route::get('search/{query}/{tab}', [SearchController::class, 'index'])->middleware('prerenderIfCrawler');
+Route::get('/', AppHomeController::class);
+Route::get('artist/{artist}', [ArtistController::class, 'show']);
+Route::get('artist/{artist}/{name}', [ArtistController::class, 'show']);
+Route::get('album/{album}/{artistName}/{albumName}', [AlbumController::class, 'show']);
+Route::get('track/{track}', [TrackControllerAlias::class, 'show']);
+Route::get('track/{track}/{name}', [TrackControllerAlias::class, 'show']);
+Route::get('track/{track}/{name}/embed', [TrackControllerAlias::class, 'show']);
+Route::get('playlist/{id}', [PlaylistController::class, 'show']);
+Route::get('playlist/{id}/{name}', [PlaylistController::class, 'show']);
+Route::get('user/{user}/{name}', [UserProfileController::class, 'show']);
+Route::get('user/{user}/{name}/{tab}', [UserProfileController::class, 'show']);
+Route::get('search/{query}', [SearchController::class, 'index']);
+Route::get('search/{query}/{tab}', [SearchController::class, 'index']);
+Route::get('channels/{channel}', [ChannelController::class, 'show']);
+Route::get('channel/{channel}', [ChannelController::class, 'show']);
 
-// REDIRECT LEGACY ROUTES
-Route::get('genre/{name}', function($genre) {
-    return redirect("channel/genre/$genre", 301);
-});
+Route::get('contact', [HomeController::class, 'render']);
+Route::get('login', [HomeController::class, 'render'])->name('login');
+Route::get('register', [HomeController::class, 'render'])->name('register');
+Route::get('forgot-password', [HomeController::class, 'render']);
+Route::get('pricing', '\Common\Billing\PricingPageController');
 
-Route::get('channels/{name}', function($name) {
-    return redirect("channel/$name", 301);
-});
-
-//CATCH ALL ROUTES AND REDIRECT TO HOME
-Route::get('{all}', [AppHomeController::class, 'show'])->where('all', '.*');
+// CHANNELS and fallback to client rendering if no channel matches
+Route::fallback(FallbackRouteController::class);

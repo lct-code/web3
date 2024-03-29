@@ -22,11 +22,12 @@ function InviteMembers({workspaceId, ...other}: Props): Promise<Response> {
 }
 
 export function useInviteMembers() {
-  return useMutation((props: Props) => InviteMembers(props), {
+  return useMutation({
+    mutationFn: (props: Props) => InviteMembers(props),
     onSuccess: (response, props) => {
-      queryClient.invalidateQueries(
-        WorkspaceQueryKeys.workspaceWithMembers(props.workspaceId)
-      );
+      queryClient.invalidateQueries({
+        queryKey: WorkspaceQueryKeys.workspaceWithMembers(props.workspaceId),
+      });
     },
     onError: err => showHttpErrorToast(err),
   });

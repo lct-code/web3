@@ -17,7 +17,6 @@ use App\Http\Controllers\Artist\ArtistTracksController;
 use App\Http\Controllers\ArtistAlbumsController;
 use App\Http\Controllers\ArtistController;
 use App\Http\Controllers\BackstageRequestController;
-use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\DownloadLocalTrackController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ImportMediaController;
@@ -38,20 +37,22 @@ use App\Http\Controllers\TagMediaController;
 use App\Http\Controllers\TrackController;
 use App\Http\Controllers\TrackFileMetadataController;
 use App\Http\Controllers\TrackPlaysController;
-use App\Http\Controllers\UserFollowersController;
 use App\Http\Controllers\UserLibrary\UserLibraryAlbumsController;
 use App\Http\Controllers\UserLibrary\UserLibraryArtistsController;
 use App\Http\Controllers\UserLibrary\UserLibraryTracksController;
-use App\Http\Controllers\UserProfile\UserFollowedUsersController;
 use App\Http\Controllers\UserProfile\UserPlaylistsController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\WaveController;
 use App\Http\Controllers\YoutubeLogController;
+use Common\Auth\Controllers\UserFollowedUsersController;
+use Common\Auth\Controllers\UserFollowersController;
+use Common\Channels\ChannelController;
 
 Route::group(['prefix' => 'v1', 'middleware' => ['optionalAuth:sanctum', 'verified']], function() {
     // SEARCH
     Route::get('search/audio/{trackId}/{artistName}/{trackName}', [SearchController::class, 'searchAudio']);
     Route::get('search', [SearchController::class, 'index']);
+    Route::get('search/model/{modelType}', [SearchController::class, 'searchSingleModelType']);
     Route::get('search/suggestions/artist', [ArtistSearchSuggestionsController::class, 'index']);
     Route::get('search/suggestions/artist/{id}', [ArtistSearchSuggestionsController::class, 'show']);
     Route::get('search/suggestions/album', [AlbumSearchSuggestionsController::class, 'index']);
@@ -59,7 +60,10 @@ Route::group(['prefix' => 'v1', 'middleware' => ['optionalAuth:sanctum', 'verifi
 
     // CHANNELS
     Route::post('channel/{channel}/update-content', [ChannelController::class, 'updateContent']);
-    Route::apiResource('channel', ChannelController::class);
+    Route::get('channel/search-for-addable-content', [ChannelController::class, 'searchForAddableContent']);
+    Route::post('channel/reset-to-default', [ChannelController::class, 'resetToDefault']);
+    Route::apiResource('channel', '\Common\Channels\ChannelController')->except(['destroy']);
+    Route::delete('channel/{ids}', [ChannelController::class, 'destroy']);
 
     // PLAYLISTS
     Route::get('playlists/{id}', [PlaylistController::class, 'show']);
@@ -128,7 +132,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['optionalAuth:sanctum', 'verifi
     Route::get('genres/{name}', [GenreController::class, 'show']);
 
     // USER PROFILE
-    Route::get('users/{user}', [UserProfileController::class, 'show'])->withoutMiddleware('verified');
+    Route::get('user-profile/{user}', [UserProfileController::class, 'show'])->withoutMiddleware('verified');
     Route::get('users/{user}/minutes-left', MinutesLimitController::class);
     Route::get('users/{user}/liked-tracks', [UserLibraryTracksController::class, 'index']);
     Route::get('users/{user}/liked-albums', [UserLibraryAlbumsController::class, 'index']);

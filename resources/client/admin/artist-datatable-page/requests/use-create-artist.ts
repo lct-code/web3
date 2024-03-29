@@ -28,10 +28,13 @@ export interface CreateArtistPayload {
 
 export function useCreateArtist(form: UseFormReturn<CreateArtistPayload>) {
   const {trans} = useTrans();
-  return useMutation((payload: CreateArtistPayload) => createAlbum(payload), {
+  return useMutation({
+    mutationFn: (payload: CreateArtistPayload) => createAlbum(payload),
     onSuccess: () => {
       toast(trans(message('Artist created')));
-      queryClient.invalidateQueries(DatatableDataQueryKey(endpoint));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey(endpoint),
+      });
     },
     onError: err => onFormQueryError(err, form),
   });

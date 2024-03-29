@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\Search;
 
-use App\Album;
+use App\Models\Album;
 use Auth;
 use Common\Core\BaseController;
 use Symfony\Component\HttpFoundation\Response;
 
 class AlbumSearchSuggestionsController extends BaseController
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function show($modelId)
     {
         $this->authorize('index', Album::class);

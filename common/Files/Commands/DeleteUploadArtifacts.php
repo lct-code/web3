@@ -13,36 +13,56 @@ use Str;
 
 class DeleteUploadArtifacts extends Command
 {
-    protected $map = [
+    protected array $map = [
         'branding_media' => [
             'type' => 'settings',
             'keys' => [
                 'branding.logo_light',
-                'branding.logo_dark'
-            ]
+                'branding.logo_dark',
+                'branding.logo_light_mobile',
+                'branding.logo_dark_mobile',
+            ],
         ],
         'homepage_media' => [
             'type' => 'settings',
-            'keys' => [
-                'homepage.appearance',
-            ]
+            'keys' => ['homepage.appearance'],
         ],
         'page_media' => [
             'type' => 'model',
             'table' => 'custom_pages',
-            'column' => 'body'
+            'column' => 'body',
         ],
 
         // mtdb
+        'person-posters' => [
+            'type' => 'model',
+            'table' => 'people',
+            'column' => 'poster',
+        ],
+        'episode-posters' => [
+            'type' => 'model',
+            'table' => 'episodes',
+            'column' => 'poster',
+        ],
+        'title-posters' => [
+            'type' => 'model',
+            'table' => 'titles',
+            'column' => 'poster',
+        ],
+        'title-backdrops' => [
+            'type' => 'model',
+            'table' => 'titles',
+            'column' => 'backdrop',
+        ],
         'title-videos' => [
             'type' => 'model',
             'table' => 'videos',
-            'column' => 'url'
+            'column' => 'src',
         ],
-        'media-images/videos' => [
+        'video-thumbnails' => [
             'type' => 'model',
             'table' => 'videos',
-            'column' => 'thumbnail'
+            'column' => 'thumbnail',
         ],
 
         // bemusic
@@ -83,6 +103,11 @@ class DeleteUploadArtifacts extends Command
             'table' => 'replies',
             'column' => 'body',
         ],
+        'category_images' => [
+            'type' => 'model',
+            'table' => 'categories',
+            'column' => 'image',
+        ],
         'article_images' => [
             'type' => 'model',
             'table' => 'articles',
@@ -94,7 +119,7 @@ class DeleteUploadArtifacts extends Command
             'type' => 'model',
             'table' => 'link_overlays',
             'column' => 'colors',
-        ]
+        ],
     ];
 
     /**
@@ -115,9 +140,6 @@ class DeleteUploadArtifacts extends Command
         parent::__construct();
     }
 
-    /**
-     * @return mixed
-     */
     public function handle()
     {
         $storage = Storage::disk('public');
@@ -125,13 +147,12 @@ class DeleteUploadArtifacts extends Command
         foreach ($this->map as $folder => $config) {
             if ($storage->exists($folder)) {
                 $fileNames = collect($storage->allFiles($folder))
-                    ->filter(function($path) use($config) {
-                        return $this->shouldDelete($path, $config);
-                    })->map(function($path) {
-                        return basename($path);
-                    });
+                    ->filter(fn($path) => $this->shouldDelete($path, $config))
+                    ->map(fn($path) => basename($path));
                 $count += $fileNames->count();
-                $entryIds = FileEntry::whereIn('file_name', $fileNames)->pluck('id');
+                $entryIds = FileEntry::whereIn('file_name', $fileNames)->pluck(
+                    'id',
+                );
                 app(PermanentlyDeleteEntries::class)->execute($entryIds);
             }
         }
@@ -139,26 +160,25 @@ class DeleteUploadArtifacts extends Command
         $this->info("Deleted $count unused files.");
     }
 
-    /**
-     * @param string $path
-     * @param array $config
-     * @return boolean
-     */
-    protected function shouldDelete($path, $config)
+    protected function shouldDelete(string $path, array $config): bool
     {
         if ($config['type'] === 'settings') {
-            return collect($config['keys'])->map(function($key) {
-                return app(Settings::class)->get($key);
-            })->filter(function($configValue) use($path) {
-                return Str::contains($configValue, basename($path));
-            })->isEmpty();
-        } else if ($config['type'] === 'model') {
+            return collect($config['keys'])
+                ->map(fn($key) => app(Settings::class)->get($key))
+                ->filter(
+                    fn($configValue) => Str::contains(
+                        $configValue,
+                        basename($path),
+                    ),
+                )
+                ->isEmpty();
+        } elseif ($config['type'] === 'model') {
             if (Schema::hasTable($config['table'])) {
                 $fileName = basename($path);
                 return DB::table($config['table'])
-                    ->whereNotNull($config['column'])
-                    ->where($config['column'], 'like', "%$fileName%")
-                    ->count() === 0;
+                        ->whereNotNull($config['column'])
+                        ->where($config['column'], 'like', "%$fileName%")
+                        ->count() === 0;
             }
         }
     }

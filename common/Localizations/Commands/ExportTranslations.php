@@ -1,6 +1,6 @@
 <?php namespace Common\Localizations\Commands;
 
-use App\User;
+use App\Models\User;
 use Common\Auth\Permissions\Permission;
 use Common\Core\Values\ValueLists;
 use Error;

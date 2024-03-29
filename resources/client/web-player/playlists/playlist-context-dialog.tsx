@@ -19,7 +19,7 @@ import {usePlaylistPermissions} from '@app/web-player/playlists/hooks/use-playli
 import {PlaylistImage} from '@app/web-player/playlists/playlist-image';
 import React, {Fragment, useCallback} from 'react';
 import {useIsFollowingPlaylist} from '@app/web-player/playlists/hooks/use-is-following-playlist';
-import {openGlobalDialog} from '@app/web-player/state/global-dialog-store';
+import {openDialog} from '@common/ui/overlays/store/dialog-store';
 import {UpdatePlaylistDialog} from '@app/web-player/playlists/crupdate-dialog/update-playlist-dialog';
 import {useUpdatePlaylist} from '@app/web-player/playlists/requests/use-update-playlist';
 import {CheckIcon} from '@common/icons/material/Check';
@@ -37,7 +37,7 @@ interface PlaylistContextDialogProps {
 export function PlaylistContextDialog({playlist}: PlaylistContextDialogProps) {
   const {close: closeMenu} = useDialogContext();
   const [, copyAlbumLink] = useCopyClipboard(
-    getPlaylistLink(playlist, {absolute: true})
+    getPlaylistLink(playlist, {absolute: true}),
   );
   const {canEdit} = usePlaylistPermissions(playlist);
 
@@ -70,7 +70,7 @@ export function PlaylistContextDialog({playlist}: PlaylistContextDialogProps) {
         <ContextMenuButton
           onClick={() => {
             closeMenu();
-            openGlobalDialog(UpdatePlaylistDialog, {playlist});
+            openDialog(UpdatePlaylistDialog, {playlist});
           }}
         >
           <Trans message="Edit" />
@@ -137,7 +137,7 @@ function TogglePublicButton({playlist}: FollowButtonsProps) {
 
   return (
     <ContextMenuButton
-      disabled={updatePlaylist.isLoading}
+      disabled={updatePlaylist.isPending}
       onClick={() => togglePublic()}
     >
       {playlist.public ? (
@@ -165,7 +165,7 @@ function ToggleCollaborativeButton({playlist}: FollowButtonsProps) {
 
   return (
     <ContextMenuButton
-      disabled={updatePlaylist.isLoading}
+      disabled={updatePlaylist.isPending}
       startIcon={playlist.collaborative ? <CheckIcon /> : undefined}
       onClick={() => toggleCollaborative()}
     >
@@ -185,10 +185,10 @@ function DeleteButton({playlist}: FollowButtonsProps) {
 
   return (
     <ContextMenuButton
-      disabled={deletePlaylist.isLoading}
+      disabled={deletePlaylist.isPending}
       onClick={() => {
         closeMenu();
-        openGlobalDialog(ConfirmationDialog, {
+        openDialog(ConfirmationDialog, {
           isDanger: true,
           title: <Trans message="Delete playlist" />,
           body: (

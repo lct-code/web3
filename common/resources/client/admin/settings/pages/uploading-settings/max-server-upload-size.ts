@@ -1,6 +1,6 @@
 import {useQuery} from '@tanstack/react-query';
-import {BackendResponse} from '../../../../http/backend-response/backend-response';
-import {apiClient} from '../../../../http/query-client';
+import {BackendResponse} from '@common/http/backend-response/backend-response';
+import {apiClient} from '@common/http/query-client';
 
 export interface FetchMaxServerUploadSizeResponse extends BackendResponse {
   maxSize: string;
@@ -13,5 +13,8 @@ function fetchMaxServerUploadSize(): Promise<FetchMaxServerUploadSizeResponse> {
 }
 
 export function useMaxServerUploadSize() {
-  return useQuery(['MaxServerUploadSize'], () => fetchMaxServerUploadSize());
+  return useQuery({
+    queryKey: ['MaxServerUploadSize'],
+    queryFn: () => fetchMaxServerUploadSize(),
+  });
 }

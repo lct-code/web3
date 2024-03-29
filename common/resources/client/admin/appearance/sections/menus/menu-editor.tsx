@@ -31,7 +31,7 @@ import {FormChipField} from '@common/ui/forms/input-field/chip-field/form-chip-f
 import {
   useSortable,
   UseSortableProps,
-} from '@common/ui/interactions/dnd/use-sortable';
+} from '@common/ui/interactions/dnd/sortable/use-sortable';
 import {IconButton} from '@common/ui/buttons/icon-button';
 import {createSvgIconFromTree} from '@common/icons/create-svg-icon';
 import {useSettings} from '@common/core/settings/use-settings';
@@ -68,7 +68,7 @@ function MenuEditorSection({formPath}: MenuEditorFormProps) {
     site: {has_mobile_app},
   } = useSettings();
   const menuSectionConfig = useAppearanceStore(
-    s => s.config?.sections.menus.config
+    s => s.config?.sections.menus.config,
   ) as MenuSectionConfig;
 
   const menuPositions = useMemo(() => {
@@ -93,7 +93,7 @@ function MenuEditorSection({formPath}: MenuEditorFormProps) {
 
   return (
     <Fragment>
-      <div className="mb-30 pb-30 border-b">
+      <div className="mb-30 border-b pb-30">
         <FormTextField
           name={`${formPath}.name`}
           label={<Trans message="Menu name" />}
@@ -136,7 +136,7 @@ function MenuItemsManager({fieldArray: {append, fields, move}}: ItemListProps) {
 
   return (
     <Fragment>
-      <div className="flex items-center gap-16 justify-between flex-shrink-0">
+      <div className="flex flex-shrink-0 items-center justify-between gap-16">
         <Trans message="Menu items" />
         <DialogTrigger
           type="popover"
@@ -250,12 +250,12 @@ function MenuListItem({item, items, index, onSortEnd}: MenuListItemProps) {
     type: 'menuEditorSortable',
     ref,
     onSortEnd,
-    previewVariant: 'liveSort',
+    strategy: 'liveSort',
   });
 
   const Icon = item.icon && createSvgIconFromTree(item.icon);
   const iconOnlyLabel = (
-    <div className="text-muted flex items-center gap-4 text-xs">
+    <div className="flex items-center gap-4 text-xs text-muted">
       {Icon && <Icon size="sm" />}
       (<Trans message="No label..." />)
     </div>

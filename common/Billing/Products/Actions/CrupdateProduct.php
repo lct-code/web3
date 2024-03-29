@@ -38,8 +38,11 @@ class CrupdateProduct
         $product = $product->fill($newData);
         $product->save();
 
-        if ($permissions = Arr::get($data, 'permissions')) {
-            $this->syncPermissions($product, $permissions);
+        if (
+            array_key_exists('permissions', $data) &&
+            is_array($data['permissions'])
+        ) {
+            $this->syncPermissions($product, $data['permissions']);
         }
 
         $prices = Arr::get($data, 'prices') ?? [];

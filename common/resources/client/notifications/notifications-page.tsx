@@ -9,17 +9,24 @@ import {useAuth} from '../auth/use-auth';
 import {Button} from '../ui/buttons/button';
 import {DoneAllIcon} from '../icons/material/DoneAll';
 import {StaticPageTitle} from '../seo/static-page-title';
+import {Fragment} from 'react';
+import {Footer} from '@common/ui/footer/footer';
+import {IconButton} from '@common/ui/buttons/icon-button';
+import {Link} from 'react-router-dom';
+import {SettingsIcon} from '@common/icons/material/Settings';
+import {useSettings} from '@common/core/settings/use-settings';
 
 export function NotificationsPage() {
   const {user} = useAuth();
   const {data, isLoading} = useUserNotifications({perPage: 30});
   const hasUnread = !!user?.unread_notifications_count;
   const markAsRead = useMarkNotificationsAsRead();
+  const {notif} = useSettings();
 
   const handleMarkAsRead = () => {
     if (!data) return;
     markAsRead.mutate({
-      ids: data.pagination.data.map(n => n.id),
+      markAllAsUnread: true,
     });
   };
 
@@ -30,7 +37,7 @@ export function NotificationsPage() {
       size="xs"
       startIcon={<DoneAllIcon />}
       onClick={handleMarkAsRead}
-      disabled={markAsRead.isLoading || isLoading}
+      disabled={markAsRead.isPending || isLoading}
       className="ml-auto"
     >
       <Trans message="Mark all as read" />
@@ -38,23 +45,32 @@ export function NotificationsPage() {
   );
 
   return (
-    <div className="flex flex-col h-full">
+    <Fragment>
       <StaticPageTitle>
         <Trans message="Notifications" />
       </StaticPageTitle>
-      <Navbar menuPosition="notifications-page" className="flex-shrink-0" />
-      <div className="overflow-y-auto">
-        <div className="container mx-auto p-16 md:p-24 flex-auto">
-          <div className="flex items-center gap-24 mb-30">
-            <h1 className="text-3xl">
-              <Trans message="Notifications" />
-            </h1>
-            {hasUnread && markAsReadButton}
-          </div>
-          <PageContent />
+      <Navbar menuPosition="notifications-page" />
+      <div className="container mx-auto min-h-[1000px] p-16 md:p-24">
+        <div className="mb-30 flex items-center gap-24">
+          <h1 className="text-3xl">
+            <Trans message="Notifications" />
+          </h1>
+          {hasUnread && markAsReadButton}
+          {notif.subs.integrated && (
+            <IconButton
+              className="ml-auto text-muted"
+              elementType={Link}
+              to="/notifications/settings"
+              target="_blank"
+            >
+              <SettingsIcon />
+            </IconButton>
+          )}
         </div>
+        <PageContent />
       </div>
-    </div>
+      <Footer className="container mx-auto mt-48 p-16 md:p-24" />
+    </Fragment>
   );
 }
 

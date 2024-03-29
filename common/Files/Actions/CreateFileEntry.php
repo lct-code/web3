@@ -2,23 +2,17 @@
 
 namespace Common\Files\Actions;
 
-use App\User;
+use App\Models\User;
 use Common\Files\Events\FileEntryCreated;
 use Common\Files\FileEntry;
 use Common\Files\FileEntryPayload;
-use Common\Workspaces\ActiveWorkspace;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 
 class CreateFileEntry
 {
-    public function __construct(protected FileEntry $entry)
-    {
-    }
-
     public function execute(FileEntryPayload $payload): FileEntry
     {
-        $ownerId = $payload->ownerId;
         $data = [
             'name' => $payload->clientName,
             'file_name' => $payload->filename,
@@ -30,18 +24,14 @@ class CreateFileEntry
             'extension' => $payload->clientExtension,
             'public' => $payload->public,
             'workspace_id' => $payload->workspaceId,
-            'owner_id' => $ownerId,
+            'owner_id' => $payload->ownerId,
         ];
 
         $entries = new Collection();
 
         // uploading a folder
         if ($payload->relativePath && !$payload->public) {
-            $path = $this->createPath(
-                $payload->relativePath,
-                $ownerId,
-                $data['parent_id'],
-            );
+            $path = $this->createPath($payload);
             $parent = $path['allParents']->last();
             if ($path['allParents']->isNotEmpty()) {
                 $entries = $entries->merge($path['allParents']);
@@ -49,7 +39,7 @@ class CreateFileEntry
             }
         }
 
-        $fileEntry = $this->entry->create($data);
+        $fileEntry = FileEntry::create($data);
 
         if (!$payload->public) {
             $fileEntry->generatePath();
@@ -63,13 +53,13 @@ class CreateFileEntry
             })
             ->toArray();
 
-        User::find($ownerId)
+        User::find($payload->ownerId)
             ->entries()
             ->syncWithoutDetaching($entryIds);
 
         if (isset($path['newlyCreated'])) {
             $path['newlyCreated']->each(function (FileEntry $entry) use (
-                $payload
+                $payload,
             ) {
                 // make sure new folder gets attached to all
                 // users who have access to the parent folder
@@ -90,25 +80,21 @@ class CreateFileEntry
         return $fileEntry;
     }
 
-    private function createPath(
-        string $path,
-        int $userId,
-        int $parentId = null
-    ): array {
+    private function createPath(FileEntryPayload $payload): array
+    {
         $newlyCreated = collect();
-        $dirname = dirname($path);
+        $dirname = dirname($payload->relativePath);
         // remove file name from path and split into folder names
         $path = collect(
-            explode('/', $dirname === '.' ? $path : $dirname),
+            explode('/', $dirname === '.' ? $payload->relativePath : $dirname),
         )->filter();
         if ($path->isEmpty()) {
             return $path->toArray();
         }
 
         $allParents = $path->reduce(function ($parents, $name) use (
-            $parentId,
-            $userId,
-            $newlyCreated
+            $newlyCreated,
+            $payload,
         ) {
             if (!$parents) {
                 $parents = collect();
@@ -120,19 +106,18 @@ class CreateFileEntry
                 'name' => $name,
                 // file name is limited to 36 chars in database, make sure we match that if we get very long file names
                 'file_name' => Str::limit($name, 36, ''),
-                'parent_id' => $parent ? $parent->id : $parentId,
-                'workspace_id' => app(ActiveWorkspace::class)->id ?? 0,
+                'parent_id' => $parent ? $parent->id : $payload->parentId,
+                'workspace_id' => $payload->workspaceId ?? 0,
             ];
 
             // check if user already has a folder with that name and parent
-            $folder = $this->entry
-                ->where($values)
-                ->whereUser($userId)
+            $folder = FileEntry::where($values)
+                ->whereUser($payload->ownerId)
                 ->first();
 
             if (!$folder) {
-                $values['owner_id'] = $userId;
-                $folder = $this->entry->create($values);
+                $values['owner_id'] = $payload->ownerId;
+                $folder = FileEntry::create($values);
                 $folder->generatePath();
                 $newlyCreated->push($folder);
             }

@@ -6,7 +6,6 @@ import {Trans} from '../../i18n/trans';
 import {Item} from '../../ui/forms/listbox/item';
 import {Subscription} from '../../billing/subscription';
 import {FormDatePicker} from '../../ui/forms/input-field/date/date-picker/date-picker';
-import {USER_MODEL} from '../../auth/user';
 import {useProducts} from '../../billing/pricing-table/use-products';
 import {FormattedPrice} from '../../i18n/formatted-price';
 import {FormNormalizedModelField} from '../../ui/forms/normalized-model-field';
@@ -25,7 +24,7 @@ export function CrupdateSubscriptionForm({
   // @ts-ignore
   const watchedProductId = form.watch('product_id');
   const selectedProduct = query.data?.products.find(
-    p => p.id === watchedProductId
+    p => p.id === watchedProductId,
   );
 
   return (
@@ -33,9 +32,8 @@ export function CrupdateSubscriptionForm({
       <FormNormalizedModelField
         name="user_id"
         className="mb-20"
-        modelType={USER_MODEL}
+        endpoint="normalized-models/user"
         label={<Trans message="User" />}
-        openMenuOnFocus
       />
       <FormSelect
         name="product_id"

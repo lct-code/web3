@@ -1,5 +1,5 @@
-import {useMutation} from '@tanstack/react-query';
-import {apiClient, queryClient} from '@common/http/query-client';
+import {useMutation, useQueryClient} from '@tanstack/react-query';
+import {apiClient} from '@common/http/query-client';
 import {useTrans} from '@common/i18n/use-trans';
 import {BackendResponse} from '@common/http/backend-response/backend-response';
 import {showHttpErrorToast} from '@common/utils/http/show-http-error-toast';
@@ -19,16 +19,20 @@ interface Payload {
 
 export function useConnectDomain() {
   const {trans} = useTrans();
-  return useMutation((props: Payload) => connectDomain(props), {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (props: Payload) => connectDomain(props),
     onSuccess: response => {
       toast.positive(
         trans(
           message('“:domain” connected', {
             values: {domain: response.domain.host},
-          })
-        )
+          }),
+        ),
       );
-      queryClient.invalidateQueries(DatatableDataQueryKey('custom-domain'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('custom-domain'),
+      });
     },
     onError: err => showHttpErrorToast(err),
   });

@@ -6,12 +6,12 @@ use Common\Files\Events\FileUploaded;
 use Common\Files\FileEntry;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Intervention\Image\Constraint;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class CreateThumbnailForUploadedFile implements ShouldQueue
 {
-    public function handle(FileUploaded $event)
+    public function handle(FileUploaded $event): void
     {
         // only create thumbnail for images over 500KB in size
         if (
@@ -28,27 +28,30 @@ class CreateThumbnailForUploadedFile implements ShouldQueue
         }
     }
 
-    private function maybeCreateThumbnail(FileEntry $entry)
+    private function maybeCreateThumbnail(FileEntry $entry): void
     {
         $this->setMemoryLimit();
         $file = $entry->getDisk()->readStream($entry->getStoragePath());
-        $img = Image::make($file)->orientate();
 
-        $img->fit(350, 250, function (Constraint $constraint) {
-            $constraint->upsize();
-        });
+        $manager = new ImageManager(new Driver());
+        $img = $manager->read($file);
 
-        $img->encode($entry->extension === 'png' ? 'png' : 'jpg', 60);
+        $img->cover(350, 250);
 
-        $entry->getDisk()->put("{$entry->file_name}/thumbnail.jpg", $img, [
-            'mimetype' => $img->mime(),
-            'visibility' => config('common.site.remote_file_visibility'),
-        ]);
+        $encodedImg =
+            $entry->extension === 'png' ? $img->toPng() : $img->toJpeg(60);
+
+        $entry
+            ->getDisk()
+            ->put("{$entry->file_name}/thumbnail.jpg", $encodedImg, [
+                'mimetype' => $encodedImg->mimetype(),
+                'visibility' => config('common.site.remote_file_visibility'),
+            ]);
 
         $entry->fill(['thumbnail' => true])->save();
     }
 
-    private function setMemoryLimit()
+    private function setMemoryLimit(): void
     {
         $new = 512;
         $current = (int) ini_get('memory_limit');

@@ -1,18 +1,17 @@
 <?php namespace App\Http\Controllers;
 
-use App;
-use App\Actions\IncrementModelViews;
-use App\Actions\Track\DeleteTracks;
-use App\Artist;
 use App\Http\Requests\ModifyArtists;
+use App\Models\Artist;
+use App\Models\UserProfile;
 use App\Services\Albums\DeleteAlbums;
+use App\Services\Artists\ArtistLoader;
 use App\Services\Artists\CrupdateArtist;
-use App\Services\Artists\LoadArtist;
 use App\Services\Artists\PaginateArtists;
-use App\UserProfile;
+use App\Services\IncrementModelViews;
+use App\Services\Tracks\DeleteTracks;
 use Common\Core\BaseController;
 use Common\Files\Actions\Deletion\DeleteEntries;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class ArtistController extends BaseController
 {
@@ -20,7 +19,10 @@ class ArtistController extends BaseController
     {
         $this->authorize('index', Artist::class);
 
-        $pagination = app(PaginateArtists::class)->execute(request()->all());
+        $pagination = app(PaginateArtists::class)->execute(
+            request()->all(),
+            Artist::withCount(['albums']),
+        );
 
         $pagination->makeVisible(['updated_at', 'views', 'plays', 'verified']);
 
@@ -31,15 +33,15 @@ class ArtistController extends BaseController
     {
         $this->authorize('show', $artist);
 
-        $response = app(LoadArtist::class)->execute(
-            $artist,
-            request()->all(),
-            request()->has('autoUpdate'),
-        );
+        $loader = request('loader', 'artistPage');
+        $data = (new ArtistLoader())->execute($artist, $loader);
 
-        app(IncrementModelViews::class)->execute($artist->id, 'artist');
+        (new IncrementModelViews())->execute($artist->id, 'artist');
 
-        return $this->success($response);
+        return $this->renderClientOrApi([
+            'pageName' => $loader === 'artistPage' ? 'artist-page' : null,
+            'data' => $data,
+        ]);
     }
 
     public function store(ModifyArtists $request)
@@ -55,10 +57,7 @@ class ArtistController extends BaseController
     {
         $this->authorize('update', $artist);
 
-        $artist = app(CrupdateArtist::class)->execute(
-            $request->all(),
-            $artist,
-        );
+        $artist = app(CrupdateArtist::class)->execute($request->all(), $artist);
 
         return $this->success(['artist' => $artist]);
     }
@@ -69,9 +68,7 @@ class ArtistController extends BaseController
         $this->authorize('destroy', [Artist::class, $artistIds]);
 
         $artists = Artist::whereIn('id', $artistIds)->get();
-        $imagePaths = $artists
-            ->pluck('image_small')
-            ->filter();
+        $imagePaths = $artists->pluck('image_small')->filter();
         app(DeleteEntries::class)->execute([
             'paths' => $imagePaths->toArray(),
         ]);
@@ -93,7 +90,7 @@ class ArtistController extends BaseController
             ->whereIn('artist_id', $artistIds)
             ->delete();
         DB::table('likes')
-            ->where('likeable_type', Artist::class)
+            ->where('likeable_type', Artist::MODEL_TYPE)
             ->whereIn('likeable_id', $artistIds)
             ->delete();
         UserProfile::whereIn('artist_id', $artistIds)->delete();

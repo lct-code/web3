@@ -43,8 +43,6 @@ export function DashboardNavbar({
       className={clsx('dashboard-grid-navbar', className)}
       border="border-b"
       size="sm"
-      color="primary"
-      darkModeColor="bg-alt"
       toggleButton={
         shouldShowToggle ? (
           <IconButton

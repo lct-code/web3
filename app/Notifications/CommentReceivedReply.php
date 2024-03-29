@@ -2,8 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Models\Track;
 use App\Services\UrlGenerator;
-use App\Track;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Str;

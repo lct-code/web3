@@ -2,7 +2,7 @@
 
 namespace Common\Auth\Actions;
 
-use App\User;
+use App\Models\User;
 use Common\Database\Datasource\Datasource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\AbstractPaginator;
@@ -10,7 +10,7 @@ use Illuminate\Support\Arr;
 
 class PaginateUsers
 {
-    public function execute($params): AbstractPaginator
+    public function execute(array $params): AbstractPaginator
     {
         $query = User::with(['roles', 'permissions']);
 
@@ -32,31 +32,29 @@ class PaginateUsers
         }
 
         if ($roleName = Arr::get($params, 'roleName')) {
-            $query->whereHas('roles', function (Builder $q) use ($roleName) {
-                $q->where('roles.name', $roleName);
-            });
+            $query->whereHas(
+                'roles',
+                fn(Builder $q) => $q->where('roles.name', $roleName),
+            );
         }
 
         if ($permission = Arr::get($params, 'permission')) {
             $query
-                ->whereHas('permissions', function (Builder $query) use (
-                    $permission
-                ) {
-                    $query
+                ->whereHas(
+                    'permissions',
+                    fn(Builder $query) => $query
                         ->where('name', $permission)
-                        ->orWhere('name', 'admin');
-                })
-                ->orWhereHas('roles', function (Builder $query) use (
-                    $permission
-                ) {
-                    $query->whereHas('permissions', function (
-                        Builder $query
-                    ) use ($permission) {
-                        $query
+                        ->orWhere('name', 'admin'),
+                )
+                ->orWhereHas(
+                    'roles',
+                    fn(Builder $query) => $query->whereHas(
+                        'permissions',
+                        fn(Builder $query) => $query
                             ->where('name', $permission)
-                            ->orWhere('name', 'admin');
-                    });
-                });
+                            ->orWhere('name', 'admin'),
+                    ),
+                );
         }
 
         return (new Datasource($query, $params))->paginate();

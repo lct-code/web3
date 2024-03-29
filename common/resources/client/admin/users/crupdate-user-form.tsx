@@ -18,6 +18,7 @@ interface Props<T extends FieldValues> {
   onSubmit: SubmitHandler<T>;
   form: UseFormReturn<T>;
   title: ReactNode;
+  subTitle?: ReactNode;
   isLoading: boolean;
   avatarManager: ReactNode;
   resendEmailButton?: ReactNode;
@@ -27,6 +28,7 @@ export function CrupdateUserForm<T extends FieldValues>({
   onSubmit,
   form,
   title,
+  subTitle,
   isLoading,
   avatarManager,
   resendEmailButton,
@@ -40,9 +42,10 @@ export function CrupdateUserForm<T extends FieldValues>({
       onSubmit={onSubmit}
       form={form}
       title={title}
+      subTitle={subTitle}
       isLoading={isLoading}
     >
-      <div className="flex items-start gap-40 md:gap-80 mb-40">
+      <div className="mb-40 flex items-start gap-40 md:gap-80">
         {avatarManager}
         <div className="flex-auto">
           {children}
@@ -58,7 +61,7 @@ export function CrupdateUserForm<T extends FieldValues>({
         </div>
       </div>
 
-      <div className="border-t border-b mb-30 pb-30 pt-30">
+      <div className="mb-30 border-b border-t pb-30 pt-30">
         <FormSwitch
           className={clsx(resendEmailButton && 'mb-30')}
           disabled={!require_email_confirmation}
@@ -104,8 +107,8 @@ export function CrupdateUserForm<T extends FieldValues>({
           </Item>
         )}
       </FormChipField>
-      <div className="mt-30 pt-30 border-t">
-        <div className="text-sm mb-10">
+      <div className="mt-30 border-t pt-30">
+        <div className="mb-10 text-sm">
           <Trans message="Permissions" />
         </div>
         <FormPermissionSelector name="permissions" />

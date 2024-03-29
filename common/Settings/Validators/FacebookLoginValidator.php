@@ -2,13 +2,13 @@
 
 namespace Common\Settings\Validators;
 
-use Config;
-use GuzzleHttp\Exception\ServerException;
-use Socialite;
 use Common\Auth\Oauth;
-use Illuminate\Support\Arr;
 use Common\Core\HttpClient;
+use Config;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
+use Illuminate\Support\Arr;
+use Socialite;
 
 class FacebookLoginValidator implements SettingsValidator
 {
@@ -32,9 +32,9 @@ class FacebookLoginValidator implements SettingsValidator
         ]);
     }
 
-    public function fails($settings)
+    public function fails($values)
     {
-        $this->setConfigDynamically($settings);
+        $this->setConfigDynamically($values);
 
         try {
             Socialite::driver('facebook')->getAccessTokenResponse('foo-bar');

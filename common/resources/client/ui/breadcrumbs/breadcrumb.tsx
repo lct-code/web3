@@ -1,4 +1,10 @@
-import React, {cloneElement, ReactElement, useCallback, useRef} from 'react';
+import React, {
+  cloneElement,
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useRef,
+} from 'react';
 import {
   useLayoutEffect,
   useResizeObserver,
@@ -17,9 +23,7 @@ const MIN_VISIBLE_ITEMS = 1;
 const MAX_VISIBLE_ITEMS = 10;
 
 export interface BreadcrumbsProps {
-  children?:
-    | ReactElement<BreadcrumbItemProps>
-    | ReactElement<BreadcrumbItemProps>[];
+  children?: ReactNode;
   isDisabled?: boolean;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
@@ -43,7 +47,7 @@ export function Breadcrumb(props: BreadcrumbsProps) {
   const childArray: ReactElement<BreadcrumbItemProps>[] = [];
   React.Children.forEach(children, child => {
     if (React.isValidElement(child)) {
-      childArray.push(child);
+      childArray.push(child as ReactElement<BreadcrumbItemProps>);
     }
   });
 
@@ -73,7 +77,7 @@ export function Breadcrumb(props: BreadcrumbsProps) {
       newVisibleItems++;
 
       if (isShowingMenu) {
-        calculatedWidth += listItems.shift()!.offsetWidth;
+        calculatedWidth += listItems.shift()?.offsetWidth ?? 0;
         maxVisibleItems--;
       }
 
@@ -104,7 +108,7 @@ export function Breadcrumb(props: BreadcrumbsProps) {
 
       return Math.max(
         MIN_VISIBLE_ITEMS,
-        Math.min(maxVisibleItems, newVisibleItems)
+        Math.min(maxVisibleItems, newVisibleItems),
       );
     };
 
@@ -184,7 +188,7 @@ export function Breadcrumb(props: BreadcrumbsProps) {
       sizeStyle: style,
       isClickable,
       isDisabled,
-      isLink: isNavigation,
+      isLink: isNavigation && child.key !== 'menu',
     });
   });
 
@@ -192,13 +196,13 @@ export function Breadcrumb(props: BreadcrumbsProps) {
 
   return (
     <Element
-      className={clsx(className, 'min-w-0 w-full')} // prevent flex parent overflow
+      className={clsx(className, 'w-full min-w-0')} // prevent flex parent overflow
       aria-label={trans({message: 'Breadcrumbs'})}
       ref={domRef}
     >
       <ol
         ref={listRef}
-        className={clsx('flex justify-start flex-nowrap', style.minHeight)}
+        className={clsx('flex flex-nowrap justify-start', style.minHeight)}
       >
         {breadcrumbItems}
       </ol>

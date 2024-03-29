@@ -18,20 +18,20 @@ interface Payload {
 
 export function useReorderPlaylistTracks() {
   const {playlistId} = useParams();
-  return useMutation(
-    (payload: Payload) => reorderTracks(playlistId!, payload),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['tracks', 'playlist', +playlistId!]);
-      },
-      onError: err => showHttpErrorToast(err),
-    }
-  );
+  return useMutation({
+    mutationFn: (payload: Payload) => reorderTracks(playlistId!, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['tracks', 'playlist', +playlistId!],
+      });
+    },
+    onError: err => showHttpErrorToast(err),
+  });
 }
 
 function reorderTracks(
   playlistId: number | string,
-  {tracks, oldIndexes, newIndex}: Payload
+  {tracks, oldIndexes, newIndex}: Payload,
 ): Promise<Response> {
   const ids = tracks.map(t => t.id);
   moveMultipleItemsInArray(ids, oldIndexes, newIndex);

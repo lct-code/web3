@@ -31,22 +31,20 @@ export interface UpdateProfilePayload {
 }
 
 export function useUpdateUserProfile(
-  form: UseFormReturn<UpdateProfilePayload>
+  form: UseFormReturn<UpdateProfilePayload>,
 ) {
   const {user} = useAuth();
   const {trans} = useTrans();
-  return useMutation(
-    (payload: UpdateProfilePayload) => updateProfile(payload),
-    {
-      onSuccess: () => {
-        toast(trans(message('Profile updated')));
-        if (user) {
-          queryClient.invalidateQueries(userProfileQueryKey(user.id));
-        }
-      },
-      onError: err => onFormQueryError(err, form),
-    }
-  );
+  return useMutation({
+    mutationFn: (payload: UpdateProfilePayload) => updateProfile(payload),
+    onSuccess: () => {
+      toast(trans(message('Profile updated')));
+      if (user) {
+        queryClient.invalidateQueries({queryKey: userProfileQueryKey(user.id)});
+      }
+    },
+    onError: err => onFormQueryError(err, form),
+  });
 }
 
 function updateProfile(payload: UpdateProfilePayload): Promise<Response> {

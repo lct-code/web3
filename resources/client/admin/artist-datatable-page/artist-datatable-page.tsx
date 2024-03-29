@@ -54,7 +54,6 @@ function Actions() {
             <IconButton
               variant="outline"
               color="primary"
-              radius="rounded"
               className="flex-shrink-0"
               size="sm"
             >

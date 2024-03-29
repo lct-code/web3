@@ -38,7 +38,8 @@ function UploadAvatar({file, url}: Payload, user: User): Promise<Response> {
 }
 
 export function useUploadAvatar({user}: UserProps) {
-  return useMutation((payload: Payload) => UploadAvatar(payload, user), {
+  return useMutation({
+    mutationFn: (payload: Payload) => UploadAvatar(payload, user),
     onSuccess: () => {
       toast(message('Uploaded avatar'));
     },

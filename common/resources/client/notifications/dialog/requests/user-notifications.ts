@@ -1,7 +1,7 @@
 import {useQuery} from '@tanstack/react-query';
-import {PaginatedBackendResponse} from '../../../http/backend-response/pagination-response';
-import {DatabaseNotification} from '../../database-notification';
-import {apiClient} from '../../../http/query-client';
+import {PaginatedBackendResponse} from '@common/http/backend-response/pagination-response';
+import {DatabaseNotification} from '@common/notifications/database-notification';
+import {apiClient} from '@common/http/query-client';
 
 const Endpoint = 'notifications';
 
@@ -15,13 +15,14 @@ interface Payload {
 }
 
 export function useUserNotifications(payload?: Payload) {
-  return useQuery(useUserNotifications.key, () =>
-    fetchUserNotifications(payload)
-  );
+  return useQuery({
+    queryKey: useUserNotifications.key,
+    queryFn: () => fetchUserNotifications(payload),
+  });
 }
 
 function fetchUserNotifications(
-  payload?: Payload
+  payload?: Payload,
 ): Promise<FetchUserNotificationsResponse> {
   return apiClient
     .get(Endpoint, {params: payload})

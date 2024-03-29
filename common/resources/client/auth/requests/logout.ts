@@ -11,33 +11,31 @@ interface Response extends BackendResponse {
   bootstrapData: string;
 }
 
+const appearanceMessage = "Can't logout while in appearance editor.";
+
 export function useLogout() {
   const navigate = useNavigate();
   const {isAppearanceEditorActive} = useAppearanceEditorMode();
   const {setBootstrapData} = useBootstrapData();
-  return useMutation(
-    () => (isAppearanceEditorActive ? noopLogout() : logout()),
-    {
-      onSuccess: response => {
-        // need to update bootstrap data in order for redirect to login page to work
-        setBootstrapData(response.bootstrapData);
-        queryClient.clear();
-        navigate('/login');
+  return useMutation({
+    mutationFn: () => (isAppearanceEditorActive ? noopLogout() : logout()),
+    onSuccess: response => {
+      // need to update bootstrap data in order for redirect to login page to work
+      setBootstrapData(response.bootstrapData);
+      queryClient.clear();
+      navigate('/login');
 
-        // need to clear query client and then set bootstrap data again immediately,
-        // because there's no way to clear everything except one in react query
-        queryClient.clear();
-        setBootstrapData(response.bootstrapData);
-      },
-      onError: err =>
-        showHttpErrorToast(
-          err,
-          isAppearanceEditorActive
-            ? message("Can't logout while in appearance editor.")
-            : undefined
-        ),
-    }
-  );
+      // need to clear query client and then set bootstrap data again immediately,
+      // because there's no way to clear everything except one in react query
+      queryClient.clear();
+      setBootstrapData(response.bootstrapData);
+    },
+    onError: err =>
+      showHttpErrorToast(
+        err,
+        isAppearanceEditorActive ? message(appearanceMessage) : undefined,
+      ),
+  });
 }
 
 function logout(): Promise<Response> {
@@ -45,5 +43,5 @@ function logout(): Promise<Response> {
 }
 
 function noopLogout() {
-  return Promise.reject();
+  return Promise.reject(appearanceMessage);
 }

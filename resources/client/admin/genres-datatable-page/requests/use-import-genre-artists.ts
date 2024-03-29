@@ -18,10 +18,13 @@ interface Payload {
 
 export function useImportGenreArtists() {
   const {trans} = useTrans();
-  return useMutation((props: Payload) => importArtists(props), {
+  return useMutation({
+    mutationFn: (props: Payload) => importArtists(props),
     onSuccess: () => {
       toast(trans(message('Artists imported')));
-      queryClient.invalidateQueries(DatatableDataQueryKey('genres'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('genres'),
+      });
     },
     onError: err => showHttpErrorToast(err),
   });

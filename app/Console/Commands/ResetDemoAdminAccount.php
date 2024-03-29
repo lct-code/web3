@@ -1,55 +1,23 @@
 <?php namespace App\Console\Commands;
 
-use App\Playlist;
-use App\User;
-use Artisan;
+use App\Models\Playlist;
+use App\Models\User;
 use Common\Auth\Permissions\Permission;
 use Common\Localizations\Localization;
-use DB;
-use Hash;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 
 class ResetDemoAdminAccount extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'demo:reset';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Reset admin account';
 
-    /**
-     * @var User
-     */
-    private $user;
-
-    /**
-     * @var Playlist
-     */
-    private $playlist;
-
-    /**
-     * @var Localization
-     */
-    private $localization;
-
     public function __construct(
-        User $user,
-        Playlist $playlist,
-        Localization $localization
+        protected Playlist $playlist,
+        protected Localization $localization,
     ) {
         parent::__construct();
-
-        $this->user = $user;
-        $this->playlist = $playlist;
-        $this->localization = $localization;
     }
 
     public function handle()
@@ -66,7 +34,7 @@ class ResetDemoAdminAccount extends Command
         $admin->username = null;
         $admin->first_name = null;
         $admin->last_name = null;
-        $admin->password = Hash::make('admin');
+        $admin->password = 'admin';
         $admin->permissions()->sync($adminPermission->id);
         $admin->save();
 

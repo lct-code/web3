@@ -15,7 +15,7 @@ export const BillingRoutes = (
     <Route
       path="checkout/*"
       element={
-        <React.Suspense fallback={<FullPageLoader />}>
+        <React.Suspense fallback={<FullPageLoader screen />}>
           <CheckoutRoutes />
         </React.Suspense>
       }
@@ -23,7 +23,7 @@ export const BillingRoutes = (
     <Route
       path="billing/*"
       element={
-        <React.Suspense fallback={<FullPageLoader />}>
+        <React.Suspense fallback={<FullPageLoader screen />}>
           <BillingPageRoutes />
         </React.Suspense>
       }

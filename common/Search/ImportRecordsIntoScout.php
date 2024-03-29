@@ -4,19 +4,12 @@ namespace Common\Search;
 
 use Algolia\AlgoliaSearch\Config\SearchConfig;
 use Algolia\AlgoliaSearch\SearchClient as Algolia;
-use App\User;
-use Common\Billing\Models\Product;
-use Common\Billing\Subscription;
-use Common\Domains\CustomDomain;
-use Common\Files\FileEntry;
-use Common\Pages\CustomPage;
+use App\Models\User;
 use Common\Search\Drivers\Mysql\MysqlFullTextIndexer;
-use Common\Tags\Tag;
-use Common\Workspaces\Workspace;
 use Exception;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Scout\Console\ImportCommand;
-use MeiliSearch\Client;
+use Meilisearch\Client as MeilisearchClient;
 
 class ImportRecordsIntoScout
 {
@@ -24,8 +17,8 @@ class ImportRecordsIntoScout
         string $modelToImport = '*',
         string $driver = null,
     ): void {
-        @ini_set('memory_limit', '-1');
         @set_time_limit(0);
+        @ini_set('memory_limit', '200M');
 
         if ($selectedDriver = $driver) {
             config()->set('scout.driver', $selectedDriver);
@@ -53,25 +46,7 @@ class ImportRecordsIntoScout
     public static function getSearchableModels(): array
     {
         $appSearchableModels = config('searchable_models');
-        $commonSearchableModels = [
-            CustomPage::class,
-            User::class,
-            FileEntry::class,
-            Tag::class,
-        ];
-
-        if (config('common.site.workspaces_integrated')) {
-            $commonSearchableModels[] = Workspace::class;
-        }
-
-        if (config('common.site.billing_integrated')) {
-            $commonSearchableModels[] = Product::class;
-            $commonSearchableModels[] = Subscription::class;
-        }
-
-        if (config('common.site.enable_custom_domains')) {
-            $commonSearchableModels[] = CustomDomain::class;
-        }
+        $commonSearchableModels = [User::class];
 
         return array_merge($appSearchableModels ?? [], $commonSearchableModels);
     }
@@ -101,28 +76,27 @@ class ImportRecordsIntoScout
                 unset($filterableFields[$key]);
             }
 
-            /**
-             * @var Searchable $model
-             */
             $model = new $model();
             $indexName = $model->searchableAs();
             $algolia->initIndex($indexName)->setSettings([
-                'attributesForFaceting' => array_map(function ($field) {
-                    return "filterOnly($field)";
-                }, $filterableFields),
+                'attributesForFaceting' => array_values(
+                    array_map(
+                        fn($field) => "filterOnly($field)",
+                        $filterableFields,
+                    ),
+                ),
             ]);
         }
     }
 
     private function configureMeilisearchIndices(array $models): void
     {
+        $client = app(MeilisearchClient::class);
+
         foreach ($models as $modelName) {
-            /**
-             * @var Searchable $model
-             */
             $model = new $modelName();
             $indexName = $model->searchableAs();
-            $index = app(Client::class)->index($indexName);
+            $index = $client->index($indexName);
 
             if ($modelConfig = config("search.meilisearch.$modelName")) {
                 $index->updateSettings($modelConfig);
@@ -134,19 +108,17 @@ class ImportRecordsIntoScout
             );
             $displayedFields = $searchableFields;
             try {
-                app(Client::class)
-                    ->index($indexName)
-                    ->delete();
+                $client->index($indexName)->delete();
             } catch (Exception $e) {
                 //
             }
-            app(Client::class)
+            $client
                 ->index($indexName)
                 ->updateSearchableAttributes($searchableFields);
-            app(Client::class)
+            $client
                 ->index($indexName)
                 ->updateFilterableAttributes($model::filterableFields());
-            app(Client::class)
+            $client
                 ->index($indexName)
                 ->updateDisplayedAttributes($displayedFields);
         }

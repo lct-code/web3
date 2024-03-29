@@ -8,6 +8,9 @@ interface Props {
   query: UseQueryResult<BackendResponse>;
 }
 export function PageMetaTags({query}: Props) {
+  if (query.data?.set_seo) {
+    return null;
+  }
   return query.data?.seo ? (
     <Helmet tags={query.data.seo} />
   ) : (

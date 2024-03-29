@@ -24,7 +24,9 @@ function addPersonalWorkspaceToResponse(response: FetchUserWorkspacesResponse) {
 }
 
 export function useUserWorkspaces() {
-  return useQuery(WorkspaceQueryKeys.fetchUserWorkspaces, fetchUserWorkspaces, {
+  return useQuery({
+    queryKey: WorkspaceQueryKeys.fetchUserWorkspaces,
+    queryFn: fetchUserWorkspaces,
     placeholderData: {workspaces: []},
     select: addPersonalWorkspaceToResponse,
   });

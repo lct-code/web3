@@ -1,6 +1,6 @@
 <?php
 
-use App\Playlist;
+use App\Models\Playlist;
 use Illuminate\Database\Migrations\Migration;
 
 class HydrateAddedByColumnInPlaylistTrackTable extends Migration

@@ -19,18 +19,20 @@ export function useDeleteTracks() {
   const navigate = useNavigate();
   const {getRedirectUri} = useAuth();
 
-  return useMutation((payload: Payload) => deleteTracks(payload), {
-    onSuccess: (response, {trackIds}) => {
+  return useMutation({
+    mutationFn: (payload: Payload) => deleteTracks(payload),
+    onSuccess: async (response, {trackIds}) => {
+      await queryClient.invalidateQueries({queryKey: ['tracks']});
+      await queryClient.invalidateQueries({queryKey: ['channel']});
       toast(
-        message('[one track|other :count tracks] deleted', {
+        message('[one Track|other :count Tracks] deleted', {
           values: {count: trackIds.length},
-        })
+        }),
       );
       // navigate to homepage if we are on this track page currently
       if (trackIds.some(trackId => pathname.startsWith(`/track/${trackId}`))) {
         navigate(getRedirectUri());
       }
-      queryClient.invalidateQueries(['tracks']);
     },
     onError: r => showHttpErrorToast(r),
   });

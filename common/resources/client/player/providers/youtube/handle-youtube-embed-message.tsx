@@ -16,7 +16,9 @@ export function handleYoutubeEmbedMessage(
   iframeRef: RefObject<HTMLIFrameElement>,
   store: PlayerStoreApi
 ) {
-  const data = JSON.parse(e.data) as YouTubeMessage;
+  const data = (
+    typeof e.data === 'string' ? JSON.parse(e.data) : e.data
+  ) as YouTubeMessage;
   const info = data.info;
   const internalState = internalStateRef.current;
   const emit = store.getState().emit;
@@ -55,14 +57,20 @@ export function handleYoutubeEmbedMessage(
   }
 
   if (isNumber(info.playbackRate)) {
+    if (internalState.playbackRate !== info.playbackRate) {
+      emit('playbackRateChange', {rate: info.playbackRate});
+    }
     internalState.playbackRate = info.playbackRate;
-    emit('playbackRateChange', {rate: info.playbackRate});
   }
 
   if (isNumber(info.videoLoadedFraction)) {
-    emit('buffered', {
-      seconds: info.videoLoadedFraction * internalState.duration,
-    });
+    const buffered = info.videoLoadedFraction * internalState.duration;
+    if (internalState.buffered !== buffered) {
+      emit('buffered', {
+        seconds: info.videoLoadedFraction * internalState.duration,
+      });
+    }
+    internalState.buffered = buffered;
   }
 
   if (Array.isArray(info.availablePlaybackRates)) {
@@ -84,30 +92,52 @@ function onYoutubeStateChange(
   const emit = store.getState().emit;
   const state = info.playerState!;
 
+  const onCued = async () => {
+    // load poster, if needed
+    if (info.videoData?.video_id && !store.getState().cuedMedia?.poster) {
+      const url = await loadYoutubePoster(info.videoData.video_id);
+      if (url) {
+        store.getState().emit('posterLoaded', {url});
+      }
+    }
+
+    // mark provider as ready
+    if (!internalStateRef.current.playbackReady) {
+      emit('providerReady', {el: iframeRef.current!});
+      internalStateRef.current.playbackReady = true;
+    }
+    emit('cued');
+  };
+
   emit('youtubeStateChange', {state});
   emit('buffering', {isBuffering: state === YouTubePlayerState.Buffering});
+
+  if (state !== YouTubePlayerState.Ended) {
+    internalStateRef.current.firedPlaybackEnd = false;
+  }
+
   switch (state) {
+    case YouTubePlayerState.Unstarted:
+      // When using autoplay, but autoplay fails, player will get "unstarted" event
+      onCued();
+      break;
     case YouTubePlayerState.Ended:
-      emit('playbackEnd');
+      // will sometimes fire twice without this, if player starts buffering as a result of seek to the end
+      if (!internalStateRef.current.firedPlaybackEnd) {
+        emit('playbackEnd');
+        internalStateRef.current.firedPlaybackEnd = true;
+      }
       break;
     case YouTubePlayerState.Playing:
-      // In case of autoplay which might skip `Cued` event
-      emit('cued');
+      // When using autoplay, "cued" event is never fired, handle "cued" here instead
+      onCued();
       emit('play');
       break;
     case YouTubePlayerState.Paused:
       emit('pause');
       break;
     case YouTubePlayerState.Cued:
-      if (info.videoData?.video_id) {
-        loadYoutubePoster(info.videoData?.video_id, store);
-      }
-
-      if (!internalStateRef.current.playbackReady) {
-        emit('providerReady', {el: iframeRef.current!});
-        internalStateRef.current.playbackReady = true;
-      }
-      emit('cued');
+      onCued();
       break;
   }
 }

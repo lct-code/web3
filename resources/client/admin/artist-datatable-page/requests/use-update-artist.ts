@@ -27,10 +27,13 @@ export function useUpdateArtist(form: UseFormReturn<UpdateArtistPayload>) {
   const {trans} = useTrans();
   const navigate = useNavigate();
   const {pathname} = useLocation();
-  return useMutation((payload: UpdateArtistPayload) => updateAlbum(payload), {
+  return useMutation({
+    mutationFn: (payload: UpdateArtistPayload) => updateAlbum(payload),
     onSuccess: response => {
       toast(trans(message('Artist updated')));
-      queryClient.invalidateQueries(DatatableDataQueryKey('artists'));
+      queryClient.invalidateQueries({
+        queryKey: DatatableDataQueryKey('artists'),
+      });
       if (pathname.includes('admin')) {
         navigate('/admin/artists');
       } else {

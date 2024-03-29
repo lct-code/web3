@@ -1,13 +1,13 @@
 <?php namespace Common\Auth\Roles;
 
-use App\User;
+use App\Models\User;
 use Common\Auth\Permissions\Traits\HasPermissionsRelation;
-use Common\Search\Searchable;
-use Illuminate\Database\Eloquent\Model;
+use Common\Core\BaseModel;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Role extends Model
+class Role extends BaseModel
 {
-    use HasPermissionsRelation, Searchable;
+    use HasPermissionsRelation;
 
     const MODEL_TYPE = 'role';
 
@@ -24,19 +24,26 @@ class Role extends Model
 
     /**
      * Get default role for assigning to new users.
-     *
-     * @return Role|null
      */
-    public function getDefaultRole()
+    public function getDefaultRole(): ?Role
     {
         return $this->where('default', 1)->first();
     }
 
-    public function users()
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_role')->withPivot(
             'created_at',
         );
+    }
+
+    public function toNormalizedArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'model_type' => self::MODEL_TYPE,
+        ];
     }
 
     public function toSearchableArray(): array
