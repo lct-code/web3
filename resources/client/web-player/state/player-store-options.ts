@@ -100,7 +100,7 @@ export const playerStoreOptions: Partial<PlayerStoreOptions> = {
       if (!cuedMedia) return;
       const site_name = getBootstrapData().settings.branding.site_name;
       let title = `${cuedMedia.meta.name}`;
-      const artistName = cuedMedia.meta.artists?.[0].name;
+      const artistName = cuedMedia.meta.artists?.[0]?.name;
 
       if (artistName) {
         title = `${title} - ${artistName} - ${site_name}`;
@@ -110,15 +110,17 @@ export const playerStoreOptions: Partial<PlayerStoreOptions> = {
 
       document.title = title;
     },
-    play: ({state: {cuedMedia, pause}}) => {
+    play: ({state: {cuedMedia, pause, stop, destroy}}) => {
       // prevent playback if user does not have permission to play music
       const hasPermission = userHasPlayPermission();
+
       if (!hasPermission) {
-        window.dispatchEvent(new CustomEvent('playDenied', {detail: {media:cuedMedia}}));
         toast.danger(
           message('Your current plan does not allow music playback.')
         );
-        pause();
+        stop();
+
+        window.dispatchEvent(new CustomEvent('playDenied', {detail: {media:cuedMedia}}));
 
         return;
       }

@@ -21,6 +21,17 @@ export function useTrack(params: Params) {
   );
 }
 
+export function useSilentTrack() {
+  const trackId = 1; // TODO config
+  return useQuery(['tracks', +trackId!], () =>
+    apiClient
+    .get<getTrackResponse>(`tracks/${trackId}`, {
+      params: {defaultRelations: true},
+    })
+    .then(response => response.data)
+  );
+}
+
 function fetchTrack(trackId: number | string, params: Params) {
   return apiClient
     .get<getTrackResponse>(`tracks/${trackId}`, {
