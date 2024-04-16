@@ -28,6 +28,18 @@ class PhonesubWebhookController extends Controller
         // Retrieve incoming request data
         $requestData = file_get_contents('php://input');
 
+        // Store sync data
+        $storagePath = storage_path('sync/zainksa-'.date('Ymd-His').'.xml');
+        if ($bytes = file_put_contents(
+          $storagePath,
+          $requestData,
+        )) {
+          Log::debug('phonesub api sync request: '.$bytes.' bytes wrote to '.$storagePath);
+        }
+        else {
+          Log::debug('phonesub api sync request: could not write to '.$storagePath);
+        }
+
         $headers = [];
         foreach ($_SERVER as $key => $value) {
           if (substr($key, 0, 5) == 'HTTP_') {
@@ -40,7 +52,6 @@ class PhonesubWebhookController extends Controller
             'request' => $_REQUEST,
             'headers' => $headers,
         ]));
-        Log::debug('phonesub api sync - parsing xml data: '.$requestData);
 
         if (empty($requestData)) {
           return $this->respondXml(400, 'Missing sync data');
