@@ -77,7 +77,7 @@ class CreateNewUser implements CreatesNewUsers
         )->first();
 
         if (!empty($existing_user)) {
-            Session::flash('message', 'You\'ve been logged in to your previously registered account.');
+            Session::flash('message', trans('You\'ve been logged in to your previously registered account.'));
             return $existing_user;
         }
 
