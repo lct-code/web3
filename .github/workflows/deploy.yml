@@ -45,7 +45,7 @@ jobs:
           tar -czvf $archive_name .  # Archive the entire project
 
       - name: Upload archive via SSH
-        uses: actions/ssh@v3
+        uses: appleboy/ssh-action@v0.1.10
         env:
           DEPLOYMENT_SERVER_HOST: ${{ secrets.DEPLOYMENT_SERVER_HOST }} # Create this secret
           DEPLOYMENT_SERVER_USER: deployer # Use the 'deployer' user
@@ -56,7 +56,7 @@ jobs:
           command: 'scp ${{ github.workspace }}/$archive_name deployer@$DEPLOYMENT_SERVER_HOST:/home/deployer/deploy/builds'
 
       - name: Execute deploy script on the deployment server
-        uses: actions/ssh@v3
+        uses: appleboy/ssh-action@v0.1.10
         env:
           DEPLOYMENT_SERVER_HOST: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
           DEPLOYMENT_SERVER_USER: deployer
