@@ -1,0 +1,68 @@
+name: Build and Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Source code branch to deploy'
+        required: true
+        type: choice
+        options:
+        - master
+        - staging
+      target_server:
+        description: 'Target deployment server hostname'
+        required: true
+        type: choice
+        options:
+        - dohaty-sa.com
+        - dohaty-tv.dohaty-sa.com
+        - staging.dohaty-sa.com
+        - alkhassaid.com
+
+jobs:
+  build_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Install dependencies (Composer)
+        run: composer install
+
+      - name: Install dependencies (NPM)
+        run: npm install
+
+      - name: Build production JavaScript
+        run: npm run build
+
+      - name: Create archive
+        run: |
+          timestamp=$(date +%Y%m%d-%H%M%S)
+          archive_name="deployment_$timestamp_${{ github.event.inputs.branch }}.tar.gz"
+          tar -czvf $archive_name .  # Archive the entire project
+
+      - name: Upload archive via SSH
+        uses: actions/ssh@v3
+        env:
+          DEPLOYMENT_SERVER_HOST: ${{ secrets.DEPLOYMENT_SERVER_HOST }} # Create this secret
+          DEPLOYMENT_SERVER_USER: deployer # Use the 'deployer' user
+        with:
+          host: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
+          username: deployer 
+          privateKey: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}  
+          command: 'scp ${{ github.workspace }}/$archive_name deployer@$DEPLOYMENT_SERVER_HOST:/home/deployer/deploy/builds'
+
+      - name: Execute deploy script on the deployment server
+        uses: actions/ssh@v3
+        env:
+          DEPLOYMENT_SERVER_HOST: ${{ secrets.DEPLOYMENT_SERVER_HOST }} 
+          DEPLOYMENT_SERVER_USER: deployer 
+        with:
+          host: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
+          username: deployer
+          privateKey: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}
+          command: 'bash /home/deployer/deploy/deploy.sh $archive_name ${{ github.event.inputs.target_server }}' 
+
