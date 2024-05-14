@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # Updated to v4 for Node.js 20 support
         with:
           ref: ${{ github.event.inputs.branch }}
 
@@ -46,23 +46,17 @@ jobs:
 
       - name: Upload archive via SSH
         uses: appleboy/ssh-action@v0.1.10
-        env:
-          DEPLOYMENT_SERVER_HOST: ${{ secrets.DEPLOYMENT_SERVER_HOST }} # Create this secret
-          DEPLOYMENT_SERVER_USER: deployer # Use the 'deployer' user
         with:
           host: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
           username: deployer
-          privateKey: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}
-          command: 'scp ${{ github.workspace }}/$archive_name deployer@$DEPLOYMENT_SERVER_HOST:/home/deployer/deploy/builds'
+          key: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}
+          script: scp ${{ github.workspace }}/$archive_name deployer@${{ secrets.DEPLOYMENT_SERVER_HOST }}:/home/deployer/deploy/builds
 
       - name: Execute deploy script on the deployment server
         uses: appleboy/ssh-action@v0.1.10
-        env:
-          DEPLOYMENT_SERVER_HOST: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
-          DEPLOYMENT_SERVER_USER: deployer
         with:
           host: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
           username: deployer
-          privateKey: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}
-          command: 'bash /home/deployer/deploy/deploy.sh $archive_name ${{ github.event.inputs.target_server }}'
+          key: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}
+          script: bash /home/deployer/deploy/deploy.sh $archive_name ${{ github.event.inputs.target_server }}
 
