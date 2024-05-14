@@ -51,18 +51,18 @@ jobs:
           DEPLOYMENT_SERVER_USER: deployer # Use the 'deployer' user
         with:
           host: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
-          username: deployer 
-          privateKey: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}  
+          username: deployer
+          privateKey: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}
           command: 'scp ${{ github.workspace }}/$archive_name deployer@$DEPLOYMENT_SERVER_HOST:/home/deployer/deploy/builds'
 
       - name: Execute deploy script on the deployment server
         uses: actions/ssh@v3
         env:
-          DEPLOYMENT_SERVER_HOST: ${{ secrets.DEPLOYMENT_SERVER_HOST }} 
-          DEPLOYMENT_SERVER_USER: deployer 
+          DEPLOYMENT_SERVER_HOST: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
+          DEPLOYMENT_SERVER_USER: deployer
         with:
           host: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
           username: deployer
           privateKey: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}
-          command: 'bash /home/deployer/deploy/deploy.sh $archive_name ${{ github.event.inputs.target_server }}' 
+          command: 'bash /home/deployer/deploy/deploy.sh $archive_name ${{ github.event.inputs.target_server }}'
 
