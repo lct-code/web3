@@ -37,6 +37,7 @@ install_files
 Homestead.json
 Homestead.yaml
 .env
+.env.*
 data.ms
 /test-results/
 /playwright-report/
