@@ -23,11 +23,21 @@ on:
 jobs:
   build_deploy:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php-version: ['8.2']
+
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4  # Updated to v4 for Node.js 20 support
         with:
           ref: ${{ github.event.inputs.branch }}
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
 
       - name: Install dependencies (Composer)
         run: composer install
