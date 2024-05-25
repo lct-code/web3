@@ -14,14 +14,14 @@ interface Payload {
 }
 
 export function useUnfollowUser() {
-  return useMutation((payload: Payload) => unfollowUser(payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => unfollowUser(payload),
     onSuccess: (response, {user}) => {
       userFollows().remove(user.id);
       toast(
         message('Stopped following :name', {values: {name: user.display_name}})
       );
-      queryClient.invalidateQueries(['users']);
-    },
+      queryClient.invalidateQueries({ queryKey: ['users'] });    },
     onError: r => showHttpErrorToast(r),
   });
 }

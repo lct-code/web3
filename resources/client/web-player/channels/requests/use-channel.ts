@@ -29,9 +29,10 @@ export function useChannel(
     filter: params.filter || '',
     paginate: 'simple',
   };
-  return useQuery(channelQueryKey(slugOrId!, queryParams), () =>
-    fetchChannel(slugOrId!, queryParams)
-  );
+  return useQuery({
+    queryKey: channelQueryKey(slugOrId!, queryParams),
+    queryFn: () => fetchChannel(slugOrId!, queryParams)
+  });
 }
 
 function fetchChannel(

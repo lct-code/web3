@@ -9,7 +9,10 @@ interface Response extends BackendResponse {
 }
 
 export function useLyrics(track: Track) {
-  return useQuery(['lyrics', track.id], () => fetchLyrics(track.id));
+  return useQuery({
+    queryKey: ['lyrics', track.id],
+    queryFn: () => fetchLyrics(track.id)
+  });
 }
 
 function fetchLyrics(trackId: number) {
