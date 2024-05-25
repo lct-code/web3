@@ -51,8 +51,8 @@ jobs:
       - name: Create archive
         run: |
           timestamp=$(date +%Y%m%d-%H%M%S)
-          archive_name="deployment_$timestamp_${{ github.event.inputs.branch }}.tar.gz"
-          tar -czvf $archive_name .  # Archive the entire project
+          archive_name="/tmp/deployment_$timestamp_${{ github.event.inputs.branch }}.tar.gz"
+          tar --exclude-vcs -czvf $archive_name .  # Archive the entire project
 
       - name: Upload archive via SSH
         uses: appleboy/ssh-action@v0.1.10
@@ -60,7 +60,7 @@ jobs:
           host: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
           username: deployer
           key: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}
-          script: scp ${{ github.workspace }}/$archive_name deployer@${{ secrets.DEPLOYMENT_SERVER_HOST }}:/home/deployer/deploy/builds
+          script: scp $archive_name deployer@${{ secrets.DEPLOYMENT_SERVER_HOST }}:/home/deployer/deploy/builds/
 
       - name: Execute deploy script on the deployment server
         uses: appleboy/ssh-action@v0.1.10
