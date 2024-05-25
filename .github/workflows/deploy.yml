@@ -16,7 +16,7 @@ on:
         type: choice
         options:
         - dohaty-sa.com
-        - dohaty-tv.dohaty-sa.com
+        - dohaty.tv
         - staging.dohaty-sa.com
         - alkhassaid.com
 
@@ -54,13 +54,15 @@ jobs:
           archive_name="/tmp/deployment_$timestamp_${{ github.event.inputs.branch }}.tar.gz"
           tar --exclude-vcs -czvf $archive_name .  # Archive the entire project
 
-      - name: Upload archive via SSH
-        uses: appleboy/ssh-action@v0.1.10
+      - name: Upload archive via SCP
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
           username: deployer
+          port: 2255
           key: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}
-          script: scp $archive_name deployer@${{ secrets.DEPLOYMENT_SERVER_HOST }}:/home/deployer/deploy/builds/
+          source: $archive_name
+          target: /home/deployer/deploy/builds/
 
       - name: Execute deploy script on the deployment server
         uses: appleboy/ssh-action@v0.1.10
