@@ -6,6 +6,7 @@
 <!DOCTYPE html>
 <html
     lang="{{ $bootstrapData->get('language') }}"
+    dir="{{$bootstrapData->get('language') == 'ar' ? 'rtl' : 'ltr'}}"
     style="{{ $bootstrapData->getSelectedTheme()->getCssVariables() }}"
     @class(['dark' => $bootstrapData->getSelectedTheme('is_dark')])
 >
