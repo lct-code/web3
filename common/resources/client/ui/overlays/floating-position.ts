@@ -9,10 +9,10 @@ import {
   shift,
   size,
   useFloating,
+  UseFloatingOptions
 } from '@floating-ui/react-dom';
 import {CSSProperties, Ref, useMemo, useRef} from 'react';
 import {mergeRefs} from 'react-merge-refs';
-import {UseFloatingOptions} from '@floating-ui/react-dom/src/types';
 
 interface Props {
   floatingWidth?: 'auto' | 'matchTrigger';

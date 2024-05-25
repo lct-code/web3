@@ -14,11 +14,12 @@ interface Payload {
 }
 
 export function useFollowUser() {
-  return useMutation((payload: Payload) => followUser(payload), {
+  return useMutation({
+    mutationFn: (payload: Payload) => followUser(payload),
     onSuccess: (response, {user}) => {
       userFollows().add(user.id);
       toast(message('Following :name', {values: {name: user.display_name}}));
-      queryClient.invalidateQueries(['users']);
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
     onError: r => showHttpErrorToast(r),
   });

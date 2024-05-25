@@ -99,7 +99,7 @@ function VirtualizedBody({renderRowAs, placeholderRowCount, query}: BodyProps) {
     // getScrollElement: () => scrollableRef.current,
     observeElementOffset: (instance, cb) => {
       return observeElementOffset(instance, offset => {
-        cb(offset - scrollOffset.current);
+        cb(offset - scrollOffset.current, true);
       });
     },
   });

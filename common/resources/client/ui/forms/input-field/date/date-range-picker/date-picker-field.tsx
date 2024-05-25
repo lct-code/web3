@@ -37,7 +37,7 @@ export const DatePickerField = React.forwardRef<
         wrapperProps!,
         {
           onBlur: e => {
-            if (!objRef.current.contains(e.relatedTarget)) {
+            if (!objRef.current?.contains(e.relatedTarget)) {
               onBlur?.(e);
             }
           },
