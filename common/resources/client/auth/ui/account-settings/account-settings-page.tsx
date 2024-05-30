@@ -22,7 +22,7 @@ import {SiteConfigContext} from '@common/core/settings/site-config-context';
 export function AccountSettingsPage() {
   const {auth} = useContext(SiteConfigContext);
   const {data, isLoading} = useUser('me', {
-    with: ['roles', 'social_profiles', 'tokens'],
+    with: ['roles', 'social_profiles', 'tokens', 'subscriptions'],
   });
   return (
     <div className="min-h-screen bg-alt">
@@ -65,7 +65,7 @@ export function AccountSettingsPage() {
                 <SessionsPanel user={data.user} />
                 <LocalizationPanel user={data.user} />
                 <AccessTokenPanel user={data.user} />
-                <DangerZonePanel />
+                <DangerZonePanel user={data.user} />
               </main>
             </div>
           )}

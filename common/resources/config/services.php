@@ -68,6 +68,15 @@ return [
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
+    'phonesub' => [
+        'address' => env('PHONESUB_ADDRESS'),
+        'baseurl_sub' => env('PHONESUB_BASEURL_SUB'),
+        'baseurl_unsub' => env('PHONESUB_BASEURL_UNSUB'),
+        'client_id' => env('PHONESUB_CLIENT_ID'),
+        'sp_id' => env('PHONESUB_SP_ID'),
+        'password' => env('PHONESUB_PASSWORD'),
+    ],
+
     /**
      * Socialite login credentials
      */

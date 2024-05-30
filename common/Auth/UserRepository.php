@@ -1,6 +1,7 @@
 <?php namespace Common\Auth;
 
 use App\User;
+use App\UserDeleted;
 use Carbon\Carbon;
 use Common\Auth\Events\UserCreated;
 use Common\Auth\Events\UsersDeleted;
@@ -76,6 +77,17 @@ class UserRepository
         $users = $this->user->whereIn('id', $ids)->get();
 
         $users->each(function (User $user) {
+            $deletedUser = new UserDeleted([
+              'email' => $user->email,
+              'username' => $user->username,
+              'first_name' => $user->first_name,
+              'last_name' => $user->last_name,
+              'phone' => $user->phone,
+              'deleted_by' => Auth::id(),
+              'deleted_id' => $user->id,
+            ]);
+            $deletedUser->save();
+
             $user->social_profiles()->delete();
             $user->roles()->detach();
             $user->notifications()->delete();
@@ -163,6 +175,8 @@ class UserRepository
             $formatted['password'] = Arr::get($params, 'password')
                 ? Hash::make($params['password'])
                 : null;
+            $formatted['phone'] = $params['phone'];
+            $formatted['phone_entered'] = $params['phone_entered'];
         } elseif ($type === 'update' && Arr::get($params, 'password')) {
             $formatted['password'] = Hash::make($params['password']);
         }

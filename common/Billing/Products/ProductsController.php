@@ -61,6 +61,7 @@ class ProductsController extends BaseController
             'prices.*.currency' => 'required|string|max:255',
             'prices.*.interval' => 'string|max:255',
             'prices.*.amount' => 'min:1',
+            'prices.*.sub_product_id' => 'nullable|string|max:255',
         ]);
 
         $plan = app(CrupdateProduct::class)->execute(request()->all());
@@ -80,6 +81,7 @@ class ProductsController extends BaseController
             'prices.*.currency' => 'required|string|max:255',
             'prices.*.interval' => 'string|max:255',
             'prices.*.amount' => 'min:1',
+            'prices.*.sub_product_id' => 'nullable|string|max:255',
         ]);
 
         $product = app(CrupdateProduct::class)->execute(
