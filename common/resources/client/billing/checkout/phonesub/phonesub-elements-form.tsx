@@ -1,10 +1,9 @@
-import clsx from 'clsx';
 import {Button} from '../../../ui/buttons/button';
 import {useForm} from 'react-hook-form';
 import {Form} from '../../../ui/forms/form';
 import {FormTextField} from '../../../ui/forms/input-field/text-field/text-field';
 import {Trans} from '../../../i18n/trans';
-import {Fragment, ReactNode, useState, useRef} from 'react';
+import {ReactNode, useState, useRef} from 'react';
 import {useAuth} from '../../../auth/use-auth';
 import {usePhonesub, PhonesubPayload} from './use-phonesub';
 import {Alert} from '../../../alerts/alert';
@@ -30,7 +29,7 @@ export function PhonesubElementsForm({
   resendLabel,
   returnUrl,
 }: PhonesubElementsFormProps) {
-  const {phonesub, paymentElementRef, phonesubIsEnabled} = usePhonesub({
+  const {phonesub, phonesubIsEnabled} = usePhonesub({
     type,
     priceId,
   });
@@ -38,10 +37,19 @@ export function PhonesubElementsForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [subStatus, setSubStatus] = useState<string>('start');
   const navigate = useNavigate();
-
-  const form = useForm<{auth_code:string}>();
-  const authRef = useRef<HTMLInputElement>(null);
   const {user} = useAuth();
+
+  const form = useForm<{auth_code:string, phone:string}>({
+    defaultValues: {
+      phone: user?.phone || '', // Set default value for phone
+    },
+  });
+  const authRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+
+  const isStateVerify = subStatus == 'verify' || subStatus == 'verified';
+  const isStateError = subStatus == 'syncerror' || subStatus == 'expired';
+  const isStateStart = subStatus == 'start';
 
   // disable upgrade button if phonesub is enabled, but not loaded yet
   const phonesubIsReady: boolean =
@@ -56,6 +64,10 @@ export function PhonesubElementsForm({
     try {
       const method = subStatus !== 'verify' ? 'subscribeStart' : 'subscribeVerify';
       const result = await phonesub[method](payload);
+
+      if (result.status == 'verify' && result.phone && user) {
+        user.phone = result.phone;
+      }
 
       if (result.status == 'verified') {
         setSyncTimeout();
@@ -138,6 +150,25 @@ export function PhonesubElementsForm({
       {errorMessage && !isSubmitting && (
         <div className="text-danger mt-20">{errorMessage}</div>
       )}
+      {isStateStart && (
+        <div>
+          <Alert
+            title={<Trans message="Enter phone number" />}
+            type="info"
+            message={
+              <Trans message="Please enter phone number you intend to use for phone payment" />
+            }
+            />
+          <FormTextField
+            className="mb-32"
+            name="phone"
+            type="text"
+            label={<Trans message="Phone number" />}
+            required
+            inputRef={phoneRef}
+          />
+        </div>
+      )}
       <Button
         variant="flat"
         color="primary"
@@ -146,7 +177,7 @@ export function PhonesubElementsForm({
         type="submit"
         disabled={isSubmitting || !phonesubIsReady}
       >
-        {subStatus == 'verify' || subStatus == 'verified' ? verifyLabel : (subStatus == 'expired' || subStatus == 'syncerror' ? resendLabel : submitLabel)}
+        {isStateVerify ? verifyLabel : (isStateError ? resendLabel : submitLabel)}
       </Button>
     </Form>
   );

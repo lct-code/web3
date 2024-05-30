@@ -68,15 +68,15 @@ END;
     }
 
     public function storeSubscriptionDetailsLocally(
-        string $productId,
+        string $subProductId,
         string $phonesubSubscriptionId,
         User $user
     ): bool {
-        Log::debug('phonesub storeSubscriptionDetailsLocally: '.$productId.' / '.$phonesubSubscriptionId.' / '.$user->id);
+        Log::debug('phonesub storeSubscriptionDetailsLocally: '.$subProductId.' / '.$phonesubSubscriptionId.' / '.$user->id);
 
         $price = Price::where(
           'sub_product_id',
-          $productId,
+          $subProductId,
         )->firstOrFail();
 
         $user->subscribe('phonesub', $phonesubSubscriptionId, $price);
@@ -88,21 +88,24 @@ END;
         Product $newProduct,
         Price $newPrice
     ): bool {
-        Log::debug('phonesub changePlan: '.$newProduct->toJson().' / '.$subscription->toJson().' / '.$newPrice.toJson());
+        Log::debug('phonesub changePlan: '.$newProduct->toJson().' / '.$subscription->toJson().' / '.$newPrice->toJson());
         return true;
     }
 
     public function subscribeStart(
         string $price_id,
+        string $phone,
         User $user
     ) {
-        Log::debug('phonesub subscribeStart: '.$price_id.' / '.$user->id);
+        Log::debug('phonesub subscribeStart: '.$price_id.' / '.$phone.' / '.$user->id);
+
+        $processedPhone = $this->processUserPhone($user, $phone);
         
         $price = Price::where('id', $price_id)->firstOrFail();
 
         $params = [
           'actionType' => 1,
-          'msisdn' => $this->getUserPhone($user),
+          'msisdn' => $processedPhone,
           'productID' => $price->sub_product_id,
         ];
 
@@ -121,6 +124,7 @@ END;
             case '000000':
                 return [
                     'status' => 'verify',
+                    'phone' => $user->phone,
                 ];
 
             case '330070':
@@ -157,7 +161,7 @@ END;
 
         $params = [
           'authCode' => $auth_code,
-          'msisdn' => $this->getUserPhone($user),
+          'msisdn' => $this->processUserPhone($user),
           'productID' => $price->sub_product_id,
         ];
 
@@ -177,7 +181,7 @@ END;
             case '000000':
                 if (app(Settings::class)->get('billing.phonesub_test_mode')) {
                     try {
-                        $test_subscription_id = implode('-', ['phonesub', 'test', $this->getUserPhone($user), $price->sub_product_id, date('YmdHis')]);
+                        $test_subscription_id = implode('-', ['phonesub', 'test', $this->processUserPhone($user), $price->sub_product_id, date('YmdHis')]);
                         $this->storeSubscriptionDetailsLocally($price->sub_product_id??0, $test_subscription_id, $user);
                         Log::debug('phonesub subscribeVerify test subscription: '.$test_subscription_id);
                     }
@@ -245,7 +249,7 @@ END;
         Log::debug('phonesub cancelSubscription: '.$subscription->toJson().' / '.($atPeriodEnd?'atPeriodEnd':'notPeriodEnd'));
 
         $params = [
-          'msisdn' => $this->getUserPhone($subscription->user),
+          'msisdn' => $this->processUserPhone($subscription->user),
           'productID' => $subscription->price->sub_product_id,
 
           'Username' => config('services.phonesub.sp_id'),
@@ -339,8 +343,20 @@ BODY;
         return false;
     }
 
-    public function getUserPhone(User $user): string {
-        return preg_replace('/^\+/', '', $user->phone);
+    public function processUserPhone(User $user, $newPhone = null): string {
+        $processedPhone = preg_replace('/^\+/', '', $user->phone ?? '');
+
+        if ($newPhone) {
+            $processedNewPhone = preg_replace('/^\+/', '', $newPhone);
+            if ($processedPhone != $processedNewPhone) {
+                $user->phone = $newPhone;
+                $user->save();
+
+                $processedPhone = $processedNewPhone;
+            }
+        }
+
+        return $processedPhone;
     }
 
     public function parseXml(Response $response): SimpleXMLElement {

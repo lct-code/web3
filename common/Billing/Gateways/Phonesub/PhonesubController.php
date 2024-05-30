@@ -21,11 +21,13 @@ class PhonesubController extends BaseController
     {
         $data = $this->validate($this->request, [
             'price_id' => 'required|string',
+            'phone' => 'required|phone',
         ]);
 
         try {
             $data = $this->phonesub->subscribeStart(
                 $data['price_id'],
+                $data['phone'],
                 $this->request->user(),
             );
         }

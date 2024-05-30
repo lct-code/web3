@@ -13,23 +13,24 @@ interface UsePhonesubProps {
 
 export interface PhonesubResponse {
   status?: string;
+  phone?: string;
   message?: string;
   error?: {
     message: string;
-    type:    string;
+    type: string;
   };
   subscriptionId?: string;
 }
 
 export interface PhonesubPayload {
   auth_code?: string
+  phone?:   string;
 }
 
-export function usePhonesub({type, priceId}: UsePhonesubProps) {
+export function usePhonesub({priceId}: UsePhonesubProps) {
   const {user} = useAuth();
   const isDarkMode = useIsDarkMode();
   const isInitiatedRef = useRef<boolean>(false);
-  const paymentElementRef = useRef<HTMLDivElement>(null);
   const {localeCode} = useSelectedLocale();
   const {
     branding: {site_name},
@@ -38,8 +39,8 @@ export function usePhonesub({type, priceId}: UsePhonesubProps) {
     },
   } = useSettings();
 
-  const subscribeStart = async (): Promise<PhonesubResponse> => {
-    const response = await apiClient.post('billing/phonesub/subscribe-start', {price_id:priceId});
+  const subscribeStart = async ({phone}: PhonesubPayload): Promise<PhonesubResponse> => {
+    const response = await apiClient.post('billing/phonesub/subscribe-start', {price_id:priceId, phone:phone});
 
     return response.data;
   }
@@ -58,7 +59,6 @@ export function usePhonesub({type, priceId}: UsePhonesubProps) {
 
   return {
     phonesub: {subscribeStart, subscribeVerify, syncSubscriptionDetails},
-    paymentElementRef,
     phonesubIsEnabled: enable,
   };
 }
