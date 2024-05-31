@@ -21,7 +21,7 @@ class PhonesubController extends BaseController
     {
         $data = $this->validate($this->request, [
             'price_id' => 'required|string',
-            'phone' => 'required|phone',
+            'phone' => 'required|string',
         ]);
 
         try {
