@@ -18,6 +18,7 @@ class CrupdateUserRequest extends BaseFormRequest
                 'string|min:2|max:255|nullable|regex:/^[\pL\s\-]+$/u',
             'last_name' =>
                 'string|min:2|max:255|nullable|regex:/^[\pL\s\-]+$/u',
+            'phone' => 'phone',
             'permissions' => 'array',
             'roles' => 'array',
             'roles.*' => 'int',

@@ -15,3 +15,13 @@ Route::post('billing/stripe/webhook', [
     StripeWebhookController::class,
     'handleWebhook',
 ]);
+
+// PHONESUB
+Route::get('api/sync/zainksa', [
+    PhonesubWebhookController::class,
+    'handleWebhook',
+]);
+Route::post('api/sync/zainksa', [
+    PhonesubWebhookController::class,
+    'handleWebhook',
+]);

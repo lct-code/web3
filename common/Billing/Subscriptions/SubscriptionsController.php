@@ -93,7 +93,7 @@ class SubscriptionsController extends BaseController
             'delete' => 'boolean',
         ]);
 
-        if ($this->request->get('delete')) {
+        if ($this->request->get('delete') || $subscription->gateway_name == 'phonesub') {
             $subscription->cancelAndDelete();
         } else {
             $subscription->cancel();
