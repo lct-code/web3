@@ -118,6 +118,8 @@ export function useSlider({
     return draggedThumbsRef.current?.[index] || false;
   };
 
+  const isRtl = (document.dir ?? 'ltr') == 'rtl';
+
   const getThumbValueLabel = (index: number) =>
     getFormattedValue(values[index]);
 
@@ -222,7 +224,8 @@ export function useSlider({
       // Find the closest thumb
       const trackPosition = trackRef.current.getBoundingClientRect().left;
       const offset = e.clientX - trackPosition;
-      const percent = offset / size;
+      const percent = isRtl ? 1 - offset / size : offset / size;
+      console.log('useSlider handlePointerDown percent', {isRtl, offset, size, percent});
       const value = getPercentValue(percent);
 
       // to find the closet thumb we split the array based on the first thumb position to the "right/end" of the click.
@@ -278,7 +281,7 @@ export function useSlider({
           getThumbPercent(realTimeTrackDraggingIndex.current || 0) * size;
       }
 
-      currentPosition.current += deltaX;
+      currentPosition.current += deltaX * (isRtl ? -1 : 1);
 
       if (realTimeTrackDraggingIndex.current != null && trackRef.current) {
         const percent = clamp(currentPosition.current / size, 0, 1);
