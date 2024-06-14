@@ -18,6 +18,7 @@ class Price extends Model
         'interval_count' => 'int',
         'default' => 'boolean',
         'subscriptions_count' => 'int',
+        'paymentMethods' => 'array',
     ];
 
     const MODEL_TYPE = 'price';
@@ -30,5 +31,15 @@ class Price extends Model
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
+    }
+
+    public function getPaymentMethodsAttribute($value)
+    {
+        return json_decode($value, true);
+    }
+
+    public function setPaymentMethodsAttribute($value)
+    {
+        $this->attributes['paymentMethods'] = json_encode($value);
     }
 }

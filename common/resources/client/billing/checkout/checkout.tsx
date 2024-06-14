@@ -13,7 +13,7 @@ import {Button} from '../../ui/buttons/button';
 import {useNavigate} from '../../utils/hooks/use-navigate';
 
 export function Checkout() {
-  const {productId, priceId} = useParams();
+  const {productId, priceId, paymentMethodId} = useParams();
   const productQuery = useProducts();
   const {paypalElementRef} = usePaypal({
     productId,
@@ -39,40 +39,43 @@ export function Checkout() {
     return <Navigate to="/pricing" replace />;
   }
 
-  return (
-    <CheckoutLayout>
-      <Fragment>
-        <h1 className="mb-40 text-4xl">
-          <Trans message="Checkout" />
-        </h1>
-        {phonesub.enable ? (
-          <Fragment>
-            <PhonesubElementsForm
-              productId={productId}
-              priceId={priceId}
-              submitLabel={<Trans message="Send code" />}
-              verifyLabel={<Trans message="Verify code" />}
-              resendLabel={<Trans message="Resend code" />}
-              type="subscription"
-              returnUrl={`/checkout/${productId}/${priceId}/phonesub/done`}
-            />
-            {stripe.enable || paypal.enable ? <Separator /> : null}
-          </Fragment>
-        ) : null}
-        {stripe.enable ? (
-          <Fragment>
-            <StripeElementsForm
-              productId={productId}
-              priceId={priceId}
-              submitLabel={<Trans message="Upgrade" />}
-              type="subscription"
-              returnUrl={`${base_url}/checkout/${productId}/${priceId}/stripe/done`}
-            />
-            {paypal.enable ? <Separator /> : null}
-          </Fragment>
-        ) : null}
-        <div ref={paypalElementRef} />
-        <Separator />
+  const paymentMethodComponents = [
+    {
+      key: 'phonesub',
+      component: (
+        <PhonesubElementsForm
+          productId={productId}
+          priceId={priceId}
+          submitLabel={<Trans message="Send code" />}
+          verifyLabel={<Trans message="Verify code" />}
+          resendLabel={<Trans message="Resend code" />}
+          type="subscription"
+          returnUrl={`/checkout/${productId}/${priceId}/phonesub/done`}
+        />
+      ),
+      enable: phonesub.enable && (price?.paymentMethods || []).includes('phonesub'),
+    },
+    {
+      key: 'stripe',
+      component: (
+        <StripeElementsForm
+          productId={productId}
+          priceId={priceId}
+          submitLabel={<Trans message="Upgrade" />}
+          type="subscription"
+          returnUrl={`${base_url}/checkout/${productId}/${priceId}/stripe/done`}
+        />
+      ),
+      enable: stripe.enable && (price?.paymentMethods || []).includes('stripe'),
+    },
+    {
+      key: 'paypal',
+      component: <div ref={paypalElementRef} />,
+      enable: paypal.enable && (price?.paymentMethods || []).includes('paypal'),
+    },
+    {
+      key: 'go-back',
+      component: (
         <Button
           variant="flat"
           color="chip"
@@ -85,6 +88,33 @@ export function Checkout() {
         >
           <Trans message="Go back" />
         </Button>
+      ),
+      enable: true,
+    }
+  ];
+
+  paymentMethodComponents.sort((a, b) => {
+    if (a.key === paymentMethodId) return -1;
+    if (b.key === paymentMethodId) return 1;
+    return 0;
+  });
+
+  const enabledComponents = paymentMethodComponents.filter(
+    component => component.enable
+  );
+
+  return (
+    <CheckoutLayout>
+      <Fragment>
+        <h1 className="mb-40 text-4xl">
+          <Trans message="Checkout" />
+        </h1>
+        {enabledComponents.map((component, index) => (
+          <Fragment key={component.key}>
+            {component.component}
+            {index < enabledComponents.length - 1 && <Separator />}
+          </Fragment>
+        ))}
         <div className="mt-30 text-xs text-muted">
           <Trans message="You’ll be charged until you cancel your subscription. Previous charges won’t be refunded when you cancel unless it’s legally required. Your payment data is encrypted and secure. By subscribing your agree to our terms of service and privacy policy." />
         </div>
