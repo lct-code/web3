@@ -21,6 +21,7 @@ use App\Http\Controllers\TrackController as TrackControllerAlias;
 use App\Http\Controllers\UserProfileController;
 use Common\Channels\ChannelController;
 use Common\Core\Controllers\HomeController;
+use App\Http\Controllers\RewardController;
 
 //FRONT-END ROUTES THAT NEED TO BE PRE-RENDERED
 Route::get('/', AppHomeController::class);
@@ -44,6 +45,9 @@ Route::get('login', [HomeController::class, 'render'])->name('login');
 Route::get('register', [HomeController::class, 'render'])->name('register');
 Route::get('forgot-password', [HomeController::class, 'render']);
 Route::get('pricing', '\Common\Billing\PricingPageController');
+
+// Referrals
+Route::get('reward/{code}', 'RewardController@storeRewardCode');
 
 // CHANNELS and fallback to client rendering if no channel matches
 Route::fallback(FallbackRouteController::class);
