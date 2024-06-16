@@ -8,4 +8,5 @@ export interface Price {
   stripe_id?: string;
   paypal_id?: string;
   sub_product_id?: string;
+  paymentMethods: string[];
 }

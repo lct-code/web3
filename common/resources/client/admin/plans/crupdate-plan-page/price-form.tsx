@@ -6,23 +6,27 @@ import {FormTextField} from '@common/ui/forms/input-field/text-field/text-field'
 import {Trans} from '@common/i18n/trans';
 import {Item} from '@common/ui/forms/listbox/item';
 import {FormSelect, Select} from '@common/ui/forms/select/select';
+import {CheckboxGroup} from '@common/ui/forms/toggle/checkbox-group';
+import {Checkbox} from '@common/ui/forms/toggle/checkbox';
 import {Price} from '@common/billing/price';
 import {BillingPeriodPresets} from '@common/admin/plans/crupdate-plan-page/billing-period-presets';
 import {Button} from '@common/ui/buttons/button';
 import {message} from '@common/i18n/message';
 import {useTrans} from '@common/i18n/use-trans';
+import {usePaymentMethods} from '@common/billing/use-payment-methods';
 
 interface PriceFormProps {
   index: number;
   onRemovePrice: () => void;
 }
+
 export function PriceForm({index, onRemovePrice}: PriceFormProps) {
   const {trans} = useTrans();
   const query = useValueLists(['currencies']);
   const currencies = useMemo(() => {
     return query.data?.currencies ? Object.values(query.data.currencies) : [];
   }, [query.data]);
-  const {watch, getValues} = useFormContext<Product>();
+  const {watch, getValues, setValue} = useFormContext<Product>();
   const isNewProduct = !watch('id');
   const isNewPrice = watch(`prices.${index}.id`) == null;
   const subscriberCount = watch(`prices.${index}.subscriptions_count`) || 0;
@@ -38,6 +42,13 @@ export function PriceForm({index, onRemovePrice}: PriceFormProps) {
   });
 
   const allowPriceChanges = isNewProduct || isNewPrice || !subscriberCount;
+
+  // check whether payment method with id = phonesub is selected
+  const isPhonesubSelected = watch(`prices.${index}.paymentMethods`)?.includes(
+    'phonesub'
+  );
+
+  const paymentMethods = usePaymentMethods();
 
   return (
     <Fragment>
@@ -78,6 +89,7 @@ export function PriceForm({index, onRemovePrice}: PriceFormProps) {
           >{`${item.code}: ${item.name}`}</Item>
         )}
       </FormSelect>
+
       <BillingPeriodSelect
         disabled={!allowPriceChanges}
         index={index}
@@ -87,12 +99,28 @@ export function PriceForm({index, onRemovePrice}: PriceFormProps) {
       {billingPeriodPreset === 'custom' && (
         <CustomBillingPeriodField disabled={!allowPriceChanges} index={index} />
       )}
+
+      <CheckboxGroup
+        label={<Trans message="Allowed Payment Methods" />}
+        value={getValues(`prices.${index}.paymentMethods`)??[]}
+        onChange={(newMethods) => setValue(`prices.${index}.paymentMethods`, newMethods.map(String))}
+        className="mb-20"
+      >
+        {paymentMethods?.map((method) => (
+          <Checkbox key={method.id} value={method.id}>
+            {method.name}
+          </Checkbox>
+        ))}
+      </CheckboxGroup>
+
       <FormTextField
-        label={<Trans message="SUB product id" />}
+        disabled={!allowPriceChanges || !isPhonesubSelected}
+        label={<Trans message="Phonesub product id" />}
         type="text"
         name={`prices.${index}.sub_product_id`}
         className="mb-20"
       />
+
       <div className="text-right">
         <Button
           size="xs"
@@ -179,7 +207,7 @@ function CustomBillingPeriodField({
   }
 
   return (
-    <div className="flex border rounded w-min">
+    <div className="flex border rounded w-min mb-20">
       <div className="px-18 flex items-center text-sm">
         <Trans message="Every" />
       </div>

@@ -62,6 +62,7 @@ class ProductsController extends BaseController
             'prices.*.interval' => 'string|max:255',
             'prices.*.amount' => 'min:1',
             'prices.*.sub_product_id' => 'nullable|string|max:255',
+            'prices.*.paymentMethods' => ['array', 'required_with:prices', 'string'],
         ]);
 
         $plan = app(CrupdateProduct::class)->execute(request()->all());
