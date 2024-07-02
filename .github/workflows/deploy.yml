@@ -65,7 +65,7 @@ jobs:
           target: /home/deployer/deploy/builds/
 
       - name: Execute deploy script on the deployment server
-        uses: appleboy/ssh-action@v0.1.10
+        uses: actions/ssh-action@v3
         with:
           host: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
           username: deployer
