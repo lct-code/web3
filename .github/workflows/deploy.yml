@@ -54,6 +54,9 @@ jobs:
           archive_name="/tmp/deployment_$timestamp_${{ github.event.inputs.branch }}.tar.gz"
           tar --exclude-vcs -czvf $archive_name .  # Archive the entire project
 
+      - name: List archive details
+        run: ls -la "$archive_name"
+
       - name: Upload archive via SCP
         uses: appleboy/scp-action@v0.1.7
         with:
