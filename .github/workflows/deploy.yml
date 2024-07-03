@@ -9,16 +9,16 @@ on:
         type: choice
         options:
         - master
-        - staging
+        - deploy-dohaty.tv
+        - deploy-staging.dohaty.tv
+
       target_server:
         description: 'Target deployment server hostname'
         required: true
         type: choice
         options:
-        - dohaty-sa.com
-        - dohaty.tv
         - staging.dohaty-sa.com
-        - alkhassaid.com
+        - staging.dohaty.tv
 
 jobs:
   build_deploy:
@@ -48,14 +48,29 @@ jobs:
       - name: Build production JavaScript
         run: npm run build
 
+      - name: Set environment variable (timestamp)
+        run: echo ARCHIVE_TIMESTAMP=$(date +%Y%m%d-%H%M%S) >> $GITHUB_ENV
+
+      - name: Set environment variable (archive name)
+        run: echo 'ARCHIVE_NAME=deployment_${{ env.ARCHIVE_TIMESTAMP }}_${{ github.event.inputs.branch }}.tar.gz' >> $GITHUB_ENV
+
+      - name: Set environment variable (archive temp path)
+        run: echo 'ARCHIVE_TEMP_PATH=/tmp/${{ env.ARCHIVE_NAME }}' >> $GITHUB_ENV
+
+      - name: Set environment variable (archive path)
+        run: echo 'ARCHIVE_PATH=${{ github.workspace }}/${{ env.ARCHIVE_NAME }}' >> $GITHUB_ENV
+
+      - name: Verify environment
+        run: env
+
       - name: Create archive
-        run: |
-          timestamp=$(date +%Y%m%d-%H%M%S)
-          archive_name="/tmp/deployment_$timestamp_${{ github.event.inputs.branch }}.tar.gz"
-          tar --exclude-vcs -czvf $archive_name .  # Archive the entire project
+        run: tar --exclude-vcs -czvf $ARCHIVE_TEMP_PATH .  # Archive the entire project
+
+      - name: Move archive to workdir
+        run: mv $ARCHIVE_TEMP_PATH $ARCHIVE_PATH
 
       - name: List archive details
-        run: ls -la "$archive_name"
+        run: ls -la $ARCHIVE_PATH
 
       - name: Upload archive via SCP
         uses: appleboy/scp-action@v0.1.7
@@ -64,14 +79,16 @@ jobs:
           username: deployer
           port: 2255
           key: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}
-          source: $archive_name
+          source: "${{ env.ARCHIVE_PATH }}"
           target: /home/deployer/deploy/builds/
+          debug: true
 
       - name: Execute deploy script on the deployment server
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
           username: deployer
+          port: 2255
           key: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}
-          script: bash /home/deployer/deploy/deploy.sh $archive_name ${{ github.event.inputs.target_server }}
+          script: bash /home/deployer/deploy/deploy.sh ${{ env.ARCHIVE_NAME }} ${{ github.event.inputs.target_server }}
 
