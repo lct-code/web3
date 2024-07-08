@@ -82,6 +82,7 @@ jobs:
           source: "${{ env.ARCHIVE_PATH }}"
           target: /home/deployer/deploy/builds/
           debug: true
+          strip_components: 2
 
       - name: Execute deploy script on the deployment server
         uses: appleboy/ssh-action@v0.1.10
