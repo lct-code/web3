@@ -64,7 +64,7 @@ jobs:
         run: env
 
       - name: Create archive
-        run: tar --exclude-vcs -czvf $ARCHIVE_TEMP_PATH .  # Archive the entire project
+        run: tar --exclude-vcs --exclude="vendor" -czvf $ARCHIVE_TEMP_PATH .  # Archive the entire project
 
       - name: Move archive to workdir
         run: mv $ARCHIVE_TEMP_PATH $ARCHIVE_PATH
