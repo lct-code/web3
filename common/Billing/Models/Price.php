@@ -18,7 +18,7 @@ class Price extends Model
         'interval_count' => 'int',
         'default' => 'boolean',
         'subscriptions_count' => 'int',
-        'paymentMethods' => 'array',
+        'paymentMethods' => 'json',
     ];
 
     const MODEL_TYPE = 'price';
