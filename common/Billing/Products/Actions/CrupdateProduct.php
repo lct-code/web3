@@ -67,7 +67,7 @@ class CrupdateProduct
                 'interval_count' => $price['interval_count'],
                 'interval' => $price['interval'],
                 'currency' => $price['currency'],
-                'sub_product_id' => $price['sub_product_id'],
+                'sub_product_id' => $price['sub_product_id'] ?? null,
                 'paymentMethods' => $price['paymentMethods'] ?? [],
             ];
 
