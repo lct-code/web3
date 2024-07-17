@@ -1,0 +1,94 @@
+name: Build and Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Source code branch to deploy'
+        required: true
+        type: choice
+        options:
+        - master
+        - deploy-dohaty.tv
+        - deploy-staging.dohaty.tv
+
+      target_server:
+        description: 'Target deployment server hostname'
+        required: true
+        type: choice
+        options:
+        - staging.dohaty-sa.com
+        - staging.dohaty.tv
+
+jobs:
+  build_deploy:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php-version: ['8.2']
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4  # Updated to v4 for Node.js 20 support
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+
+      - name: Install dependencies (Composer)
+        run: composer install
+
+      - name: Install dependencies (NPM)
+        run: npm install
+
+      - name: Build production JavaScript
+        run: npm run build
+
+      - name: Set environment variable (timestamp)
+        run: echo ARCHIVE_TIMESTAMP=$(date +%Y%m%d-%H%M%S) >> $GITHUB_ENV
+
+      - name: Set environment variable (archive name)
+        run: echo 'ARCHIVE_NAME=deployment_${{ env.ARCHIVE_TIMESTAMP }}_${{ github.event.inputs.branch }}.tar.gz' >> $GITHUB_ENV
+
+      - name: Set environment variable (archive temp path)
+        run: echo 'ARCHIVE_TEMP_PATH=/tmp/${{ env.ARCHIVE_NAME }}' >> $GITHUB_ENV
+
+      - name: Set environment variable (archive path)
+        run: echo 'ARCHIVE_PATH=${{ github.workspace }}/${{ env.ARCHIVE_NAME }}' >> $GITHUB_ENV
+
+      - name: Verify environment
+        run: env
+
+      - name: Create archive
+        run: tar --exclude-vcs --exclude="vendor" -czvf $ARCHIVE_TEMP_PATH .  # Archive the entire project
+
+      - name: Move archive to workdir
+        run: mv $ARCHIVE_TEMP_PATH $ARCHIVE_PATH
+
+      - name: List archive details
+        run: ls -la $ARCHIVE_PATH
+
+      - name: Upload archive via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
+          username: deployer
+          port: 2255
+          key: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}
+          source: "${{ env.ARCHIVE_PATH }}"
+          target: /home/deployer/deploy/builds/
+          debug: true
+          strip_components: 2
+
+      - name: Execute deploy script on the deployment server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.DEPLOYMENT_SERVER_HOST }}
+          username: deployer
+          port: 2255
+          key: ${{ secrets.DEPLOYMENT_SERVER_SSH_KEY }}
+          script: bash /home/deployer/deploy/deploy.sh ${{ env.ARCHIVE_NAME }} ${{ github.event.inputs.target_server }}
