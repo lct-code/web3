@@ -7,7 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
+# node_modules
 # vendor
 dist
 dist-ssr
@@ -31,13 +31,13 @@ Thumbs.db
 public/.htaccess
 public/favicon
 public/favicon.ico
-public/build
+# public/build
 install_files
 /public/hot
 /storage/*.key
 Homestead.json
 Homestead.yaml
-.env
+#.env
 .env.*
 data.ms
 /test-results/
