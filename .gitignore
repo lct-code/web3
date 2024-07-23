@@ -37,7 +37,7 @@ install_files
 /storage/*.key
 Homestead.json
 Homestead.yaml
-.env
+#.env
 .env.*
 data.ms
 /test-results/
