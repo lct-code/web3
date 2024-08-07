@@ -82,7 +82,7 @@ function openNewSocialAuthWindow(url: string): Promise<SocialMessageEvent> {
     win = window.open(
       url,
       'Authenticate Account',
-      `menubar=0, location=0, toolbar=0, titlebar=0, status=0, scrollbars=1, width=${windowWidth}, height=${windowHeight}, left=${left}, top=${top}`,
+      `menubar=0, location=0, toolbar=0, titlebar=0, status=0, scrollbars=1, width=${windowWidth}, height=${windowHeight}, left=${left}, top=${top}, opener=1`,
     );
 
     const messageListener = (e: MessageEvent) => {
