@@ -12,6 +12,13 @@
         @endif
     @endif
 
-    window.opener.postMessage({status: status, callbackData: data, type: 'social-auth'}, '*');
+    var messageObject = {status: status, callbackData: data, type: 'social-auth'};
+
+    if (window.opener) {
+        window.opener.postMessage(messageObject, '*');
+    }
+    else {
+        localStorage.setItem('oauthMessage', JSON.stringify(MessageObject));
+    }
     window.close();
 </script>

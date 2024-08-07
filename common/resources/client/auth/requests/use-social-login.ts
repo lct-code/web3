@@ -103,8 +103,8 @@ function openNewSocialAuthWindow(url: string): Promise<SocialMessageEvent> {
         const messageObject = JSON.parse(e.newValue || '{}');
         console.log('storageListener', e.key, messageObject, e);
 
-        if (messageObject.callbackData.type === 'social-auth' && e.url.indexOf(baseUrl) === 0) {
-          resolve(messageObject.callbackData);
+        if (messageObject.type === 'social-auth' && e.url.indexOf(baseUrl) === 0) {
+          resolve(messageObject);
           window.removeEventListener('storage', storageListener);
         }
 			}
