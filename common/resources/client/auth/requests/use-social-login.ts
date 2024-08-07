@@ -87,6 +87,7 @@ function openNewSocialAuthWindow(url: string): Promise<SocialMessageEvent> {
 
     const messageListener = (e: MessageEvent) => {
       const baseUrl = getBootstrapData().settings.base_url;
+      console.log('messageListener', e, e.data);
       if (e.data.type === 'social-auth' && baseUrl.indexOf(e.origin) > -1) {
         resolve(e.data);
         window.removeEventListener('message', messageListener);
@@ -95,12 +96,29 @@ function openNewSocialAuthWindow(url: string): Promise<SocialMessageEvent> {
 
     window.addEventListener('message', messageListener);
 
+    const storageListener = (e: StorageEvent) => {
+      const baseUrl = getBootstrapData().settings.base_url;
+			if (e.key === 'oauthMessage') {
+
+        const messageObject = JSON.parse(e.newValue || '{}');
+        console.log('storageListener', e.key, messageObject, e);
+
+        if (messageObject.type === 'social-auth' && e.url.indexOf(baseUrl) === 0) {
+          resolve(messageObject);
+          window.removeEventListener('storage', storageListener);
+        }
+			}
+    };
+
+		window.addEventListener('storage', storageListener);
+
     // if user closes social login callback without interacting with it, remove message event listener
     const timer = setInterval(() => {
       if (!win || win.closed) {
         clearInterval(timer);
         resolve({});
         window.removeEventListener('message', messageListener);
+        window.removeEventListener('storage', storageListener);
       }
     }, 1000);
   });
