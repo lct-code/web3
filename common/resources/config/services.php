@@ -98,7 +98,6 @@ return [
         'client_id' => env('FACEBOOK_ID'),
         'client_secret' => env('FACEBOOK_SECRET'),
         'redirect' => env('APP_URL') . '/secure/auth/social/facebook/callback',
-        'popup' => false,
     ],
 
     /**
