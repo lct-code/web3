@@ -18,7 +18,7 @@
         window.opener.postMessage(messageObject, '*');
     }
     else {
-        localStorage.setItem('oauthMessage', JSON.stringify(MessageObject));
+        localStorage.setItem('oauthMessage', JSON.stringify(messageObject));
     }
     window.close();
 </script>
