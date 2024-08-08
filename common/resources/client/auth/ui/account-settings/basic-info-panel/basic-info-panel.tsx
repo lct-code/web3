@@ -24,6 +24,7 @@ export function BasicInfoPanel({user}: Props) {
     defaultValues: {
       first_name: user.first_name || '',
       last_name: user.last_name || '',
+      phone: user.phone || '',
       avatar: user.avatar,
     },
   });
@@ -32,7 +33,7 @@ export function BasicInfoPanel({user}: Props) {
   return (
     <AccountSettingsPanel
       id={AccountSettingsId.AccountDetails}
-      title={<Trans message="Update name and profile image" />}
+      title={<Trans message="Update name, phone number and profile image" />}
       actions={
         <Button
           type="submit"
@@ -60,8 +61,13 @@ export function BasicInfoPanel({user}: Props) {
             label={<Trans message="First name" />}
           />
           <FormTextField
+            className="mb-24"
             name="last_name"
             label={<Trans message="Last name" />}
+          />
+          <FormTextField
+            name="phone"
+            label={<Trans message="Phone number" />}
           />
         </div>
         <FileUploadProvider>

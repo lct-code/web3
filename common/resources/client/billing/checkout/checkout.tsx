@@ -4,10 +4,13 @@ import {CheckoutLayout} from './checkout-layout';
 import {CheckoutProductSummary} from './checkout-product-summary';
 import {usePaypal} from './paypal/use-paypal';
 import {StripeElementsForm} from './stripe/stripe-elements-form';
+import {PhonesubElementsForm} from './phonesub/phonesub-elements-form';
 import {Fragment} from 'react';
 import {useProducts} from '../pricing-table/use-products';
 import {FullPageLoader} from '../../ui/progress/full-page-loader';
 import {useSettings} from '../../core/settings/use-settings';
+import {Button} from '../../ui/buttons/button';
+import {useNavigate} from '../../utils/hooks/use-navigate';
 
 export function Checkout() {
   const {productId, priceId} = useParams();
@@ -18,8 +21,9 @@ export function Checkout() {
   });
   const {
     base_url,
-    billing: {stripe},
+    billing: {stripe, phonesub, paypal},
   } = useSettings();
+  const navigate = useNavigate();
 
   if (productQuery.isLoading) {
     return <FullPageLoader screen />;
@@ -41,6 +45,20 @@ export function Checkout() {
         <h1 className="mb-40 text-4xl">
           <Trans message="Checkout" />
         </h1>
+        {phonesub.enable ? (
+          <Fragment>
+            <PhonesubElementsForm
+              productId={productId}
+              priceId={priceId}
+              submitLabel={<Trans message="Send code" />}
+              verifyLabel={<Trans message="Verify code" />}
+              resendLabel={<Trans message="Resend code" />}
+              type="subscription"
+              returnUrl={`/checkout/${productId}/${priceId}/phonesub/done`}
+            />
+            {stripe.enable || paypal.enable ? <Separator /> : null}
+          </Fragment>
+        ) : null}
         {stripe.enable ? (
           <Fragment>
             <StripeElementsForm
@@ -50,10 +68,23 @@ export function Checkout() {
               type="subscription"
               returnUrl={`${base_url}/checkout/${productId}/${priceId}/stripe/done`}
             />
-            <Separator />
+            {paypal.enable ? <Separator /> : null}
           </Fragment>
         ) : null}
         <div ref={paypalElementRef} />
+        <Separator />
+        <Button
+          variant="flat"
+          color="chip"
+          size="md"
+          className="w-full"
+          type="button"
+          onClick={() => {
+            navigate('/pricing');
+          }}
+        >
+          <Trans message="Go back" />
+        </Button>
         <div className="mt-30 text-xs text-muted">
           <Trans message="You’ll be charged until you cancel your subscription. Previous charges won’t be refunded when you cancel unless it’s legally required. Your payment data is encrypted and secure. By subscribing your agree to our terms of service and privacy policy." />
         </div>

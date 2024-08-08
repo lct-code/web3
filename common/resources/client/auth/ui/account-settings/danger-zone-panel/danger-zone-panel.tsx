@@ -5,9 +5,15 @@ import {ConfirmationDialog} from '@common/ui/overlays/dialog/confirmation-dialog
 import {useDeleteAccount} from './delete-account';
 import {Trans} from '@common/i18n/trans';
 import {AccountSettingsId} from '@common/auth/ui/account-settings/account-settings-sidenav';
+import {User} from '../../../user';
 
-export function DangerZonePanel() {
+interface Props {
+  user: User;
+}
+export function DangerZonePanel({user}: Props) {
   const deleteAccount = useDeleteAccount();
+
+  const hasSubscription = (user?.subscriptions ?? []).filter((sub) => sub.active ?? false).length > 0;
 
   return (
     <AccountSettingsPanel
@@ -22,7 +28,10 @@ export function DangerZonePanel() {
           }
         }}
       >
-        <Button variant="flat" color="danger">
+        <Button
+          variant="flat"
+          color="danger"
+          disabled={hasSubscription}>
           <Trans message="Delete account" />
         </Button>
         <ConfirmationDialog
@@ -34,6 +43,12 @@ export function DangerZonePanel() {
           confirm={<Trans message="Delete" />}
         />
       </DialogTrigger>
+
+      {hasSubscription && (
+        <div className="text-muted text-sm pt-16 pb-6">
+          <Trans message="You cannot delete your account with an active subscription." />
+        </div>
+      )}
     </AccountSettingsPanel>
   );
 }
