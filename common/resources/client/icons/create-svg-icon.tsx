@@ -4,7 +4,8 @@ import {SvgIcon, SvgIconProps} from './svg-icon';
 export function createSvgIcon(
   path: ReactElement | ReactElement[],
   displayName: string = '',
-  viewBox?: string
+  viewBox?: string,
+  reverseOnRtl?: boolean
 ): ComponentType<SvgIconProps> {
   const Component = (props: SvgIconProps, ref: RefObject<SVGSVGElement>) => (
     <SvgIcon
@@ -13,6 +14,7 @@ export function createSvgIcon(
       viewBox={viewBox}
       {...props}
       size={props.size || 'md'}
+      reverseOnRtl={reverseOnRtl}
     >
       {path}
     </SvgIcon>

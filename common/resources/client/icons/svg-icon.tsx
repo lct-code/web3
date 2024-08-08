@@ -8,6 +8,7 @@ export interface SvgIconProps extends React.SVGAttributes<SVGElement> {
   size?: IconSize;
   color?: string;
   title?: string;
+  reverseOnRtl?: boolean;
 }
 
 export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps & {attr?: {}}>(
@@ -23,6 +24,7 @@ export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps & {attr?: {}}>(
       viewBox,
       width,
       height,
+      reverseOnRtl,
       ...svgProps
     } = props;
 
@@ -34,7 +36,7 @@ export const SvgIcon = forwardRef<SVGSVGElement, SvgIconProps & {attr?: {}}>(
         viewBox={viewBox || '0 0 24 24'}
         {...attr}
         {...svgProps}
-        className={clsx('svg-icon', className, getSizeClassName(size))}
+        className={clsx('svg-icon', className, getSizeClassName(size), reverseOnRtl ? 'reverse-on-rtl' : null)}
         style={{
           color,
           ...style,

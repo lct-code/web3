@@ -106,6 +106,7 @@
     "express": "^4.18.2",
     "laravel-vite-plugin": "^0.8.1",
     "postcss": "^8.4.31",
+    "postcss-rtlcss": "^5.1.0",
     "prettier": "^3.0.3",
     "prettier-plugin-blade": "^1.6.14",
     "prettier-plugin-tailwindcss": "^0.5.6",
