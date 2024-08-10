@@ -1,14 +1,16 @@
 // find the highest percentage decrease between monthly and yearly prices of specified products
 import {Product} from '../product';
-import {findBestPrice} from './find-best-price';
+import {findBestPrice, yearlyPriceAmount, UpsellBillingCycle} from './find-best-price';
 import {Fragment, memo} from 'react';
 import {Trans} from '../../i18n/trans';
 
 interface UpsellLabelProps {
   products?: Product[];
+  cycle?: UpsellBillingCycle;
 }
-export const UpsellLabel = memo(({products}: UpsellLabelProps) => {
-  const upsellPercentage = calcHighestUpsellPercentage(products);
+
+export const UpsellLabel = memo(({products, cycle}: UpsellLabelProps) => {
+  const upsellPercentage = calcHighestUpsellPercentage(products, cycle);
 
   if (upsellPercentage <= 0) {
     return null;
@@ -29,21 +31,50 @@ export const UpsellLabel = memo(({products}: UpsellLabelProps) => {
   );
 });
 
-function calcHighestUpsellPercentage(products?: Product[]) {
+function calcHighestUpsellPercentage(products?: Product[], cycle?: UpsellBillingCycle) {
   if (!products?.length) return 0;
+  if (!cycle) {
+    cycle = 'yearly';
+  }
 
   const decreases = products.map(product => {
-    const monthly = findBestPrice('monthly', product.prices);
-    const yearly = findBestPrice('yearly', product.prices);
+    if (product.hidden) return 0;
 
-    if (!monthly || !yearly) return 0;
+    const bestPrice = {
+      'daily': findBestPrice('daily', product.prices),
+      'weekly': findBestPrice('weekly', product.prices),
+      'monthly': findBestPrice('monthly', product.prices),
+      'quarterly': findBestPrice('quarterly', product.prices),
+      'yearly': findBestPrice('yearly', product.prices),
+    }
 
-    // monthly plan per year amount
-    const monthlyAmount = monthly.amount * 12;
-    const yearlyAmount = yearly.amount;
+    if (!bestPrice[cycle]) return 0;
+
+    // all plans per year amount
+    const amountPerYear = {
+      'daily': yearlyPriceAmount(bestPrice.daily),
+      'weekly': yearlyPriceAmount(bestPrice.weekly),
+      'monthly': yearlyPriceAmount(bestPrice.monthly),
+      'quarterly': yearlyPriceAmount(bestPrice.quarterly),
+      'yearly': yearlyPriceAmount(bestPrice.yearly),
+    }
+    if (!amountPerYear[cycle]) return 0;
+
+    //const worstAmount = Object.values(amountPerYear).filter(Boolean).reduce((max, current) => Math.max(max, current??0), 0);
+    //const worstAmount = Math.max(...Object.values(amountPerYear).filter(Boolean));
+    //
+    // find the worst (highest) amount
+    let worstAmount = 0;
+    for (const [key, value] of Object.entries(amountPerYear)) {
+      if (!value) continue;
+      if (value > worstAmount) {
+        worstAmount = value;
+      }
+    }
+    if (!worstAmount) return 0;
 
     const savingsPercentage = Math.round(
-      ((monthlyAmount - yearlyAmount) / monthlyAmount) * 100
+      ((worstAmount - (amountPerYear[cycle] ?? worstAmount)) / worstAmount) * 100
     );
 
     if (savingsPercentage > 0 && savingsPercentage <= 200) {
@@ -55,3 +86,4 @@ function calcHighestUpsellPercentage(products?: Product[]) {
 
   return Math.max(Math.max(...decreases), 0);
 }
+
