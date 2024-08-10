@@ -9,7 +9,7 @@ const intervalMultipliers = {
     'day': 365,
 }
 
-export function yearlyPriceAmount(price: Price) {
+export function yearlyPriceAmount(price?: Price) {
     if (!price) return;
     return price.amount * intervalMultipliers[price.interval] / price.interval_count;
 }

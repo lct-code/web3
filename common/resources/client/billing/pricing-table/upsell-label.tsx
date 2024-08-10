@@ -31,7 +31,7 @@ export const UpsellLabel = memo(({products, cycle}: UpsellLabelProps) => {
   );
 });
 
-function calcHighestUpsellPercentage(products: Product[], cycle: UpsellBillingCycle) {
+function calcHighestUpsellPercentage(products?: Product[], cycle?: UpsellBillingCycle) {
   if (!products?.length) return 0;
   if (!cycle) {
     cycle = 'yearly';
@@ -58,11 +58,23 @@ function calcHighestUpsellPercentage(products: Product[], cycle: UpsellBillingCy
       'quarterly': yearlyPriceAmount(bestPrice.quarterly),
       'yearly': yearlyPriceAmount(bestPrice.yearly),
     }
+    if (!amountPerYear[cycle]) return 0;
 
-    const worstAmount = Object.values(amountPerYear).filter(Boolean).reduce((max, current) => Math.max(max, current), 0);
+    //const worstAmount = Object.values(amountPerYear).filter(Boolean).reduce((max, current) => Math.max(max, current??0), 0);
+    //const worstAmount = Math.max(...Object.values(amountPerYear).filter(Boolean));
+    //
+    // find the worst (highest) amount
+    let worstAmount = 0;
+    for (const [key, value] of Object.entries(amountPerYear)) {
+      if (!value) continue;
+      if (value > worstAmount) {
+        worstAmount = value;
+      }
+    }
+    if (!worstAmount) return 0;
 
     const savingsPercentage = Math.round(
-      ((worstAmount - amountPerYear[cycle]) / worstAmount) * 100
+      ((worstAmount - (amountPerYear[cycle] ?? worstAmount)) / worstAmount) * 100
     );
 
     if (savingsPercentage > 0 && savingsPercentage <= 200) {
@@ -74,4 +86,3 @@ function calcHighestUpsellPercentage(products: Product[], cycle: UpsellBillingCy
 
   return Math.max(Math.max(...decreases), 0);
 }
-
