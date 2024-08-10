@@ -220,6 +220,7 @@ function PricingListForm() {
             amount: 1,
             interval_count: 1,
             interval: 'month',
+            paymentMethods: ['paypal', 'stripe', 'phonesub'],
           });
         }}
       >

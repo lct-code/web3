@@ -18,6 +18,14 @@ export default function CheckoutRoutes() {
         }
       />
       <Route
+        path=":productId/:priceId/:paymentMethodId"
+        element={
+          <NotSubscribedRoute>
+            <Checkout />
+          </NotSubscribedRoute>
+        }
+      />
+      <Route
         path=":productId/:priceId/stripe/done"
         element={
           <NotSubscribedRoute>

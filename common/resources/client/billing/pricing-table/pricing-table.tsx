@@ -4,6 +4,7 @@ import {opacityAnimation} from '@common/ui/animation/opacity-animation';
 import {Skeleton} from '@common/ui/skeleton/skeleton';
 import {useProducts} from '@common/billing/pricing-table/use-products';
 import {Product} from '@common/billing/product';
+import {Price} from '@common/billing/price';
 import {
   findBestPrice,
   UpsellBillingCycle,
@@ -17,6 +18,7 @@ import {Button} from '@common/ui/buttons/button';
 import {Link} from 'react-router-dom';
 import {setInLocalStorage} from '@common/utils/hooks/local-storage';
 import {ProductFeatureList} from '@common/billing/pricing-table/product-feature-list';
+import {usePaymentMethods} from '@common/billing/use-payment-methods';
 
 interface PricingTableProps {
   selectedCycle: UpsellBillingCycle;
@@ -58,23 +60,26 @@ interface PlanListProps {
 function PlanList({plans, selectedPeriod}: PlanListProps) {
   const {isLoggedIn, isSubscribed} = useAuth();
   const filteredPlans = plans.filter(plan => !plan.hidden);
+  const paymentMethods = usePaymentMethods();
+
+  const getUpgradeRoute = (plan: Product, price?: Price, paymentMethod?: string) => {
+    if (!isLoggedIn) {
+      return `/register?redirectFrom=pricing`;
+    }
+    if (isSubscribed) {
+      return `/billing/change-plan/${plan.id}/${price?.id}/confirm`;
+    }
+    if (isLoggedIn && !plan.free) {
+      return `/checkout/${plan.id}/${price?.id}/${paymentMethod}`;
+    }
+  }
+
   return (
     <Fragment>
       {filteredPlans.map((plan, index) => {
         const isFirst = index === 0;
         const isLast = index === filteredPlans.length - 1;
         const price = findBestPrice(selectedPeriod, plan.prices);
-
-        let upgradeRoute;
-        if (!isLoggedIn) {
-          upgradeRoute = `/register?redirectFrom=pricing`;
-        }
-        if (isSubscribed) {
-          upgradeRoute = `/change-plan/${plan.id}/${price?.id}/confirm`;
-        }
-        if (isLoggedIn && !plan.free) {
-          upgradeRoute = `/checkout/${plan.id}/${price?.id}`;
-        }
 
         return (
           <m.div
@@ -118,28 +123,53 @@ function PlanList({plans, selectedPeriod}: PlanListProps) {
                 </div>
               )}
               <div className="mt-60">
-                <Button
-                  variant={plan.recommended ? 'flat' : 'outline'}
-                  color="primary"
-                  className="w-full"
-                  size="md"
-                  elementType={upgradeRoute ? Link : undefined}
-                  disabled={!upgradeRoute}
-                  onClick={() => {
-                    if (isLoggedIn || !price || !plan) return;
-                    setInLocalStorage('be.onboarding.selected', {
-                      productId: plan.id,
-                      priceId: price.id,
-                    });
-                  }}
-                  to={upgradeRoute}
-                >
-                  {plan.free ? (
+                {plan.free ? (
+                  <Button
+                    variant={plan.recommended ? 'flat' : 'outline'}
+                    color="primary"
+                    className="w-full"
+                    size="md"
+                    elementType={getUpgradeRoute(plan, price) ? Link : undefined}
+                    disabled={!getUpgradeRoute(plan, price)}
+                    onClick={() => {
+                      if (isLoggedIn || !price || !plan) return;
+                      setInLocalStorage('be.onboarding.selected', {
+                        productId: plan.id,
+                        priceId: price.id,
+                      });
+                    }}
+                    to={getUpgradeRoute(plan, price)}
+                  >
                     <Trans message="Get started" />
-                  ) : (
-                    <Trans message="Upgrade" />
-                  )}
-                </Button>
+                  </Button>
+              ) : (
+                paymentMethods.filter((method) => method.enabled && (price?.paymentMethods || []).includes(method.id)).map((method) => (
+                  <div key={method.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}} className="mb-20">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <strong>{method.name}</strong>
+                    </div>
+                    <Button
+                      variant={plan.recommended ? 'flat' : 'outline'}
+                      color="primary"
+                      className="w-full"
+                      size="md"
+                      elementType={getUpgradeRoute(plan, price, method.id) ? Link : undefined}
+                      disabled={!getUpgradeRoute(plan, price, method.id)}
+                      onClick={() => {
+                        if (isLoggedIn || !price || !plan) return;
+                        setInLocalStorage('be.onboarding.selected', {
+                          productId: plan.id,
+                          priceId: price.id,
+                          paymentMethod: method.id,
+                        });
+                      }}
+                      to={getUpgradeRoute(plan, price, method.id)}
+                    >
+                      <Trans message="Upgrade" />
+                    </Button>
+                  </div>
+                ))
+              )}
               </div>
               <ProductFeatureList product={plan} />
             </div>
