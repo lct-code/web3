@@ -86,7 +86,7 @@ function findMonthlyPrice(prices: Price[]) {
     if (price.interval === 'week' && price.interval_count >= 4) {
       return price;
     }
-    if (price.interval === 'month' && price.interval_count >= 1) {
+    if (price.interval === 'month' && price.interval_count >= 1 && price.interval_count < 3) {
       return price;
     }
   });
