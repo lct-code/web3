@@ -17,7 +17,7 @@
     // add a fallback timeout to redirect to the home page
     setTimeout(function() {
         window.location.href = '/';
-    }, 1000);
+    }, 2000);
 
     if (window.opener) {
         window.opener.postMessage(messageObject, '*');
