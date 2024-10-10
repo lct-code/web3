@@ -1,4 +1,4 @@
-import {useCallback, useState} from 'react';
+import {useCallback, useState, useEffect} from 'react';
 import {toast} from '../../ui/toast/toast';
 import {useDisconnectSocial} from './disconnect-social';
 import {useTrans} from '../../i18n/use-trans';
@@ -50,9 +50,34 @@ export function useSocialLogin() {
     [trans, setBootstrapData],
   );
 
-  globalThis.handleAuthToken = (provider: String, token: String) => {
+  const handleAuthToken = (provider: String, token: String) => {
     console.log('handleAuthToken', provider, token);
   };
+
+	useEffect(() => {
+		const mobileStorageListener = (event: StorageEvent) => {
+      console.log('mobileStorageListener', event);
+			if (event.key === 'oauthMobileToken') {
+				try {
+					const jsonObject = JSON.parse(event.newValue || '{}');
+					const idToken = jsonObject.idToken;
+					const provider = jsonObject.provider;
+
+          handleAuthToken(provider, idToken);
+
+				} catch (error) {
+					// Handle JSON parsing error
+					console.error("Error parsing JSON from localStorage:", error);
+				}
+			}
+		};
+
+		window.addEventListener('storage', mobileStorageListener);
+
+		return () => {
+			window.removeEventListener('storage', mobileStorageListener);
+		};
+	}, []);
 
   return {
     requestingPassword,
