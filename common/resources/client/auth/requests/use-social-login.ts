@@ -50,6 +50,10 @@ export function useSocialLogin() {
     [trans, setBootstrapData],
   );
 
+  globalThis.handleAuthToken = (provider: String, token: String) => {
+    console.log('handleAuthToken', provider, token);
+  };
+
   return {
     requestingPassword,
     setIsRequestingPassword,

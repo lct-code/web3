@@ -32,4 +32,6 @@ return [
     'ssr_url' => env('SSR_URL', 'http://127.0.0.1:13714'),
     'disable_csrf' => env('DISABLE_CSRF', false),
     'demo_password' => env('DEMO_ADMIN_PASSWORD'),
+
+    'android_app_user_agent' => env('ANDROID_APP_USER_AGENT', 'Sngine'),
 ];
