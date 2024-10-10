@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\View;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\One\User as OneUser;
 use Laravel\Socialite\Two\User as TwoUser;
+use Illuminate\Support\Facades\Log;
 
 class Oauth
 {
@@ -38,7 +39,17 @@ class Oauth
     {
         $this->validateProvider($providerName);
 
-        return Socialite::driver($providerName)->redirect();
+        $response = Socialite::driver($providerName)->redirect();
+        Log::debug("Oauth redirect for $providerName to " . $response->getTargetUrl()." with user agent ".request()->header('User-Agent'));
+
+        if (is_android_app()) {
+            // Modify the redirect URL to the Android deep link
+            $response->setTargetUrl('lctmediastreaming://auth/' . $providerName);
+
+            Log::debug("Oauth redirect rerouted to " . $response->getTargetUrl());
+        }
+
+        return $response;
     }
 
     /**
@@ -341,4 +352,9 @@ class Oauth
 
         return $view;
     }
+}
+
+function is_android_app(): bool
+{
+    return request()->header('User-Agent') === (config('common.site.android_app_user_agent') || 'Sngine');
 }
