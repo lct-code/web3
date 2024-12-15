@@ -47,6 +47,7 @@ export function AuthenticationSettings() {
         <Trans message="Compact buttons" />
       </FormSwitch>
       <EnvatoSection />
+      <MobileLoginSection />
       <GoogleSection />
       <FacebookSection />
       <TwitterSection />
@@ -156,6 +157,30 @@ function EnvatoSection() {
             </>
           )}
         </>
+      )}
+    </SettingsErrorGroup>
+  );
+}
+
+function MobileLoginSection() {
+  const {watch} = useFormContext<AdminSettings>();
+  const isMobileLoginDisabled = watch('client.mobile_login.disable' as keyof AdminSettings);
+
+  return (
+    <SettingsErrorGroup 
+    name="mobile_login_group"
+    separatorBottom={false}>
+      {isInvalid => (
+        <FormSwitch
+          invalid={isInvalid}
+          className="mb-24"
+          name="client.mobile_login.disable"
+          description={
+            <Trans message={isMobileLoginDisabled ? "Enable login from mobile devices." : "Disable login from mobile devices."} />
+          }
+        >
+          <Trans message={isMobileLoginDisabled ? "Enable mobile login" : "Disable mobile login"} />
+        </FormSwitch>
       )}
     </SettingsErrorGroup>
   );
