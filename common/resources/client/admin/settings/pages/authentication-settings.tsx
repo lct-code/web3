@@ -164,7 +164,7 @@ function EnvatoSection() {
 
 function MobileLoginSection() {
   const {watch} = useFormContext<AdminSettings>();
-  const isMobileLoginDisabled = watch('client.mobile_login.disable' as keyof AdminSettings);
+  const isMobileLoginDisabled = watch('client.mobile_login' as keyof AdminSettings);
 
   return (
     <SettingsErrorGroup 
@@ -174,7 +174,7 @@ function MobileLoginSection() {
         <FormSwitch
           invalid={isInvalid}
           className="mb-24"
-          name="client.mobile_login.disable"
+          name="client.mobile_login"
           description={
             <Trans message={isMobileLoginDisabled ? "Enable login from mobile devices." : "Disable login from mobile devices."} />
           }

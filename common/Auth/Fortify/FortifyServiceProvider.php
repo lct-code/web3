@@ -53,7 +53,14 @@ class FortifyServiceProvider extends ServiceProvider
         });
 
         Fortify::authenticateUsing(function (Request $request) {
-            $user = User::where('email', $request->email)->first();
+
+            $mobileLogin = settings('mobile_login') === true;
+
+            if ($mobileLogin) {
+                $user = User::where('phone', $request->phone)->first();
+            } else {
+                $user = User::where('email', $request->email)->first();
+            }
 
             if (!FortifyRegisterUser::emailIsValid($request->email)) {
                 $this->throwFailedAuthenticationException(
@@ -72,7 +79,7 @@ class FortifyServiceProvider extends ServiceProvider
                 );
             }
 
-            if ($user && Hash::check($request->password, $user->password)) {
+            if ($user && ($mobileLogin || Hash::check($request->password, $user->password))) {
                 return $user;
             }
         });

@@ -114,6 +114,7 @@ export interface Settings {
   };
   require_email_confirmation: boolean;
   single_device_login: boolean;
+  mobile_login: boolean;
   mail: {
     contact_page_address: string;
     handler: string;

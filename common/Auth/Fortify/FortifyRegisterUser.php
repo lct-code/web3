@@ -6,8 +6,12 @@ use App\Models\User;
 use Closure;
 use Common\Auth\Actions\CreateUser;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
+use Propaganistas\LaravelPhone\PhoneNumber;
+
 
 class FortifyRegisterUser implements CreatesNewUsers
 {
@@ -18,7 +22,27 @@ class FortifyRegisterUser implements CreatesNewUsers
         if (settings('registration.disable')) {
             abort(404);
         }
-
+        if(settings('mobile_login')) {
+            Validator::make($input, [
+                'phone' => ['required', 'string', 'regex:/^0\d{9}$/', 'unique:users'],
+            ])->validate();
+                
+            // skipp for now adding validation for phone number
+            // $input['phone_entered'] = trim($input['phone']);
+            // $phone = new PhoneNumber($input['phone_entered'], ['SA','INTERNATIONAL']);
+            // $input['phone'] = $phone->formatE164();        
+            $url_base = trim(substr(env('APP_URL'), strpos(env('APP_URL'), '//')+2), '/');
+            if (empty($input['email'])) {
+              $input['email'] = "{$input['phone']}@{$url_base}";
+            }
+            if (empty($input['password'])) {
+              $input['password'] = "{$input['phone']}";
+            }
+            if (empty($input['name'])) {
+              $input['name'] = $input['phone'];
+            }
+            return (new CreateUser())->execute($input);
+        }   
         $appRules = config('common.registration-rules') ?? [];
         $commonRules = [
             'email' => [
