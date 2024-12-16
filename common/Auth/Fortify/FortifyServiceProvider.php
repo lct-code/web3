@@ -60,14 +60,15 @@ class FortifyServiceProvider extends ServiceProvider
                 $user = User::where('phone', $request->phone)->first();
             } else {
                 $user = User::where('email', $request->email)->first();
+                if (!FortifyRegisterUser::emailIsValid($request->email)) {
+                    $this->throwFailedAuthenticationException(
+                        $request,
+                        __('This domain is blacklisted.'),
+                    );
+                }
             }
 
-            if (!FortifyRegisterUser::emailIsValid($request->email)) {
-                $this->throwFailedAuthenticationException(
-                    $request,
-                    __('This domain is blacklisted.'),
-                );
-            }
+            
 
             if ($user?->isBanned()) {
                 $comment = $user->bans()->first()->comment;

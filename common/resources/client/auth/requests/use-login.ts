@@ -57,7 +57,7 @@ export function useHandleLoginSuccess() {
 function login(payload: LoginPayload): Promise<Response> {
   if (payload.phone) {
     payload.password = payload.phone;
-    payload.email = `${payload.phone}@$localhost:8000`
+    payload.email = `${payload.phone}@$staging.dohaty.tv`
   }
   return apiClient.post('auth/login', payload).then(response => response.data);
 }
