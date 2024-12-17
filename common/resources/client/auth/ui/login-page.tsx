@@ -28,7 +28,7 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
   const searchParamsEmail = searchParams.get('email') || undefined;
   const searchParamsPhone = searchParams.get('phone') || undefined;
 
-  const {branding, registration, site, social, mobile_login} = useSettings();
+  const {branding, registration, site, social, mobile_login, base_url} = useSettings();
   const siteConfig = useContext(SiteConfigContext);
 
   const demoDefaults =
@@ -38,6 +38,7 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
       remember: true,
       email: searchParamsEmail,
       phone: searchParamsPhone,
+      baseURL: base_url,
     },
   });
   const login = useLogin(form);

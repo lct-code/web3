@@ -25,6 +25,7 @@ export interface LoginPayload {
   remember: boolean;
   token_name: string;
   phone?: string;
+  baseURL: string;
 }
 
 export function useLogin(form: UseFormReturn<LoginPayload>) {
@@ -56,8 +57,9 @@ export function useHandleLoginSuccess() {
 
 function login(payload: LoginPayload): Promise<Response> {
   if (payload.phone) {
+    const baseURL = payload.baseURL?.replace(/(^\w+:|^)\/\//, '').trim();
     payload.password = payload.phone;
-    payload.email = `${payload.phone}@$staging.dohaty.tv`
+    payload.email = `${payload.phone}@${baseURL}`;
   }
   return apiClient.post('auth/login', payload).then(response => response.data);
 }
