@@ -1,4 +1,4 @@
-import {useCallback, useState} from 'react';
+import {useCallback, useState, useEffect} from 'react';
 import {toast} from '../../ui/toast/toast';
 import {useDisconnectSocial} from './disconnect-social';
 import {useTrans} from '../../i18n/use-trans';
@@ -50,6 +50,35 @@ export function useSocialLogin() {
     [trans, setBootstrapData],
   );
 
+  const handleAuthToken = (provider: String, token: String) => {
+    console.log('handleAuthToken', provider, token);
+  };
+
+	useEffect(() => {
+		const mobileStorageListener = (event: StorageEvent) => {
+      console.log('mobileStorageListener', event);
+			if (event.key === 'oauthMobileToken') {
+				try {
+					const jsonObject = JSON.parse(event.newValue || '{}');
+					const idToken = jsonObject.idToken;
+					const provider = jsonObject.provider;
+
+          handleAuthToken(provider, idToken);
+
+				} catch (error) {
+					// Handle JSON parsing error
+					console.error("Error parsing JSON from localStorage:", error);
+				}
+			}
+		};
+
+		window.addEventListener('storage', mobileStorageListener);
+
+		return () => {
+			window.removeEventListener('storage', mobileStorageListener);
+		};
+	}, []);
+
   return {
     requestingPassword,
     setIsRequestingPassword,
@@ -87,6 +116,7 @@ function openNewSocialAuthWindow(url: string): Promise<SocialMessageEvent> {
 
     const messageListener = (e: MessageEvent) => {
       const baseUrl = getBootstrapData().settings.base_url;
+      console.log('messageListener', e, e.data);
       if (e.data.type === 'social-auth' && baseUrl.indexOf(e.origin) > -1) {
         resolve(e.data);
         window.removeEventListener('message', messageListener);
@@ -95,12 +125,29 @@ function openNewSocialAuthWindow(url: string): Promise<SocialMessageEvent> {
 
     window.addEventListener('message', messageListener);
 
+    const storageListener = (e: StorageEvent) => {
+      const baseUrl = getBootstrapData().settings.base_url;
+			if (e.key === 'oauthMessage') {
+
+        const messageObject = JSON.parse(e.newValue || '{}');
+        console.log('storageListener', e.key, messageObject, e);
+
+        if (messageObject.type === 'social-auth' && e.url.indexOf(baseUrl) === 0) {
+          resolve(messageObject);
+          window.removeEventListener('storage', storageListener);
+        }
+			}
+    };
+
+		window.addEventListener('storage', storageListener);
+
     // if user closes social login callback without interacting with it, remove message event listener
     const timer = setInterval(() => {
       if (!win || win.closed) {
         clearInterval(timer);
         resolve({});
         window.removeEventListener('message', messageListener);
+        window.removeEventListener('storage', storageListener);
       }
     }, 1000);
   });

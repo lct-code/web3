@@ -59,7 +59,16 @@ interface PlanListProps {
 }
 function PlanList({plans, selectedPeriod}: PlanListProps) {
   const {isLoggedIn, isSubscribed} = useAuth();
-  const filteredPlans = plans.filter(plan => !plan.hidden);
+  const filteredPlans = plans.filter(plan => {
+    if (plan.hidden) return false;
+
+    const price = findBestPrice(selectedPeriod, plan.prices);
+    if (!price && !plan.free) {
+      return false;
+    }
+
+    return true;
+  });
   const paymentMethods = usePaymentMethods();
 
   const getUpgradeRoute = (plan: Product, price?: Price, paymentMethod?: string) => {

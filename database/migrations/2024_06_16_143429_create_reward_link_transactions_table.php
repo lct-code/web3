@@ -19,7 +19,7 @@ return new class extends Migration
             // This would create INT(11) column, colliding with users.id:
             // $table->unsignedBigInteger('user_id');
             // We'll use the following instead:
-            $table->integer('user_id', 10)->unsigned();  
+            $table->integer('user_id')->unsigned();  
 
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
 
