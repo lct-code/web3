@@ -6,7 +6,7 @@
     "dev": "vite --host",
     "build": "tsc --skipLibCheck && vite build",
     "preview": "vite preview",
-    "iconIndex": "node ./scripts/create-icon-index.js",
+    "iconIndex": "node ./resources/scripts/create-icon-index.js",
     "extract": "node ./resources/scripts/extract-translations.js",
     "build:digitalocean": "npm install && npm run build"
   },

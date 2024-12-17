@@ -253,6 +253,7 @@ Route::group(['prefix' => 'v1'], function () {
         $limiter ? 'throttle:'.$limiter : null,
     ]))->withoutMiddleware('verifyApiAccess');
     Route::post('auth/register', [MobileAuthController::class, 'register'])->withoutMiddleware('verifyApiAccess');
+    // Route::post('auth/register-mobile', [MobileAuthController::class, 'registerMobile'])->withoutMiddleware('verifyApiAccess');
     Route::get('auth/social/{provider}/callback', [SocialAuthController::class, 'loginCallback']);
     Route::post('auth/password/email', [PasswordResetLinkController::class, 'store']);
 });

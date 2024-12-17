@@ -21,6 +21,7 @@ export function RegisterPage() {
     branding,
     registration: {disable},
     social,
+    mobile_login,
   } = useSettings();
   const {auth} = useContext(SiteConfigContext);
   const {verify, isVerifying} = useRecaptcha('register');
@@ -31,10 +32,13 @@ export function RegisterPage() {
   const isWorkspaceRegister = pathname.includes('workspace');
   const isBillingRegister = searchParams.get('redirectFrom') === 'pricing';
   const searchParamsEmail = searchParams.get('email') || undefined;
+  const searchParamsPhone = searchParams.get('phone') || undefined;
 
   const form = useForm<RegisterPayload>({
-    defaultValues: {email: searchParamsEmail},
+    defaultValues: {phone: searchParamsPhone, email: searchParamsEmail},
   });
+
+  const isInvalid = !!Object.keys(form.formState.errors).length;
   const register = useRegister(form);
 
   if (disable) {
@@ -80,28 +84,47 @@ export function RegisterPage() {
           }
         }}
       >
-        <FormTextField
-          className="mb-32"
-          name="email"
-          type="email"
-          disabled={!!searchParamsEmail}
-          label={<Trans message="Email" />}
-          required
-        />
-        <FormTextField
-          className="mb-32"
-          name="password"
-          type="password"
-          label={<Trans message="Password" />}
-          required
-        />
-        <FormTextField
-          className="mb-32"
-          name="password_confirmation"
-          type="password"
-          label={<Trans message="Confirm password" />}
-          required
-        />
+        {mobile_login ? (
+          <FormTextField
+            className="mb-32"
+            name="phone"
+            type="tel"
+            label={<Trans message="Phone" />}
+            invalid={isInvalid}
+            required
+          />
+        ) : (
+          <>
+            <FormTextField
+              className="mb-32"
+              name="email"
+              type="email"
+              label={<Trans message="Email" />}
+              disabled={!!searchParamsEmail}
+              invalid={isInvalid}
+              required
+            />
+            <FormTextField
+              className="mb-12"
+              name="password"
+              type="password"
+              label={<Trans message="Password" />}
+              invalid={isInvalid}
+              required
+            />
+            <FormTextField
+              className="mb-12"
+              name="password_confirmation"
+              type="password"
+              label={<Trans message="Confirm Password" />}
+              invalid={isInvalid}
+              required
+            />
+            <FormCheckbox name="remember" className="mb-32 block">
+              <Trans message="Stay signed in for a month" />
+            </FormCheckbox>
+          </>
+        )}
         {auth?.registerFields ? <auth.registerFields /> : null}
         <PolicyCheckboxes />
         <Button

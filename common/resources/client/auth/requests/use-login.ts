@@ -7,6 +7,7 @@ import {apiClient} from '../../http/query-client';
 import {useAuth} from '../use-auth';
 import {useBootstrapData} from '../../core/bootstrap-data/bootstrap-data-context';
 import {useCallback} from 'react';
+import {useSettings} from '../../core/settings/use-settings';
 
 interface LoginResponse extends BackendResponse {
   bootstrapData: string;
@@ -19,10 +20,11 @@ interface TwoFactorResponse {
 type Response = LoginResponse | TwoFactorResponse;
 
 export interface LoginPayload {
-  email: string;
-  password: string;
+  email?: string;
+  password?: string;
   remember: boolean;
   token_name: string;
+  phone?: string;
 }
 
 export function useLogin(form: UseFormReturn<LoginPayload>) {
@@ -53,5 +55,9 @@ export function useHandleLoginSuccess() {
 }
 
 function login(payload: LoginPayload): Promise<Response> {
+  if (payload.phone) {
+    payload.password = payload.phone;
+    payload.email = `${payload.phone}@$staging.dohaty.tv`
+  }
   return apiClient.post('auth/login', payload).then(response => response.data);
 }
