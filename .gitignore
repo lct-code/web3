@@ -16,7 +16,7 @@ dist-ssr
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+# .idea
 .DS_Store
 Thumbs.db
 *.suo
@@ -27,7 +27,7 @@ Thumbs.db
 
 # misc
 /storage/tntsearch/*.index
-.htaccess
+# .htaccess
 # public/.htaccess
 # public/favicon
 # public/favicon.ico
