@@ -10,25 +10,25 @@ import {useBootstrapData} from '../../core/bootstrap-data/bootstrap-data-context
 interface Response extends BackendResponse {
   bootstrapData?: string;
   message?: string;
-  status: 'success' | 'needs_email_verification';
+  status: 'success' | 'needs_email_verification' | 'needs_phone_verification';
 }
 
 export interface RegisterPayload {
-  email: string;
-  password: string;
-  password_confirmation: string;
+  email?: string;
+  password?: string;
+  password_confirmation?: string;
+  phone?: string;
 }
 
 export function useRegister(form: UseFormReturn<RegisterPayload>) {
   const navigate = useNavigate();
   const {getRedirectUri} = useAuth();
   const {setBootstrapData} = useBootstrapData();
-
   return useMutation({
     mutationFn: register,
     onSuccess: response => {
       setBootstrapData(response.bootstrapData!);
-      if (response.status === 'needs_email_verification') {
+      if (response.status !== 'success') {
         navigate('/');
       } else {
         navigate(getRedirectUri(), {replace: true});
@@ -39,7 +39,5 @@ export function useRegister(form: UseFormReturn<RegisterPayload>) {
 }
 
 function register(payload: RegisterPayload): Promise<Response> {
-  return apiClient
-    .post('auth/register', payload)
-    .then(response => response.data);
+    return apiClient.post('auth/register', payload).then(response => response.data);
 }
