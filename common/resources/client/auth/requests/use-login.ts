@@ -62,8 +62,11 @@ async function login(payload: LoginPayload): Promise<Response> {
     payload.email = `${payload.phone}@${baseURL}`;
   }
   try {
-    return apiClient.post('auth/login', payload).then(response => response.data);
+    const response = await apiClient.post('auth/login', payload);
+    console.log(response,"<<response")
+    return response.data;
   } catch (error: any) {
+    console.log(error,"<<error")
     if (error.response && error.response.status === 422) {
       const registerPayload = {
         phone: payload.phone,
