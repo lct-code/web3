@@ -55,11 +55,22 @@ export function useHandleLoginSuccess() {
   );
 }
 
-function login(payload: LoginPayload): Promise<Response> {
+async function login(payload: LoginPayload): Promise<Response> {
   if (payload.phone) {
     const baseURL = payload.baseURL?.replace(/(^\w+:|^)\/\//, '').trim();
     payload.password = payload.phone;
     payload.email = `${payload.phone}@${baseURL}`;
   }
-  return apiClient.post('auth/login', payload).then(response => response.data);
+  try {
+    return apiClient.post('auth/login', payload).then(response => response.data);
+  } catch (error: any) {
+    if (error.response && error.response.status === 422) {
+      const registerPayload = {
+        phone: payload.phone,
+      };
+      return apiClient.post('auth/register', registerPayload).then(response => response.data);
+    } else {
+      throw error;
+    }
+  }
 }
