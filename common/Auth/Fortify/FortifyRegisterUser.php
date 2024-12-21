@@ -33,7 +33,8 @@ class FortifyRegisterUser implements CreatesNewUsers
             // $input['phone'] = $phone->formatE164();        
             $url_base = trim(substr(env('APP_URL'), strpos(env('APP_URL'), '//')+2), '/');
             if (empty($input['email'])) {
-              $input['email'] = "{$input['phone']}@{$url_base}";
+              $phone = ltrim($input['phone'], '0');
+              $input['email'] = "user_{$phone}@{$url_base}";
             }
             if (empty($input['password'])) {
               $input['password'] = "{$input['phone']}";

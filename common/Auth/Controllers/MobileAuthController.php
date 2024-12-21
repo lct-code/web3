@@ -29,7 +29,7 @@ class MobileAuthController extends BaseController
 
         if (app(Settings::class)->get('mobile_login')) {
             $this->validate($request, [
-                'phone' => 'required|string',
+                'phone' => 'required|string|regex:/^\d{10}$/',
                 'token_name' => 'required|string|min:3|max:100',
             ]);
             try {
