@@ -47,6 +47,9 @@ export function PriceForm({index, onRemovePrice}: PriceFormProps) {
   const isPhonesubSelected = watch(`prices.${index}.paymentMethods`)?.includes(
     'phonesub'
   );
+  const isZainSelected = watch(`prices.${index}.paymentMethods`)?.includes(
+    'zain_sd'
+  );
 
   const paymentMethods = usePaymentMethods();
 
@@ -118,6 +121,13 @@ export function PriceForm({index, onRemovePrice}: PriceFormProps) {
         label={<Trans message="Phonesub product id" />}
         type="text"
         name={`prices.${index}.sub_product_id`}
+        className="mb-20"
+      />
+      <FormTextField
+        disabled={!allowPriceChanges || !isZainSelected}
+        label={<Trans message="Zain SD product id" />}
+        type="text"
+        name={`prices.${index}.zain_sd_product_id`}
         className="mb-20"
       />
 

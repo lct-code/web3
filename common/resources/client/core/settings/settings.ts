@@ -65,6 +65,9 @@ export interface Settings {
     phonesub: {
       enable: boolean;
     };
+    zain_sd: {
+      enable: boolean;
+    };
   };
   notifications: {
     integrated: boolean;
