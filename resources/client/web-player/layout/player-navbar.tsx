@@ -12,6 +12,7 @@ import {getArtistLink} from '@app/web-player/artists/artist-link';
 import {Navbar} from '@common/ui/navigation/navbar/navbar';
 import {SearchAutocomplete} from '@app/web-player/search/search-autocomplete';
 import clsx from 'clsx';
+import { getBootstrapData } from '@common/core/bootstrap-data/use-backend-bootstrap-data';
 
 interface Props {
   className?: string;
@@ -71,11 +72,12 @@ export function PlayerNavbar({className}: Props) {
 function ActionButtons() {
   const {player, billing} = useSettings();
   const {isLoggedIn, hasPermission, isSubscribed} = useAuth();
-
   const showUploadButton =
     player?.show_upload_btn && isLoggedIn && hasPermission('music.create');
-  const showTryProButton =
+    const showTryProButton =
     billing?.enable && hasPermission('plans.view') && !isSubscribed;
+    const {environment} = getBootstrapData(); 
+    const subscriptionRedirectUrl = environment.DEFAULT_REDIRECT_GATEWAY === 'zainSD' ? `https://dsplp.sd.zain.com/?p=${environment.DEFAULT_REDIRECT_PRODUCT_CODE}` : '/pricing';
 
   return (
     <Fragment>
@@ -85,7 +87,7 @@ function ActionButtons() {
           size="xs"
           color="primary"
           elementType={Link}
-          to="/pricing"
+          to={subscriptionRedirectUrl}
         >
           <Trans message="Try Pro" />
         </Button>

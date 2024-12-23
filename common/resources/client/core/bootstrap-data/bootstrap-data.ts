@@ -17,4 +17,8 @@ export interface BootstrapData {
   default_meta_tags: MetaTag[];
   show_cookie_notice: boolean;
   rendered_ssr?: boolean;
+  environment: {
+    DEFAULT_REDIRECT_GATEWAY?: string;
+    DEFAULT_REDIRECT_PRODUCT_CODE?: string;
+  };
 }

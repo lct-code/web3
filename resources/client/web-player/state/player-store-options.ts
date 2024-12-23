@@ -115,10 +115,16 @@ export const playerStoreOptions: Partial<PlayerStoreOptions> = {
       // prevent playback if user does not have permission to play music
       const hasPermission = userHasPlayPermission();
       if (!hasPermission) {
-        toast.danger(
-          message('Your current plan does not allow music playback.')
-        );
         pause();
+        const {environment} = getBootstrapData();
+        if (environment.DEFAULT_REDIRECT_GATEWAY === 'zainSD') {
+          const productCode = environment.DEFAULT_REDIRECT_PRODUCT_CODE || 'zainSD_product_code';
+          window.location.href = `https://dsplp.sd.zain.com/?p=${productCode}`;
+        } else {
+          toast.danger(
+            message('Your current plan does not allow music playback.')
+          );
+        }        
         return;
       }
       // log track play
