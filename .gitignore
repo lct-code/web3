@@ -46,4 +46,3 @@ data.ms
 storageState.json
 # translation files (include default "en"), will be created during installation
 resources/lang/*.json
-.env
