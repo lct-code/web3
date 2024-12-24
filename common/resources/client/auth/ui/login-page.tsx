@@ -26,17 +26,23 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
 
   const isWorkspaceLogin = pathname.includes('workspace');
   const searchParamsEmail = searchParams.get('email') || undefined;
+  const searchParamsPhone = searchParams.get('phone') || undefined;
 
-  const {branding, registration, site, social} = useSettings();
+  const {branding, registration, site, social, mobile_login, base_url} = useSettings();
   const siteConfig = useContext(SiteConfigContext);
 
   const demoDefaults =
     site.demo && !searchParamsEmail ? getDemoFormDefaults(siteConfig) : {};
   const form = useForm<LoginPayload>({
-    defaultValues: {remember: true, email: searchParamsEmail, ...demoDefaults},
+    defaultValues: {
+      remember: true,
+      email: searchParamsEmail,
+      phone: searchParamsPhone,
+      baseURL: base_url,
+    },
   });
   const login = useLogin(form);
-
+  
   const heading = isWorkspaceLogin ? (
     <Trans
       values={{siteName: branding?.site_name}}
@@ -78,28 +84,36 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
           });
         }}
       >
-        <FormTextField
-          className="mb-32"
-          name="email"
-          type="email"
-          label={<Trans message="Email" />}
-          disabled={!!searchParamsEmail}
-          invalid={isInvalid}
-          required
-        />
-        <FormTextField
-          className="mb-12"
-          name="password"
-          type="password"
-          label={<Trans message="Password" />}
-          invalid={isInvalid}
-          labelSuffix={
-            <Link className={LinkStyle} to="/forgot-password" tabIndex={-1}>
-              <Trans message="Forgot your password?" />
-            </Link>
-          }
-          required
-        />
+        {mobile_login ? (
+          <FormTextField
+            className="mb-32"
+            name="phone"
+            type="tel"
+            label={<Trans message="Phone Number" />}
+            invalid={isInvalid}
+            required
+          />
+        ) : (
+          <>
+            <FormTextField
+              className="mb-32"
+              name="email"
+              type="email"
+              label={<Trans message="Email" />}
+              disabled={!!searchParamsEmail}
+              invalid={isInvalid}
+              required
+            />
+            <FormTextField
+              className="mb-32"
+              name="password"
+              type="password"
+              label={<Trans message="Password" />}
+              invalid={isInvalid}
+              required
+            />
+          </>
+        )}
         <FormCheckbox name="remember" className="mb-32 block">
           <Trans message="Stay signed in for a month" />
         </FormCheckbox>

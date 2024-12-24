@@ -16,7 +16,7 @@ dist-ssr
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+# .idea
 .DS_Store
 Thumbs.db
 *.suo
@@ -27,22 +27,22 @@ Thumbs.db
 
 # misc
 /storage/tntsearch/*.index
-.htaccess
-public/.htaccess
-public/favicon
-public/favicon.ico
-public/build
-install_files
-/public/hot
+# .htaccess
+# public/.htaccess
+# public/favicon
+# public/favicon.ico
+# public/build
+# install_files
+# /public/hot
 /storage/*.key
-Homestead.json
-Homestead.yaml
-#.env
+# Homestead.json
+# Homestead.yaml
+.env
 .env.*
-data.ms
+# data.ms
 /test-results/
-/playwright-report/
-/playwright/.cache/
-storageState.json
+# /playwright-report/
+# /playwright/.cache/
+# storageState.json
 # translation files (include default "en"), will be created during installation
 resources/lang/*.json

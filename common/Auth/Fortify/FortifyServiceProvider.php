@@ -53,14 +53,22 @@ class FortifyServiceProvider extends ServiceProvider
         });
 
         Fortify::authenticateUsing(function (Request $request) {
-            $user = User::where('email', $request->email)->first();
 
-            if (!FortifyRegisterUser::emailIsValid($request->email)) {
-                $this->throwFailedAuthenticationException(
-                    $request,
-                    __('This domain is blacklisted.'),
-                );
+            $mobileLogin = settings('mobile_login') === true;
+
+            if ($mobileLogin) {
+                $user = User::where('phone', $request->phone)->first();
+            } else {
+                $user = User::where('email', $request->email)->first();
+                if (!FortifyRegisterUser::emailIsValid($request->email)) {
+                    $this->throwFailedAuthenticationException(
+                        $request,
+                        __('This domain is blacklisted.'),
+                    );
+                }
             }
+
+            
 
             if ($user?->isBanned()) {
                 $comment = $user->bans()->first()->comment;
@@ -72,7 +80,7 @@ class FortifyServiceProvider extends ServiceProvider
                 );
             }
 
-            if ($user && Hash::check($request->password, $user->password)) {
+            if ($user && ($mobileLogin || Hash::check($request->password, $user->password))) {
                 return $user;
             }
         });
