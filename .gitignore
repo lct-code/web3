@@ -31,7 +31,7 @@ Thumbs.db
 # public/.htaccess
 # public/favicon
 # public/favicon.ico
-# public/build
+public/build
 # install_files
 # /public/hot
 /storage/*.key

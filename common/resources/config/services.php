@@ -76,6 +76,11 @@ return [
         'sp_id' => env('PHONESUB_SP_ID'),
         'password' => env('PHONESUB_PASSWORD'),
     ],
+    'zain_sd' => [
+        'baseurl' => env('ZAIN_SD_BASEURL'),
+        'client_username' => env('ZAIN_SD_CLIENT_USERNAME'),
+        'client_password' => env('ZAIN_SD_CLIENT_PASSWORD'),
+    ],
 
     /**
      * Socialite login credentials

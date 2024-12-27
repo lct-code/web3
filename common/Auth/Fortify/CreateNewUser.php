@@ -45,7 +45,6 @@ class CreateNewUser implements CreatesNewUsers
             'phone' => [
               'required',
               'string',
-              'phone:INTERNATIONAL,SA',
               'max:255',
               Rule::unique(User::class),
             ],

@@ -20,6 +20,7 @@ use Common\Auth\Roles\RolesController;
 use Common\Billing\Gateways\Paypal\PaypalController;
 use Common\Billing\Gateways\Stripe\StripeController;
 use Common\Billing\Gateways\Phonesub\PhonesubController;
+use Common\Billing\Gateways\ZainSd\ZainSdController;
 use Common\Billing\Gateways\SyncProductsController;
 use Common\Billing\Invoices\InvoiceController;
 use Common\Billing\Products\ProductsController;
@@ -211,9 +212,11 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('billing/phonesub/subscribe-start', [PhonesubController::class, 'subscribeStart']);
         Route::post('billing/phonesub/subscribe-verify', [PhonesubController::class, 'subscribeVerify']);
         Route::post('billing/phonesub/sync-subscription-details', [PhonesubController::class, 'syncSubscriptionDetails']);
-
+        Route::post('billing/zain-sd/sync-subscription-details', [ZainSdController::class, 'syncSubscriptionDetails']);
+        Route::post('billing/zain-sd/cancel-subscription', [ZainSdController::class, 'cancelSubscription']);
         // INVOICES
         Route::get('billing/invoices', [InvoiceController::class, 'index']);
+        
 
         // CUSTOM DOMAINS
         Route::apiResource('custom-domain', CustomDomainController::class)->middleware('customDomainsEnabled');

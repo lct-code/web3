@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('prices', function (Blueprint $table) {
-            $table->renameColumn('zain_product_id', 'zain_sd_product_id'); // Replace 'correct_column_name' with the desired name
+            $table->renameColumn('zain_product_id', 'zain_sd_product_code'); // Replace 'correct_column_name' with the desired name
         });
     }
 
@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('prices', function (Blueprint $table) {
-            $table->renameColumn('zain_sd_product_id', 'zain_product_id'); // Revert back to the original name
+            $table->renameColumn('zain_sd_product_code', 'zain_product_id'); // Revert back to the original name
         });
     }
 };
