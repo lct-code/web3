@@ -130,7 +130,7 @@ function ActionButtons() {
           size="xs"
           color="danger"
           disabled={cancelZainSdSubscription.isPending}
-          className={showTryProButton ? 'hidden' : ''}
+          className={showTryProButton || true ? 'hidden' : ''} // hide the button until we make sure that we need it here.
         >
           <Trans message="Cancel Subscription" />
         </Button>
