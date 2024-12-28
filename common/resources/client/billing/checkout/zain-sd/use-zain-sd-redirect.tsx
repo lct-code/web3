@@ -34,8 +34,9 @@ export function useZainSdRedirect() {
         })
         .catch(err => {
           // Error handling similar to other gateways
-          if (err?.response?.data?.message) {
-            toast.danger(err.response.data.message);
+          console.log("🚀 ~ file: use-zain-sd-redirect.tsx:43 ~ useEffect ~ err:", err);
+          if (err?.response?.data?.error?.message) {
+            toast.danger(err.response.data.error.message);
           }
         });
     }

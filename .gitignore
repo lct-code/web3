@@ -46,3 +46,6 @@ public/build
 # storageState.json
 # translation files (include default "en"), will be created during installation
 resources/lang/*.json
+
+# zain sd token file
+common/Billing/Gateways/ZainSd/dsp.txt
