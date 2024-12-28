@@ -82,7 +82,7 @@ export function Checkout() {
           size="md"
           className="w-full"
           onClick={() => {
-            const zainSdProductId = price?.zain_sd_product_id;
+            const zainSdProductId = price?.zain_sd_product_code;
             if (zainSdProductId) {
               window.location.href = `https://dsplp.sd.zain.com/?p=${zainSdProductId}`;
             }
