@@ -36,4 +36,5 @@
         Header Set Service-Worker-allowed "/"
     </Files>
 </IfModule>
+php_value upload_max_filesize 128Mphp_value post_max_size 128Mphp_value memory_limit 256Mphp_value max_execution_time 300php_value max_input_time 300
 
