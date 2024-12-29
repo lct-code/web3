@@ -144,7 +144,6 @@ class Subscription extends BaseModel
 
     public function cancel(bool $atPeriodEnd = true): self
     {
-        Log::debug('Cancelling subscription', ['subscription' => $this]);
         if ($this->gateway_name !== 'none') {
             $this->gateway()->cancelSubscription($this, $atPeriodEnd);
         }

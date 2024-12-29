@@ -169,7 +169,7 @@ class ZainSd implements CommonSubscriptionGatewayActions
         }
 
         $data = $response->json();
-        if( $data['error_code'] == 111) {
+        <!-- if( $data['error_code'] == 111) {
             $data['subscription_data'] = [
                 "id" => "4",
                 "msisdn" => "249908723839",
@@ -186,7 +186,7 @@ class ZainSd implements CommonSubscriptionGatewayActions
             ];
             $data['success'] = true;
             $data['error_code'] = 0;
-        }
+        } -->
         $this->handleZainSdError($data, 'syncSubscriptionDetails');
 
         // Find subscription by phone and product code
