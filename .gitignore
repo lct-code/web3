@@ -33,7 +33,7 @@ Thumbs.db
 # public/favicon.ico
 public/build
 # install_files
-# /public/hot
+/public/hot
 /storage/*.key
 # Homestead.json
 # Homestead.yaml
