@@ -169,24 +169,24 @@ class ZainSd implements CommonSubscriptionGatewayActions
         }
 
         $data = $response->json();
-        <!-- if( $data['error_code'] == 111) {
-            $data['subscription_data'] = [
-                "id" => "4",
-                "msisdn" => "249908723839",
-                "operator_id" => "1",
-                "product_id" => "3",
-                "is_active" => "1",
-                "price" => "5.00",
-                "channel" => "api",
-                'subdate_unix' => Carbon::now()->timestamp,
-                'unsubdate_unix' => Carbon::now()->addDays(30)->timestamp,
-                'retry_unix' => null,
-                'thread_id' => null,
-                'creation_date' => now()->format('Y-m-d H:i:s'),
-            ];
-            $data['success'] = true;
-            $data['error_code'] = 0;
-        } -->
+        // if( $data['error_code'] == 111) {
+        //     $data['subscription_data'] = [
+        //         "id" => "4",
+        //         "msisdn" => "249908723839",
+        //         "operator_id" => "1",
+        //         "product_id" => "3",
+        //         "is_active" => "1",
+        //         "price" => "5.00",
+        //         "channel" => "api",
+        //         'subdate_unix' => Carbon::now()->timestamp,
+        //         'unsubdate_unix' => Carbon::now()->addDays(30)->timestamp,
+        //         'retry_unix' => null,
+        //         'thread_id' => null,
+        //         'creation_date' => now()->format('Y-m-d H:i:s'),
+        //     ];
+        //     $data['success'] = true;
+        //     $data['error_code'] = 0;
+        // }
         $this->handleZainSdError($data, 'syncSubscriptionDetails');
 
         // Find subscription by phone and product code
