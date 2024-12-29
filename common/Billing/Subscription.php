@@ -6,6 +6,7 @@ use Common\Billing\Gateways\Contracts\CommonSubscriptionGatewayActions;
 use Common\Billing\Gateways\Paypal\Paypal;
 use Common\Billing\Gateways\Stripe\Stripe;
 use Common\Billing\Gateways\Phonesub\Phonesub;
+use Common\Billing\Gateways\ZainSd\ZainSd;
 use Common\Billing\Models\Price;
 use Common\Billing\Models\Product;
 use Common\Billing\Subscriptions\SubscriptionFactory;
@@ -13,7 +14,7 @@ use Common\Core\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use LogicException;
-
+use Illuminate\Support\Facades\Log;
 class Subscription extends BaseModel
 {
     use HasFactory;
@@ -143,6 +144,7 @@ class Subscription extends BaseModel
 
     public function cancel(bool $atPeriodEnd = true): self
     {
+        Log::debug('Cancelling subscription', ['subscription' => $this]);
         if ($this->gateway_name !== 'none') {
             $this->gateway()->cancelSubscription($this, $atPeriodEnd);
         }
@@ -237,6 +239,8 @@ class Subscription extends BaseModel
             return app(Paypal::class);
         } elseif ($this->gateway_name === 'phonesub') {
             return app(Phonesub::class);
+        } elseif ($this->gateway_name === 'zain_sd') {
+            return app(ZainSd::class);
         }
 
         return null;
