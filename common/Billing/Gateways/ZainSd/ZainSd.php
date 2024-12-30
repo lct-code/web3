@@ -95,16 +95,23 @@ class ZainSd implements CommonSubscriptionGatewayActions
         $loggedInUser = Auth::user();
 
         // Create new user if needed
-        if (!$user && !$loggedInUser) {
-            try {
+        if (!$user) {
+            try {   
+                $loggedInUser = Auth::user();
                 $user = app(FortifyRegisterUser::class)->create([
                     'phone' => $phone,
                 ], true);
-                
-                // Authenticate user
-                Auth::login($user, true); // true for "remember me"
-                
-                // Generate API token if needed
+                    // Clear existing token if any
+                if ($loggedInUser) {
+                    $loggedInUser->tokens()->delete();
+                    // session()->flush();
+                    auth()->guard('web')->login($user, true);
+                    Log::info('Logged in user ' . $user->phone);    
+                    // Refresh token and bootstrap data
+                } else {
+                    Auth::login($user, true); // true for "remember me"
+                }
+                    // Generate API token if needed
                 $token = $user->createToken('default-token');
                 
                 // Load permissions and bootstrap data
@@ -114,7 +121,6 @@ class ZainSd implements CommonSubscriptionGatewayActions
                 app(BaseBootstrapData::class)
                     ->init()
                     ->set('user', $user);
-
             } catch (\Exception $e) {
                 Log::error('Failed to create local subscription for Zain SD', [
                     'error' => $e->getMessage(),
@@ -125,19 +131,19 @@ class ZainSd implements CommonSubscriptionGatewayActions
         }
 
         // Update existing user
-        if (!$user && $loggedInUser) {
-            try {
-                $user = $loggedInUser;
-                $user->phone = $phone;
-                $user->save();
-            } catch (\Exception $e) {
-                Log::error('Failed to add phone to user', [
-                    'error' => $e->getMessage(),
-                    'phone' => $phone,
-                ]);
-                throw new GatewayException(__('Could not update user phone'));
-            }
-        }
+        // if (!$user && $loggedInUser) {
+        //     try {
+        //         $user = $loggedInUser;
+        //         $user->phone = $phone;
+        //         $user->save();
+        //     } catch (\Exception $e) {
+        //         Log::error('Failed to add phone to user', [
+        //             'error' => $e->getMessage(),
+        //             'phone' => $phone,
+        //         ]);
+        //         throw new GatewayException(__('Could not update user phone'));
+        //     }
+        // }
 
         // Switch authentication if needed
         $price = Price::where('zain_sd_product_code', $productCode)->firstOrFail();
@@ -190,11 +196,7 @@ class ZainSd implements CommonSubscriptionGatewayActions
         $this->handleZainSdError($data, 'syncSubscriptionDetails');
 
         // Find subscription by phone and product code
-        $subscription = Subscription::whereHas('user', function ($query) use ($phone) {
-            $query->where('phone', $phone);
-        })->whereHas('price', function ($query) use ($productCode) {
-            $query->where('zain_sd_product_code', $productCode);
-        })->first();
+        $subscription = Subscription::where('gateway_id',$data['subscription_data']['id'])->first();
 
         // If no subscription found and subscription is active on Zain SD, create it locally
         $subscriptionData = $data['subscription_data'];
