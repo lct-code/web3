@@ -125,7 +125,7 @@ export function PriceForm({index, onRemovePrice}: PriceFormProps) {
       />
       <FormTextField
         disabled={!allowPriceChanges || !isZainSelected}
-        label={<Trans message="Zain SD product id" />}
+        label={<Trans message="Zain SD product code" />}
         type="text"
         name={`prices.${index}.zain_sd_product_code`}
         className="mb-20"
