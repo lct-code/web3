@@ -62,7 +62,7 @@ class ProductsController extends BaseController
             'prices.*.interval' => 'string|max:255',
             'prices.*.amount' => 'min:1',
             'prices.*.sub_product_id' => 'nullable|string|max:255',
-            'prices.*.zain_sd_product_id' => 'nullable|string|max:255',
+            'prices.*.zain_sd_product_code' => 'nullable|string|max:255',
             'prices.*.paymentMethods' => ['array', 'required_with:prices'],
         ]);
 
@@ -84,7 +84,7 @@ class ProductsController extends BaseController
             'prices.*.interval' => 'string|max:255',
             'prices.*.amount' => 'min:1',
             'prices.*.sub_product_id' => 'nullable|string|max:255',
-            'prices.*.zain_sd_product_id' => 'nullable|string|max:255',
+            'prices.*.zain_sd_product_code' => 'nullable|string|max:255',
         ]);
 
         $product = app(CrupdateProduct::class)->execute(
