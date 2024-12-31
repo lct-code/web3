@@ -30,7 +30,7 @@ export function ActivePlanPanel() {
           </div>
         </div>
         <div className="w-[233px]">
-          <Button
+          {/* <Button
             variant="flat"
             color="primary"
             size="md"
@@ -40,7 +40,7 @@ export function ActivePlanPanel() {
             disabled={subscription.gateway_name === 'none'}
           >
             <Trans message="Change plan" />
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             color="danger"

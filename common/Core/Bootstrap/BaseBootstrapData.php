@@ -76,6 +76,10 @@ class BaseBootstrapData implements BootstrapData
         $this->data['sentry_release'] = config('sentry.release');
         $this->data['default_meta_tags'] = $this->getDefaultMetaTags();
         $this->data['user'] = $this->getCurrentUser();
+        $this->data['environment'] = [
+            'DEFAULT_REDIRECT_GATEWAY' => env('DEFAULT_REDIRECT_GATEWAY'),
+            'DEFAULT_REDIRECT_PRODUCT_CODE' => env('DEFAULT_REDIRECT_PRODUCT_CODE'),
+        ];
         $this->data['guest_role'] = app('guestRole')?->load('permissions');
         $this->data['i18n'] =
             $this->localizationsRepository->getByNameOrCode(

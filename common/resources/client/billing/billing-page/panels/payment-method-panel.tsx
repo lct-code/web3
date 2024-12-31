@@ -14,8 +14,10 @@ export function PaymentMethodPanel() {
 
   const isPhonesub = subscription.gateway_name === 'phonesub';
   const isPaypal = subscription.gateway_name === 'paypal';
-  const PaymentMethod = isPhonesub ? PhonesubPaymentMethod :
-    (isPaypal ? PaypalPaymentMethod : CardPaymentMethod);
+  const isZainSD = subscription.gateway_name === 'zain_sd';
+  const PaymentMethod = isZainSD ? ZainSDPaymentMethod :
+    (isPhonesub ? PhonesubPaymentMethod :
+    (isPaypal ? PaypalPaymentMethod : CardPaymentMethod));
 
   return (
     <BillingPlanPanel title={<Trans message="Payment method" />}>
@@ -90,6 +92,18 @@ function PaypalPaymentMethod({
         <EditIcon size="sm" />
         <Trans message="Change payment method" />
       </a>
+    </Fragment>
+  );
+}
+
+function ZainSDPaymentMethod({
+  methodClassName,
+}: PaymentMethodProps) {
+  return (
+    <Fragment>
+      <div className={methodClassName}>
+        <span className="capitalize">Zain SD</span>
+      </div>
     </Fragment>
   );
 }

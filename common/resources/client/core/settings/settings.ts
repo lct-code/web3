@@ -65,6 +65,9 @@ export interface Settings {
     phonesub: {
       enable: boolean;
     };
+    zain_sd: {
+      enable: boolean;
+    };
   };
   notifications: {
     integrated: boolean;
@@ -114,6 +117,7 @@ export interface Settings {
   };
   require_email_confirmation: boolean;
   single_device_login: boolean;
+  mobile_login: boolean;
   mail: {
     contact_page_address: string;
     handler: string;

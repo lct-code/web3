@@ -47,6 +47,7 @@ export function SubscriptionSettings() {
             <PhoneSubSection />
             <PaypalSection />
             <StripeSection />
+            <ZainSDSection />
             <SettingsSeparator />
             <JsonChipField
               label={<Trans message="Accepted cards" />}
@@ -227,5 +228,25 @@ function StripeSection() {
         </SettingsErrorGroup>
       ) : null}
     </Fragment>
+  );
+}
+
+function ZainSDSection() {
+  const {watch} = useFormContext<AdminSettings>();
+  const zainSdEnabled = watch('client.billing.zain_sd.enable');
+  
+  return (
+    <div className="mb-30">
+      <FormSwitch
+        name="client.billing.zain_sd.enable"
+        description={
+          <div>
+            <Trans message="Enable Zain SD payment gateway integration." />
+          </div>
+        }
+      >
+        <Trans message="Zain SD gateway" />
+      </FormSwitch>
+    </div>
   );
 }

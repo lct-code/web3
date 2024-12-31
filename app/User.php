@@ -58,13 +58,13 @@ class User extends BaseUser
         return $this->hasOne(UserProfile::class);
     }
 
-    public function followedUsers()
+    public function followedUsers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(User::class, 'follows', 'follower_id', 'followed_id')
             ->select(['users.id', 'first_name', 'last_name', 'avatar', 'email']);
     }
 
-    public function followers()
+    public function followers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(User::class, 'follows', 'followed_id', 'follower_id')
             ->select(['users.id', 'first_name', 'last_name', 'avatar', 'email']);

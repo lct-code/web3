@@ -12,6 +12,10 @@ import {getArtistLink} from '@app/web-player/artists/artist-link';
 import {Navbar} from '@common/ui/navigation/navbar/navbar';
 import {SearchAutocomplete} from '@app/web-player/search/search-autocomplete';
 import clsx from 'clsx';
+import { getBootstrapData } from '@common/core/bootstrap-data/use-backend-bootstrap-data';
+import {useCancelZainSdSubscription} from '@common/billing/billing-page/requests/use-cancel-zain-sd-subscription';
+import {DialogTrigger} from '@common/ui/overlays/dialog/dialog-trigger';
+import {ConfirmationDialog} from '@common/ui/overlays/dialog/confirmation-dialog';
 
 interface Props {
   className?: string;
@@ -71,11 +75,23 @@ export function PlayerNavbar({className}: Props) {
 function ActionButtons() {
   const {player, billing} = useSettings();
   const {isLoggedIn, hasPermission, isSubscribed} = useAuth();
-
   const showUploadButton =
     player?.show_upload_btn && isLoggedIn && hasPermission('music.create');
-  const showTryProButton =
+    const showTryProButton =
     billing?.enable && hasPermission('plans.view') && !isSubscribed;
+    const {environment, user} = getBootstrapData(); 
+    const subscriptionRedirectUrl = environment.DEFAULT_REDIRECT_GATEWAY === 'zainSD' ? `https://dsplp.sd.zain.com/?p=${environment.DEFAULT_REDIRECT_PRODUCT_CODE}` : '/pricing';
+    const cancelZainSdSubscription = useCancelZainSdSubscription();
+
+    const handleCancelSubscription = () => {
+      if(user?.subscriptions?.[0]?.id){
+        if(environment.DEFAULT_REDIRECT_GATEWAY === 'zainSD'){
+          cancelZainSdSubscription.mutate(
+            {subscription_id: user?.subscriptions?.[0]?.id.toString()},
+          );
+        }
+      }
+    };
 
   return (
     <Fragment>
@@ -85,7 +101,7 @@ function ActionButtons() {
           size="xs"
           color="primary"
           elementType={Link}
-          to="/pricing"
+          to={subscriptionRedirectUrl}
         >
           <Trans message="Try Pro" />
         </Button>
@@ -101,6 +117,37 @@ function ActionButtons() {
           <Trans message="Upload" />
         </Button>
       ) : null}
+      <DialogTrigger
+        type="modal"
+        onClose={confirmed => {
+          if (confirmed) {
+            handleCancelSubscription();
+          }
+        }}
+      >
+        <Button
+          variant="outline"
+          size="xs"
+          color="danger"
+          disabled={cancelZainSdSubscription.isPending}
+          className={showTryProButton || true ? 'hidden' : ''} // hide the button until we make sure that we need it here.
+        >
+          <Trans message="Cancel Subscription" />
+        </Button>
+        <ConfirmationDialog
+          isDanger
+          title={<Trans message="Cancel subscription" />}
+          body={
+            <div>
+              <Trans message="Are you sure you want to cancel your subscription?" />
+              <div className="mt-10 text-sm font-semibold">
+                <Trans message="This will permanently cancel your subscription." />
+              </div>
+            </div>
+          }
+          confirm={<Trans message="Cancel subscription" />}
+        />
+      </DialogTrigger>
     </Fragment>
   );
 }

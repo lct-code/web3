@@ -21,7 +21,7 @@ export function Checkout() {
   });
   const {
     base_url,
-    billing: {stripe, phonesub, paypal},
+    billing: {stripe, phonesub, paypal, zain_sd},
   } = useSettings();
   const navigate = useNavigate();
 
@@ -72,6 +72,26 @@ export function Checkout() {
       key: 'paypal',
       component: <div ref={paypalElementRef} />,
       enable: paypal.enable && (price?.paymentMethods || []).includes('paypal'),
+    },
+    {
+      key: 'zain_sd',
+      component: (
+        <Button 
+          variant="flat"
+          color="primary"
+          size="md"
+          className="w-full"
+          onClick={() => {
+            const zainSdProductId = price?.zain_sd_product_code;
+            if (zainSdProductId) {
+              window.location.href = `https://dsplp.sd.zain.com/?p=${zainSdProductId}`;
+            }
+          }}
+        >
+          <Trans message="Pay with Zain SD" />
+        </Button>
+      ),
+      enable: zain_sd?.enable && (price?.paymentMethods || []).includes('zain_sd'),
     },
     {
       key: 'go-back',

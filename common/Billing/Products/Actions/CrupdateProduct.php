@@ -68,6 +68,7 @@ class CrupdateProduct
                 'interval' => $price['interval'],
                 'currency' => $price['currency'],
                 'sub_product_id' => $price['sub_product_id'] ?? null,
+                'zain_sd_product_id' => $price['zain_sd_product_id'] ?? null,
                 'paymentMethods' => $price['paymentMethods'] ?? [],
             ];
 

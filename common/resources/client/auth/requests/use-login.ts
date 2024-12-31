@@ -7,6 +7,7 @@ import {apiClient} from '../../http/query-client';
 import {useAuth} from '../use-auth';
 import {useBootstrapData} from '../../core/bootstrap-data/bootstrap-data-context';
 import {useCallback} from 'react';
+import {useSettings} from '../../core/settings/use-settings';
 
 interface LoginResponse extends BackendResponse {
   bootstrapData: string;
@@ -19,10 +20,12 @@ interface TwoFactorResponse {
 type Response = LoginResponse | TwoFactorResponse;
 
 export interface LoginPayload {
-  email: string;
-  password: string;
+  email?: string;
+  password?: string;
   remember: boolean;
   token_name: string;
+  phone?: string;
+  baseURL: string;
 }
 
 export function useLogin(form: UseFormReturn<LoginPayload>) {
@@ -52,6 +55,25 @@ export function useHandleLoginSuccess() {
   );
 }
 
-function login(payload: LoginPayload): Promise<Response> {
-  return apiClient.post('auth/login', payload).then(response => response.data);
+async function login(payload: LoginPayload): Promise<Response> {
+  if (payload.phone) {
+    const baseURL = payload.baseURL?.replace(/(^\w+:|^)\/\//, '').trim();
+    payload.password = payload.phone;
+    payload.email = `${payload.phone}@${baseURL}`;
+  }
+  try {
+    const response = await apiClient.post('auth/login', payload);
+    console.log(response,"<<response")
+    return response.data;
+  } catch (error: any) {
+    console.log(error,"<<error")
+    if (error.response && error.response.status === 422) {
+      const registerPayload = {
+        phone: payload.phone,
+      };
+      return apiClient.post('auth/register', registerPayload).then(response => response.data);
+    } else {
+      throw error;
+    }
+  }
 }

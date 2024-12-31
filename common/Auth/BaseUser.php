@@ -33,9 +33,12 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Scout\Searchable;
+use Common\Billing\Gateways\ZainSd\ZainSd;
+// use Common\Billing\Gateways\ZainSd\Exceptions\GatewayException;
 
 abstract class BaseUser extends BaseModel implements
     HasLocalePreference,
@@ -347,8 +350,38 @@ abstract class BaseUser extends BaseModel implements
         }
 
         $subscription = $this->subscriptions->first();
+        if ($subscription && ($subscription->valid() || (env('DEFAULT_REDIRECT_GATEWAY') === 'zainSD' && $subscription->gateway_name === 'zain_sd'))) {
+            // Check if it's a Zain SD subscription and hasn't been validated this session
+            if (env('DEFAULT_REDIRECT_GATEWAY') === 'zainSD' && $subscription->gateway_name === 'zain_sd' && !session()->get('zain_sd_validated')) {
+                try {
+                    // Get the Zain SD gateway instance
+                    $zainSd = app(ZainSd::class);
+                    
+                    // Sync subscription details
+                    $result = $zainSd->syncSubscriptionDetails(
+                        $this->phone,
+                        $subscription->price->zain_sd_product_code
+                    );
 
-        if ($subscription && $subscription->valid()) {
+                    // Mark as validated for this session
+                    session()->put('zain_sd_validated', true);
+                    Log::debug('Zain SD subscription validated', ['session_zain_sd_validated'=> session()->get('zain_sd_validated')]);
+                    // If subscription is not active anymore, return free plan
+                    if (!$result['is_active']) {
+                        return Product::where('free', true)->first();
+                    }
+                } catch (\Exception $e) {
+                    // Log the error but don't throw it to prevent blocking user access
+                    session()->put('zain_sd_validated', true);
+
+                    Log::error('Failed to validate Zain SD subscription: ' . $e->getMessage(), [
+                        'user_id' => $this->id,
+                        'subscription_id' => $subscription->id,
+                    ]);
+                    // Continue with current subscription state
+                }
+            }
+            
             return $subscription->product;
         } else {
             return Product::where('free', true)->first();

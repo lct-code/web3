@@ -48,7 +48,7 @@ export function useBackendBootstrapData() {
 
 const fetchBootstrapData = async (): Promise<BootstrapData> => {
   return apiClient
-    .get('http://bedesk.test/api/v1/bootstrap-data')
+    .get('bootstrap-data')
     .then(response => {
       return decodeBootstrapData(response.data.data);
     });

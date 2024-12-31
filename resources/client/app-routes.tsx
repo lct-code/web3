@@ -18,6 +18,7 @@ import {NotificationRoutes} from '@common/notifications/notification-routes';
 import {ContactUsPage} from '@common/contact/contact-us-page';
 import {CustomPageLayout} from '@common/custom-page/custom-page-layout';
 import {NotFoundPage} from '@common/ui/not-found-page/not-found-page';
+import { useZainSdRedirect } from '@common/billing/checkout/zain-sd/use-zain-sd-redirect';
 
 const AdminRoutes = React.lazy(() => import('@common/admin/admin-routes'));
 const WebPlayerRoutes = React.lazy(
@@ -35,7 +36,7 @@ export function AppRoutes() {
     useSettings();
   const {isAppearanceEditorActive} = useAppearanceEditorMode();
   const {user, hasPermission} = useAuth();
-
+  useZainSdRedirect();
   if (user != null && require_email_confirmation && !user.email_verified_at) {
     return (
       <Fragment>
