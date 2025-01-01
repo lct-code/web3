@@ -75,7 +75,6 @@ class ZainSd implements CommonSubscriptionGatewayActions
         // Update local subscription status
         $subscription->update([
             'ends_at' => now(),
-            'cancelled_at' => now(),
         ]);
 
         return true;
@@ -251,7 +250,6 @@ class ZainSd implements CommonSubscriptionGatewayActions
                     
                 $subscription->update([
                     'ends_at' => null,
-                    'cancelled_at' => null,
                     'renews_at' => $renewsAt,
                 ]);
             } else {
@@ -262,7 +260,6 @@ class ZainSd implements CommonSubscriptionGatewayActions
                     
                 $subscription->update([
                     'ends_at' => $unsubDate,
-                    'cancelled_at' => $unsubDate,
                 ]);
             }
         }
