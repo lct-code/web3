@@ -1,0 +1,7 @@
+.absolute.left-1\/2.top-1\/2.z-20 {
+    visibility: hidden !important;
+}
+
+.relative.isolate.block::after {
+    background-color: transparent;
+}
