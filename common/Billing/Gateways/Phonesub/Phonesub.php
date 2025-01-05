@@ -7,6 +7,7 @@ use Common\Billing\Models\Product;
 use Common\Billing\Subscription;
 use Common\Billing\GatewayException;
 use Common\Settings\Settings;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
@@ -95,9 +96,9 @@ END;
     public function subscribeStart(
         string $price_id,
         string $phone,
-        User $user
+        User|null $user
     ) {
-        Log::debug('phonesub subscribeStart: '.$price_id.' / '.$phone.' / '.$user->id);
+        Log::debug('phonesub subscribeStart: '.$price_id.' / '.$phone.' / '.$user?->id);
 
         $processedPhone = $this->processUserPhone($user, $phone);
         
@@ -124,7 +125,7 @@ END;
             case '000000':
                 return [
                     'status' => 'verify',
-                    'phone' => $user->phone,
+                    'phone' => $processedPhone,
                 ];
 
             case '330070':
@@ -182,6 +183,7 @@ END;
                 if (app(Settings::class)->get('billing.phonesub_test_mode')) {
                     try {
                         $test_subscription_id = implode('-', ['phonesub', 'test', $this->processUserPhone($user), $price->sub_product_id, date('YmdHis')]);
+                        if(!isset($test_subscription_id)) throw new Exception('No sub_product_id for this product');
                         $this->storeSubscriptionDetailsLocally($price->sub_product_id??0, $test_subscription_id, $user);
                         Log::debug('phonesub subscribeVerify test subscription: '.$test_subscription_id);
                     }
@@ -343,18 +345,8 @@ BODY;
         return false;
     }
 
-    public function processUserPhone(User $user, $newPhone = null): string {
-        $processedPhone = preg_replace('/^\+/', '', $user->phone ?? '');
-
-        if ($newPhone) {
-            $processedNewPhone = preg_replace('/^\+/', '', $newPhone);
-            if ($processedPhone != $processedNewPhone) {
-                $user->phone = $newPhone;
-                $user->save();
-
-                $processedPhone = $processedNewPhone;
-            }
-        }
+    public function processUserPhone(User|null $user, $newPhone = null): string {
+        $processedPhone = preg_replace('/^\+/', '',  $newPhone ?? $user->phone);
 
         return $processedPhone;
     }

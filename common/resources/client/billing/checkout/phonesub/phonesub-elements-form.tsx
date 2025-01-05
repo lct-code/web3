@@ -11,6 +11,7 @@ import {obfuscatePhone} from '../../../utils/string/obfuscate-phone';
 import {toast} from '../../../ui/toast/toast';
 import {useNavigate} from '../../../utils/hooks/use-navigate';
 import {ProgressCircle} from '../../../ui/progress/progress-circle';
+import { useBootstrapData } from '@common/core/bootstrap-data/bootstrap-data-context';
 
 interface PhonesubElementsFormProps {
   productId?: string;
@@ -38,6 +39,7 @@ export function PhonesubElementsForm({
   const [subStatus, setSubStatus] = useState<string>('start');
   const navigate = useNavigate();
   const {user} = useAuth();
+  const {invalidateBootstrapData} = useBootstrapData()
 
   const form = useForm<{auth_code:string, phone:string}>({
     defaultValues: {
@@ -65,8 +67,9 @@ export function PhonesubElementsForm({
       const method = subStatus !== 'verify' ? 'subscribeStart' : 'subscribeVerify';
       const result = await phonesub[method](payload);
 
-      if (result.status == 'verify' && result.phone && user) {
-        user.phone = result.phone;
+      if (result.status == 'verify' ) {
+        invalidateBootstrapData();
+        if(result.phone && user) user.phone = result.phone;
       }
 
       if (result.status == 'verified') {
