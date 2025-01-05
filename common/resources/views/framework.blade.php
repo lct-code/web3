@@ -106,7 +106,7 @@
     <body>
         @if ($code = settings('analytics.tracking_code'))
             <!-- Google Tag Manager (noscript) -->
-            <noscript><iframe src="https://www.googletagmanager.com/ns.html?{{ settings('analytics.tracking_code') }}"
+            <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ settings('analytics.tracking_code') }}"
             height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <!-- End Google Tag Manager (noscript) -->
         @endif
