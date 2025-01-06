@@ -125,10 +125,13 @@ export function Checkout() {
 
   return (
     <CheckoutLayout>
+      {price.custom_summary?
+      <div dangerouslySetInnerHTML={{__html:price.custom_summary}}></div>
+      :
+      // <CheckoutProductSummary /> 
+      <></>
+      }
       <Fragment>
-        <h1 className="mb-40 text-4xl">
-          <Trans message="Checkout" />
-        </h1>
         {enabledComponents.map((component, index) => (
           <Fragment key={component.key}>
             {component.component}
@@ -139,7 +142,6 @@ export function Checkout() {
           <Trans message="You’ll be charged until you cancel your subscription. Previous charges won’t be refunded when you cancel unless it’s legally required. Your payment data is encrypted and secure. By subscribing your agree to our terms of service and privacy policy." />
         </div>
       </Fragment>
-      <CheckoutProductSummary />
     </CheckoutLayout>
   );
 }

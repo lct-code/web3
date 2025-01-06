@@ -156,14 +156,13 @@ export function PhonesubElementsForm({
       {isStateStart && (
         <div>
           <Alert
-            title={<Trans message="Enter phone number" />}
             type="info"
             message={
-              <Trans message="Please enter phone number you intend to use for phone payment" />
+              <Trans message="The subscription will be renewed automatically" />
             }
             />
           <FormTextField
-            className="mb-32"
+            className="mb-12"
             name="phone"
             type="text"
             label={<Trans message="Phone number" />}
@@ -176,7 +175,7 @@ export function PhonesubElementsForm({
         variant="flat"
         color="primary"
         size="md"
-        className="w-full mt-40"
+        className="w-full mt-12"
         type="submit"
         disabled={isSubmitting || !phonesubIsReady}
       >
