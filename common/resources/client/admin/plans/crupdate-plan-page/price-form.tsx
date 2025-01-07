@@ -93,6 +93,16 @@ export function PriceForm({index, onRemovePrice}: PriceFormProps) {
         )}
       </FormSelect>
 
+      <FormTextField
+        disabled={!allowPriceChanges}
+        label={<Trans message="Custom summary" />}
+        description={<Trans message="Optional custom text to display instead of the default price summary" />}
+        inputElementType='textarea'
+        type="text"
+        name={`prices.${index}.custom_summary`}
+        className="mb-20"
+      />
+
       <BillingPeriodSelect
         disabled={!allowPriceChanges}
         index={index}
@@ -160,7 +170,7 @@ function BillingPeriodSelect({
   onValueChange,
   disabled,
 }: BillingPeriodSelectProps) {
-  const {setValue: setFormValue} = useFormContext<Product>();
+  const { setValue: setFormValue } = useFormContext<Product>();
 
   return (
     <Select

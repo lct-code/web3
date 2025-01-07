@@ -69,6 +69,7 @@ class CrupdateProduct
                 'currency' => $price['currency'],
                 'sub_product_id' => $price['sub_product_id'] ?? null,
                 'zain_sd_product_code' => $price['zain_sd_product_code'] ?? null,
+                'custom_summary' => $price['custom_summary'] ?? null,
                 'paymentMethods' => $price['paymentMethods'] ?? [],
             ];
 
