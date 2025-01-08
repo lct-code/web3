@@ -14,10 +14,12 @@ use Illuminate\Support\Facades\Auth;
 use Common\Auth\Fortify\FortifyRegisterUser;
 use Common\Core\Bootstrap\BaseBootstrapData;
 use Illuminate\Http\Request;
+use Common\Auth\Traits\HandlesPhoneVerification;
 
 class ZainSd implements CommonSubscriptionGatewayActions
 {
     use InteractsWithZainSdRestApi;
+    use HandlesPhoneVerification;
 
     public function __construct(
         protected Settings $settings,

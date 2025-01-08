@@ -12,10 +12,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use SimpleXMLElement;
+use Common\Auth\Traits\HandlesPhoneVerification;
 
 class Phonesub implements CommonSubscriptionGatewayActions
 {
     use InteractsWithPhonesubRestApi;
+    use HandlesPhoneVerification;
 
     public function __construct(
         protected Settings $settings
@@ -180,6 +182,9 @@ END;
             $result = 'unknown';
             switch ($resultCode) {
             case '000000':
+                // Mark phone as verified after successful OTP verification
+                $this->markPhoneAsVerified($user);
+
                 if (app(Settings::class)->get('billing.phonesub_test_mode')) {
                     try {
                         $test_subscription_id = implode('-', ['phonesub', 'test', $this->processUserPhone($user), $price->sub_product_id, date('YmdHis')]);

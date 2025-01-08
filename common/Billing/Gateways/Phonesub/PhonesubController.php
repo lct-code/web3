@@ -52,7 +52,6 @@ class PhonesubController extends BaseController
     public function subscribeVerify(): JsonResponse
     {
         $this->middleware('auth');
-        Log::debug('Logged In User'. json_encode($this->request->user()));
 
         $data = $this->validate($this->request, [
             'price_id' => 'required|string',
