@@ -13,11 +13,13 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use SimpleXMLElement;
 use Common\Auth\Traits\HandlesPhoneVerification;
+use Common\Billing\Gateways\Traits\HandlesPhoneSubscriptionErrors;
 
 class Phonesub implements CommonSubscriptionGatewayActions
 {
     use InteractsWithPhonesubRestApi;
     use HandlesPhoneVerification;
+    use HandlesPhoneSubscriptionErrors;
 
     public function __construct(
         protected Settings $settings
@@ -120,34 +122,27 @@ END;
 
         if ($response->successful()) {
             $xml = $this->parseXml($response);
-
             $resultCode = (string) $xml->resultCode;
 
-            switch ($resultCode) {
-            case '000000':
+            if ($resultCode === '000000') {
                 return [
                     'status' => 'verify',
                     'phone' => $processedPhone,
                 ];
-
-            case '330070':
-            case '310001':
-                throw new GatewayException(__('Phone number entered is invalid. Make sure it is Zain KSA phone number and try again'));
-
-            case '330040':
-                return [
-                    'status' => 'subscribed',
-                    'message' => __('You\'re already subscribed to the service.'),
-                ];
-
-            default:
-                Log::error("phoneSub gateway - unexpected response code [$resultCode]");
-                throw new GatewayException(__('Unexpected response code. Please try again later.'));
             }
-        }
-        else {
-          Log::error("phoneSub gateway - unexpected response (".$response->status()."): ".$response->body());
-          throw new GatewayException(__('Unexpexted SUB server response.'));
+
+            $this->handleCommonPhoneErrors(
+                $this->mapPhonesubErrorCode($resultCode),
+                'subscribeStart',
+                metadata: [
+                    'price_id' => $price_id,
+                    'phone' => $phone,
+                    'user_id' => $user?->id
+                ]
+            );
+        } else {
+            Log::error("phoneSub gateway - unexpected response (" . $response->status() . "): " . $response->body());
+            throw new GatewayException(__('Unexpexted SUB server response.'));
         }
 
         return false;
@@ -176,12 +171,11 @@ END;
 
         if ($response->successful()) {
             $xml = $this->parseXml($response);
-
             $resultCode = (string) $xml->resultCode;
 
-            $result = 'unknown';
-            switch ($resultCode) {
-            case '000000':
+            $mappedCode = $this->mapPhonesubErrorCode($resultCode);
+
+            if ($mappedCode === 'SUCCESS') {
                 // Mark phone as verified after successful OTP verification
                 $this->markPhoneAsVerified($user);
 
@@ -201,24 +195,29 @@ END;
                     'status' => 'verified',
                     'message' => __('Your verification code has been validated successfully.'),
                 ];
+            }
 
-            case '330157':
-                throw new GatewayException(__('Invalid verification code. Please try again.'));
-
-            case '330158':
+            if ($mappedCode === 'AUTH_EXPIRED') {
                 return [
                     'status' => 'expired',
                     'error' => [
                       'message' => __('The SMS verification code has expired. You can request a new code below.'),
                     ]
                 ];
-
-            default:
-                throw new GatewayException(__('Unexpected response code. Please try again later.'));
             }
+
+            $this->handleCommonPhoneErrors(
+                $mappedCode,
+                'subscribeVerify',
+                metadata: [
+                    'price_id' => $price_id,
+                    'user_id' => $user->id,
+                    'auth_code' => $auth_code
+                ]
+            );
         }
 
-        return false;
+        throw new GatewayException(__('Could not complete the verification. Please try again.'));
     }
 
     public function syncSubscriptionDetails(
@@ -311,34 +310,25 @@ BODY;
 
             $resultCode = (string) $this->extractXmlItem($response, ['result']);
 
-            switch ($resultCode) {
-            case '00000000':
-              return true;
-                return [
-                    'status' => 'success',
-                    'message' => __('Your subscription has been cancelled successfully.'),
-                ];
+            $mappedCode = $this->mapPhonesubErrorCode($resultCode);
 
-            case '22007219':
+            if (in_array($mappedCode, ['SUCCESS_UNSUBSCRIBE', 'ALREADY_UNSUBSCRIBED'])) {
                 return true;
-                return [
-                    'status' => 'unsubscribed',
-                    'message' => __('You\'ve already unsubscribed from the service.'),
-                ];
-
-            default:
-                Log::error("phoneSub gateway - unexpected response code [$resultCode]");
-                throw new GatewayException(__('Unexpected response code. Please try again later.'));
             }
-        }
-        else {
-          Log::error("phoneSub gateway - unexpected response (".$response->status()."): ".$response->body());
-          throw new GatewayException(__('Unexpexted SUB server response.'));
-        }
 
+            $this->handleCommonPhoneErrors(
+                $mappedCode,
+                'cancelSubscription',
+                metadata: [
+                    'subscription_id' => $subscription->id,
+                    'user_id' => $subscription->user_id
+                ]
+            );
+        } else {
+            Log::error("phoneSub gateway - unexpected response (" . $response->status() . "): " . $response->body());
+            throw new GatewayException(__('Unexpexted SUB server response.'));
+        }
         return false;
-
-        return true;
     }
 
     public function resumeSubscription(
@@ -347,7 +337,6 @@ BODY;
     ): bool {
         Log::debug('phonesub resumeSubscription: '.$subscription->toJson().' / '.json_encode($gatewayParams));
         throw new GatewayException(__('Could not renew subscription.'));
-        return false;
     }
 
     public function processUserPhone(User|null $user, $newPhone = null): string {

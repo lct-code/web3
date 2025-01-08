@@ -15,11 +15,13 @@ use Common\Auth\Fortify\FortifyRegisterUser;
 use Common\Core\Bootstrap\BaseBootstrapData;
 use Illuminate\Http\Request;
 use Common\Auth\Traits\HandlesPhoneVerification;
+use Common\Billing\Gateways\Traits\HandlesPhoneSubscriptionErrors;
 
 class ZainSd implements CommonSubscriptionGatewayActions
 {
     use InteractsWithZainSdRestApi;
     use HandlesPhoneVerification;
+    use HandlesPhoneSubscriptionErrors;
 
     public function __construct(
         protected Settings $settings,
@@ -258,22 +260,14 @@ class ZainSd implements CommonSubscriptionGatewayActions
         throw new GatewayException(__('Subscription creation not implemented for Zain SD'));
     }
 
-    protected function handleZainSdError(array $data, string $context = ''): void
+    protected function handleZainSdError(array $data, string $context = '', array $metadata = []): void
     {
         if (!$data['success']) {
-            Log::error("ZainSD {$context} error: " . json_encode($data));
-
-            $errorMessage = match ($data['error_code'] ?? null) {
-                111 => __('This number is not subscribed to this service'),
-                102 => __('Invalid phone number format'),
-                113 => __('You already have an active subscription'),
-                118 => __('Subscription is currently inactive'),
-                1000 => __('Could not verify subscription status. Please try again later'),
-                1003 => __('Could not verify subscription status. Please try again later'),
-                default => __('Could not complete the request. Please try again later')
-            };
-
-            throw new GatewayException($errorMessage);
+            $this->handleCommonPhoneErrors(
+                $this->mapZainSdErrorCode($data['error_code'] ?? 'UNKNOWN_ERROR'),
+                $context,
+                metadata: $metadata
+            );
         }
     }
 }
