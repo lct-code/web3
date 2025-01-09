@@ -12,6 +12,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use SimpleXMLElement;
+use Common\Files\FileEntryPayload;
+use Common\Files\Actions\StoreFile;
 
 class PhonesubWebhookController extends Controller
 {
@@ -19,7 +21,8 @@ class PhonesubWebhookController extends Controller
 
     public function __construct(
         protected Subscription $subscription,
-        protected Phonesub $phonesub
+        protected Phonesub $phonesub,
+        protected StoreFile $storeFile
     ) {
     }
 
@@ -28,16 +31,37 @@ class PhonesubWebhookController extends Controller
         // Retrieve incoming request data
         $requestData = file_get_contents('php://input');
 
-        // Store sync data
-        $storagePath = storage_path('sync/zainksa-'.date('Ymd-His').'.xml');
-        if ($bytes = file_put_contents(
-          $storagePath,
-          $requestData,
-        )) {
-          Log::debug('phonesub api sync request: '.$bytes.' bytes wrote to '.$storagePath);
-        }
-        else {
-          Log::debug('phonesub api sync request: could not write to '.$storagePath);
+        $filename = date('Ymd-His') . '.xml';
+
+        try {
+            $payload = new FileEntryPayload([
+                'name' => $filename,
+                'clientMime' => 'application/xml',
+                'clientName' => $filename,
+                'clientSize' => strlen($requestData),
+                'filename' => $filename,
+                'diskPrefix' => 'webhook-logs/zainksa',
+                'visibility' => 'public',
+                'public' => false, // This ensures it uses the 'uploads' disk instead of 'public'
+            ]);
+            // Use the existing StoreFile action with contents
+            $stored = $this->storeFile->execute($payload, [
+                'contents' => $requestData,
+            ]);
+
+            if (!$stored) {
+                Log::error('phonesub api sync request: could not write file', [
+                    'filename' => $filename,
+                    'disk' => 'uploads',
+                    'driver' => config('filesystems.disks.uploads.driver')
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('phonesub api sync request: failed to store file', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'config' => config('filesystems.disks.uploads')
+            ]);
         }
 
         $headers = [];

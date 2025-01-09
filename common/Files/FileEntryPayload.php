@@ -79,7 +79,7 @@ class FileEntryPayload
 
     private function getDiskPrefix()
     {
-        if ($this->public) {
+        if ($this->data['diskPrefix']) {
             return Arr::get($this->data, 'diskPrefix');
         } else {
             return $this->filename;

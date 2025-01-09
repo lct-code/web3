@@ -1,6 +1,7 @@
 <?php namespace Common\Billing\Gateways\Phonesub;
 
 use App\Models\User;
+use App\User as AppUser;
 use Common\Billing\Gateways\Contracts\CommonSubscriptionGatewayActions;
 use Common\Billing\Models\Price;
 use Common\Billing\Models\Product;
@@ -75,7 +76,7 @@ END;
     public function storeSubscriptionDetailsLocally(
         string $subProductId,
         string $phonesubSubscriptionId,
-        User $user
+        User|AppUser $user
     ): bool {
         Log::debug('phonesub storeSubscriptionDetailsLocally: '.$subProductId.' / '.$phonesubSubscriptionId.' / '.$user->id);
 
