@@ -155,12 +155,12 @@ export function PhonesubElementsForm({
       )}
       {isStateStart && (
         <div>
-          <Alert
+          {/* <Alert
             type="info"
             message={
               <Trans message="The subscription will be renewed automatically" />
             }
-            />
+            /> */}
           <FormTextField
             className="mb-12"
             name="phone"

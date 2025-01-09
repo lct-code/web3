@@ -93,24 +93,24 @@ export function Checkout() {
       ),
       enable: zain_sd?.enable && (price?.paymentMethods || []).includes('zain_sd'),
     },
-    {
-      key: 'go-back',
-      component: (
-        <Button
-          variant="flat"
-          color="chip"
-          size="md"
-          className="w-full"
-          type="button"
-          onClick={() => {
-            navigate('/pricing');
-          }}
-        >
-          <Trans message="Go back" />
-        </Button>
-      ),
-      enable: true,
-    }
+    // {
+    //   key: 'go-back',
+    //   component: (
+    //     <Button
+    //       variant="flat"
+    //       color="chip"
+    //       size="md"
+    //       className="w-full"
+    //       type="button"
+    //       onClick={() => {
+    //         navigate('/pricing');
+    //       }}
+    //     >
+    //       <Trans message="Go back" />
+    //     </Button>
+    //   ),
+    //   enable: true,
+    // }
   ];
 
   paymentMethodComponents.sort((a, b) => {
