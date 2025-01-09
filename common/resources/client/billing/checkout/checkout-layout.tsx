@@ -20,7 +20,7 @@ export function CheckoutLayout({children}: CheckoutLayoutProps) {
   }, []);
 
   return customProductSummaryLayout? (
-    <div className='bg-gradient-to-r from-primary-light to-primary-dark pb-24 min-h-screen'>
+    <div className='flex flex-col bg-gradient-to-r from-primary-light to-primary-dark pb-24 min-h-screen'>
       <StaticPageTitle>
         <Trans message="Checkout" />
       </StaticPageTitle>
@@ -33,7 +33,8 @@ export function CheckoutLayout({children}: CheckoutLayoutProps) {
         darkModeColor="transparent"
         menuPosition="checkout-page-navbar"
       />
-      <div className="bg-white mx-12 md:mx-auto py-24 px-4 md:max-w-[90%]  lg:max-w-[900px]">
+      <div className="flex items-center grow w-full">
+      <div className=" bg-white mx-12 md:mx-auto py-24 px-4 md:max-w-[90%]   lg:max-w-[900px] w-full h-full">
         <div className="flex flex-col items-center gap-20 w-full mx-auto justify-between px-20 md:px-0 md:max-w-950">
           <div className="self-end mb-4">
             {/* <LocaleSwitcher /> */}
@@ -53,6 +54,7 @@ export function CheckoutLayout({children}: CheckoutLayoutProps) {
           </div>
         </div>
       </div>
+    </div>
     </div>
   ):
   (
