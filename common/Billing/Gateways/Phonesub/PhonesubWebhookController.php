@@ -29,8 +29,15 @@ class PhonesubWebhookController extends Controller
     public function handleWebhook(Request $request): Response
     {
         // Retrieve incoming request data
-        $requestData = file_get_contents('php://input');
-
+        $requestData = $request->getContent();
+    
+        if (empty($requestData)) {
+            Log::debug('😥😥 trying the other way');
+            $requestData = file_get_contents('php://input');
+        } else {
+            Log::debug('New way worked ✅✅' . $requestData);
+        }
+        
         $filename = date('Ymd-His') . '.xml';
 
         try {
