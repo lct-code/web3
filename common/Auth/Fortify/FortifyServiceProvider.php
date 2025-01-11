@@ -6,6 +6,7 @@ use App\Models\User;
 use Hash;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\ValidationException;
@@ -55,9 +56,13 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::authenticateUsing(function (Request $request) {
 
             $mobileLogin = settings('mobile_login') === true;
-
-            if ($mobileLogin) {
+            Log::debug('LOG IN'. $mobileLogin . json_encode($request->all()));
+            if ($mobileLogin && $request->has('phone')) {
+                Log::debug('logging in with hpone' . $request ->phone);
                 $user = User::where('phone', $request->phone)->first();
+                if ($user) {
+                    return $user;
+                }
             } else {
                 $user = User::where('email', $request->email)->first();
                 if (!FortifyRegisterUser::emailIsValid($request->email)) {
@@ -67,9 +72,6 @@ class FortifyServiceProvider extends ServiceProvider
                     );
                 }
             }
-
-            
-
             if ($user?->isBanned()) {
                 $comment = $user->bans()->first()->comment;
                 $this->throwFailedAuthenticationException(
@@ -79,10 +81,10 @@ class FortifyServiceProvider extends ServiceProvider
                         : __('This user is banned.'),
                 );
             }
-
-            if ($user && ($mobileLogin || Hash::check($request->password, $user->password))) {
+            if ($user &&  Hash::check($request->password, $user->password)) {
                 return $user;
             }
+            return null;
         });
     }
 

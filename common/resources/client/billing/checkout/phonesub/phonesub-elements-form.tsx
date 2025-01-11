@@ -3,7 +3,7 @@ import {useForm} from 'react-hook-form';
 import {Form} from '../../../ui/forms/form';
 import {FormTextField} from '../../../ui/forms/input-field/text-field/text-field';
 import {Trans} from '../../../i18n/trans';
-import {ReactNode, useState, useRef} from 'react';
+import {ReactNode, useState, useRef, useEffect} from 'react';
 import {useAuth} from '../../../auth/use-auth';
 import {usePhonesub, PhonesubPayload} from './use-phonesub';
 import {Alert} from '../../../alerts/alert';
@@ -39,7 +39,9 @@ export function PhonesubElementsForm({
   const [subStatus, setSubStatus] = useState<string>('start');
   const navigate = useNavigate();
   const {user} = useAuth();
-  const {invalidateBootstrapData} = useBootstrapData()
+  const {invalidateBootstrapData} = useBootstrapData();
+  const [timeLeft, setTimeLeft] = useState<number>(90);
+  const [canResend, setCanResend] = useState(false);
 
   const form = useForm<{auth_code:string, phone:string}>({
     defaultValues: {
@@ -57,14 +59,47 @@ export function PhonesubElementsForm({
   const phonesubIsReady: boolean =
     !phonesubIsEnabled || (phonesub != null);
 
-  const handleSubmit = async (payload: PhonesubPayload) => {
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    if (subStatus === 'verify' && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            setCanResend(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [subStatus, timeLeft]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleResend = async () => {
+    setCanResend(false);
+    // setSubStatus('start');
+    await handleSubmit({ phone: form.getValues('phone'),resend:true });
+    setTimeLeft(90);
+  };
+
+  const handleSubmit = async (input: PhonesubPayload) => {
     // phonesub has not loaded yet
     if (!phonesub) return;
 
     setIsSubmitting(true);
-
+    const {resend, ...payload} = input
     try {
-      const method = subStatus !== 'verify' ? 'subscribeStart' : 'subscribeVerify';
+      const method = subStatus !== 'verify' || resend ? 'subscribeStart' : 'subscribeVerify';
       const result = await phonesub[method](payload);
 
       if (result.status == 'verify' ) {
@@ -114,7 +149,7 @@ export function PhonesubElementsForm({
     <Form form={form} onSubmit={handleSubmit}>
       { subStatus === 'verify' && (
         <div>
-          <Alert
+          {/* <Alert
             title={<Trans message="Sending verification code" />}
             type="info"
             message={
@@ -122,7 +157,12 @@ export function PhonesubElementsForm({
               values={{phone: obfuscatePhone(user?.phone)}}
               />
             }
-            />
+            /> */}
+          <div className="text-center mb-20">
+            <div className="text-5xl font-semibold mb-10">
+              {formatTime(timeLeft)}
+            </div>
+          </div>
           <FormTextField
             className="mb-32"
             name="auth_code"
@@ -181,6 +221,19 @@ export function PhonesubElementsForm({
       >
         {isStateVerify ? verifyLabel : (isStateError ? resendLabel : submitLabel)}
       </Button>
+
+      {canResend && subStatus === 'verify' && (
+        <Button
+          variant="text"
+          color="primary"
+          size="sm"
+          className="w-full mt-8"
+          onClick={handleResend}
+          disabled={isSubmitting}
+        >
+          <Trans message="Resend code" />
+        </Button>
+      )}
     </Form>
   );
 }
