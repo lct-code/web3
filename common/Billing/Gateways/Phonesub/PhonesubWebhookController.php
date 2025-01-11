@@ -85,6 +85,12 @@ class PhonesubWebhookController extends Controller
         ]));
 
         if (empty($requestData)) {
+            Log::error('phonesub webhook: Missing sync data', [
+                'method' => $request->method(),
+                'headers' => $request->headers->all(),
+                'input' => $request->all(),
+                'server' => $_SERVER,
+            ]);
           return $this->respondXml(400, 'Missing sync data');
         }
 
