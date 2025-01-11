@@ -67,7 +67,7 @@ async function login(payload: LoginPayload): Promise<Response> {
     return response.data;
   } catch (error: any) {
     console.log(error,"<<error")
-    if (error.response && error.response.status === 422) {
+    if (error.response && error.response.status === 422 && payload.phone) {
       const registerPayload = {
         phone: payload.phone,
       };

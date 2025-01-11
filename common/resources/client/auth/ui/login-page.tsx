@@ -27,6 +27,7 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
   const isWorkspaceLogin = pathname.includes('workspace');
   const searchParamsEmail = searchParams.get('email') || undefined;
   const searchParamsPhone = searchParams.get('phone') || undefined;
+  const searchParamsForceEmail = searchParams.get('user') === 'admin';
 
   const {branding, registration, site, social, mobile_login, base_url} = useSettings();
   const siteConfig = useContext(SiteConfigContext);
@@ -84,7 +85,7 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
           });
         }}
       >
-        {mobile_login ? (
+        {mobile_login && !searchParamsForceEmail ? (
           <FormTextField
             className="mb-32"
             name="phone"
