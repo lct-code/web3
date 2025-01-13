@@ -68,7 +68,7 @@ export function LoginPage({ onTwoFactorChallenge }: Props) {
 
   const isInvalid = !!Object.keys(form.formState.errors).length;
 
-  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [showEmailForm, setShowEmailForm] = useState(!!searchParamsEmail || searchParamsForceEmail);
 
   return (
     <AuthLayout heading={heading} message={message}>
@@ -95,10 +95,12 @@ export function LoginPage({ onTwoFactorChallenge }: Props) {
             type="tel"
             label={<Trans message="Phone Number" />}
             invalid={isInvalid}
-            required
+            required={!showEmailForm}
           />
         ) : <></>}
 
+        {
+          social?.email?.enable &&
           <Button
             variant="outline"
             className="mb-20 min-h-42 w-full"
@@ -109,6 +111,7 @@ export function LoginPage({ onTwoFactorChallenge }: Props) {
               <Trans message="Continue with email" />
             </span>
           </Button>
+        }
 
         {showEmailForm && (
 
