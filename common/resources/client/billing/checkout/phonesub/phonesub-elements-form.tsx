@@ -3,13 +3,13 @@ import {useForm} from 'react-hook-form';
 import {Form} from '../../../ui/forms/form';
 import {FormTextField} from '../../../ui/forms/input-field/text-field/text-field';
 import {Trans} from '../../../i18n/trans';
-import {ReactNode, useState, useRef, useEffect} from 'react';
+import {ReactNode, useState, useRef, useEffect, useCallback} from 'react';
 import {useAuth} from '../../../auth/use-auth';
 import {usePhonesub, PhonesubPayload} from './use-phonesub';
 import {Alert} from '../../../alerts/alert';
 import {obfuscatePhone} from '../../../utils/string/obfuscate-phone';
 import {toast} from '../../../ui/toast/toast';
-import {useNavigate} from '../../../utils/hooks/use-navigate';
+import {useNavigate, useSearchParams} from 'react-router-dom';
 import {ProgressCircle} from '../../../ui/progress/progress-circle';
 import { useBootstrapData } from '@common/core/bootstrap-data/bootstrap-data-context';
 
@@ -42,6 +42,7 @@ export function PhonesubElementsForm({
   const {invalidateBootstrapData} = useBootstrapData();
   const [timeLeft, setTimeLeft] = useState<number>(90);
   const [canResend, setCanResend] = useState(false);
+  const [, setSearchParams] = useSearchParams();
 
   const form = useForm<{auth_code:string, phone:string}>({
     defaultValues: {
@@ -59,7 +60,20 @@ export function PhonesubElementsForm({
   const phonesubIsReady: boolean =
     !phonesubIsEnabled || (phonesub != null);
 
+    const updateSearchParams = useCallback((status: string) => {
+      setSearchParams(prev => {
+        const newParams = new URLSearchParams(prev);
+        newParams.set('status', status);
+        return newParams;
+      });
+    },[setSearchParams]);
+  
   useEffect(() => {
+
+    if(subStatus === 'start'){
+      updateSearchParams('start');
+    }
+
     let timer: NodeJS.Timeout;
 
     if (subStatus === 'verify' && timeLeft > 0) {
@@ -77,7 +91,7 @@ export function PhonesubElementsForm({
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [subStatus, timeLeft]);
+  }, [subStatus, timeLeft,updateSearchParams]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -97,7 +111,7 @@ export function PhonesubElementsForm({
     if (!phonesub) return;
 
     setIsSubmitting(true);
-    const {resend, ...payload} = input
+    const {resend, ...payload} = input;
     try {
       const method = subStatus !== 'verify' || resend ? 'subscribeStart' : 'subscribeVerify';
       const result = await phonesub[method](payload);
@@ -105,9 +119,11 @@ export function PhonesubElementsForm({
       if (result.status == 'verify' ) {
         invalidateBootstrapData();
         if(result.phone && user) user.phone = result.phone;
+        updateSearchParams('OTPVerify');
       }
 
       if (result.status == 'verified') {
+        updateSearchParams('verified');
         setSyncTimeout();
       }
 
@@ -187,12 +203,6 @@ export function PhonesubElementsForm({
             />
         </div>
       )}
-      { subStatus === 'syncerror' && (
-        <div className="text-danger mt-20"><Trans message="Something went wrong. Please try again later."/></div>
-      )}
-      {errorMessage && !isSubmitting && (
-        <div className="text-danger mt-20">{errorMessage}</div>
-      )}
       {isStateStart && (
         <div>
           {/* <Alert
@@ -211,6 +221,13 @@ export function PhonesubElementsForm({
           />
         </div>
       )}
+      { subStatus === 'syncerror' && (
+        <div className="text-danger mb-8"><Trans message="Something went wrong. Please try again later."/></div>
+      )}
+      {errorMessage && !isSubmitting && (
+        <div className="text-danger mb-8">{errorMessage}</div>
+      )}
+
       <Button
         variant="flat"
         color="primary"

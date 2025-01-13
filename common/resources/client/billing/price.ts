@@ -11,4 +11,5 @@ export interface Price {
   zain_sd_product_code?: string;
   paymentMethods: string[];
   custom_summary?: string;
+  otp_summary?: string;
 }

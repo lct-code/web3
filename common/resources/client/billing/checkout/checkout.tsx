@@ -1,4 +1,4 @@
-import {Navigate, useParams} from 'react-router-dom';
+import {Navigate, useParams, useSearchParams} from 'react-router-dom';
 import {Trans} from '../../i18n/trans';
 import {CheckoutLayout} from './checkout-layout';
 import {CheckoutProductSummary} from './checkout-product-summary';
@@ -24,6 +24,9 @@ export function Checkout() {
     billing: {stripe, phonesub, paypal, zain_sd},
   } = useSettings();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isOTPStep = searchParams.get('status') === 'OTPVerify';
+  const isFirstStep = searchParams.get('status') === 'start';
 
   if (productQuery.isLoading) {
     return <FullPageLoader screen />;
@@ -125,12 +128,13 @@ export function Checkout() {
 
   return (
     <CheckoutLayout>
-      {price.custom_summary?
-      <div dangerouslySetInnerHTML={{__html:price.custom_summary}}></div>
-      :
-      // <CheckoutProductSummary /> 
-      <></>
-      }
+      {isOTPStep && (price.custom_summary || price.otp_summary ) ? (
+        <div dangerouslySetInnerHTML={{__html: price.otp_summary || ''}}></div>
+      ) : price.custom_summary && isFirstStep ? (
+        <div dangerouslySetInnerHTML={{__html: price.custom_summary}}></div>
+      ) : (
+        <></>
+      )}
       <Fragment>
         {enabledComponents.map((component, index) => (
           <Fragment key={component.key}>

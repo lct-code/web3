@@ -65,6 +65,7 @@ class ProductsController extends BaseController
             'prices.*.zain_sd_product_code' => 'nullable|string|max:255',
             'prices.*.custom_summary' => 'nullable|string',
             'prices.*.paymentMethods' => ['array', 'required_with:prices'],
+            'prices.*.otp_summary' => 'nullable|string',
         ]);
 
         $plan = app(CrupdateProduct::class)->execute(request()->all());
@@ -87,6 +88,7 @@ class ProductsController extends BaseController
             'prices.*.sub_product_id' => 'nullable|string|max:255',
             'prices.*.custom_summary' => 'nullable|string',
             'prices.*.zain_sd_product_code' => 'nullable|string|max:255',
+            'prices.*.otp_summary' => 'nullable|string',
         ]);
 
         $product = app(CrupdateProduct::class)->execute(
