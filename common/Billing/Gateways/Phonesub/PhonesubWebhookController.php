@@ -54,7 +54,7 @@ class PhonesubWebhookController extends Controller
         ]));
 
         if (empty($requestData)) {
-          return $this->respondXml(400, 'Missing sync data');
+          return $this->respondXml(00000000, 'ok');
         }
 
         /*
