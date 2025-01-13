@@ -139,7 +139,8 @@ END;
                     'price_id' => $price_id,
                     'phone' => $phone,
                     'user_id' => $user?->id
-                ]
+                ],
+                message: $this->mapPhonesubErrorCode($resultCode) === 'UNKNOWN_ERROR'? $xml->resultDesc  : '',
             );
         } else {
             Log::error("phoneSub gateway - unexpected response (" . $response->status() . "): " . $response->body());
@@ -214,7 +215,8 @@ END;
                     'price_id' => $price_id,
                     'user_id' => $user->id,
                     'auth_code' => $auth_code
-                ]
+                ],
+                message: $this->mapPhonesubErrorCode($resultCode) === 'UNKNOWN_ERROR'? $xml->resultDesc  : '',
             );
         }
 
@@ -323,7 +325,8 @@ BODY;
                 metadata: [
                     'subscription_id' => $subscription->id,
                     'user_id' => $subscription->user_id
-                ]
+                ],
+                message: $this->mapPhonesubErrorCode($resultCode) === 'UNKNOWN_ERROR'? $xml->resultDesc  : '',
             );
         } else {
             Log::error("phoneSub gateway - unexpected response (" . $response->status() . "): " . $response->body());
