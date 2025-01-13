@@ -91,7 +91,7 @@ class PhonesubWebhookController extends Controller
                 'input' => $request->all(),
                 'server' => $_SERVER,
             ]);
-          return $this->respondXml(400, 'Missing sync data');
+          return $this->respondXml(00000000, 'ok');
         }
 
         /*
