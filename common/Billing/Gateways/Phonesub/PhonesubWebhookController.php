@@ -157,7 +157,7 @@ class PhonesubWebhookController extends Controller
         }
         catch (\Exception $e) {
             Log::debug('phonesub api sync - handleSubscription - user NOT FOUND for phone: '.$phonesubUserId);
-            return $this->respondXml(400, 'Missing User data');
+            return $this->respondXml(00000000, 'ok');
         }
 
         Log::debug('phonesub api sync - handleSubscription - user: '.json_encode($user));
