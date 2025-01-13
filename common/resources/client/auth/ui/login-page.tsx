@@ -10,7 +10,7 @@ import {SocialAuthSection} from './social-auth-section';
 import {AuthLayout} from './auth-layout/auth-layout';
 import {Trans} from '../../i18n/trans';
 import {StaticPageTitle} from '../../seo/static-page-title';
-import {useContext} from 'react';
+import { useContext, useState } from 'react';
 import {
   SiteConfigContext,
   SiteConfigContextValue,
@@ -20,16 +20,16 @@ import {useSettings} from '../../core/settings/use-settings';
 interface Props {
   onTwoFactorChallenge: () => void;
 }
-export function LoginPage({onTwoFactorChallenge}: Props) {
+export function LoginPage({ onTwoFactorChallenge }: Props) {
   const [searchParams] = useSearchParams();
-  const {pathname} = useLocation();
+  const { pathname } = useLocation();
 
   const isWorkspaceLogin = pathname.includes('workspace');
   const searchParamsEmail = searchParams.get('email') || undefined;
   const searchParamsPhone = searchParams.get('phone') || undefined;
   const searchParamsForceEmail = searchParams.get('user') === 'admin';
 
-  const {branding, registration, site, social, mobile_login, base_url} = useSettings();
+  const { branding, registration, site, social, mobile_login, base_url } = useSettings();
   const siteConfig = useContext(SiteConfigContext);
 
   const demoDefaults =
@@ -43,10 +43,10 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
     },
   });
   const login = useLogin(form);
-  
+
   const heading = isWorkspaceLogin ? (
     <Trans
-      values={{siteName: branding?.site_name}}
+      values={{ siteName: branding?.site_name }}
       message="To join your team on :siteName, login to your account"
     />
   ) : (
@@ -68,11 +68,14 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
 
   const isInvalid = !!Object.keys(form.formState.errors).length;
 
+  const [showEmailForm, setShowEmailForm] = useState(!!searchParamsEmail || searchParamsForceEmail);
+
   return (
     <AuthLayout heading={heading} message={message}>
       <StaticPageTitle>
         <Trans message="Login" />
       </StaticPageTitle>
+
       <Form
         form={form}
         onSubmit={payload => {
@@ -85,16 +88,33 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
           });
         }}
       >
-        {mobile_login && !searchParamsForceEmail ? (
+        {mobile_login ? (
           <FormTextField
             className="mb-32"
             name="phone"
             type="tel"
             label={<Trans message="Phone Number" />}
             invalid={isInvalid}
-            required
+            required={!showEmailForm}
           />
-        ) : (
+        ) : <></>}
+
+        {
+          social?.email?.enable &&
+          <Button
+            variant="outline"
+            className="mb-20 min-h-42 w-full"
+            startIcon={<EmailIcon />}
+            onClick={() => setShowEmailForm(prev => !prev)}
+          >
+            <span className="min-w-160 text-start">
+              <Trans message="Continue with email" />
+            </span>
+          </Button>
+        }
+
+        {showEmailForm && (
+
           <>
             <FormTextField
               className="mb-32"
@@ -113,8 +133,10 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
               invalid={isInvalid}
               required
             />
+
           </>
         )}
+
         <FormCheckbox name="remember" className="mb-32 block">
           <Trans message="Stay signed in for a month" />
         </FormCheckbox>
@@ -129,6 +151,9 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
           <Trans message="Continue" />
         </Button>
       </Form>
+
+
+
       <SocialAuthSection
         dividerMessage={
           social.compact_buttons ? (
@@ -157,4 +182,13 @@ function getDemoFormDefaults(siteConfig: SiteConfigContextValue) {
       password: siteConfig.demo.password ?? 'admin',
     };
   }
+}
+
+function EmailIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-24 h-24">
+      <path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" />
+      <path d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z" />
+    </svg>
+  );
 }
