@@ -40,7 +40,7 @@ export function CheckoutLayout({children}: CheckoutLayoutProps) {
             {/* <LocaleSwitcher /> */}
           </div>
           {/* <div className="hidden md:block fixed right-0 top-0 w-1/2 h-full bg-alt shadow-[15px_0_30px_0_rgb(0_0_0_/_18%)]" /> */}
-          <div className="md:w-400 overflow-hidden">
+          <div className="overflow-hidden">
             {upper}
           </div>
           <div className="md:block max-w-384">
