@@ -76,19 +76,19 @@ export function LoginPage({ onTwoFactorChallenge }: Props) {
         <Trans message="Login" />
       </StaticPageTitle>
 
-      <Form
-        form={form}
-        onSubmit={payload => {
-          login.mutate(payload, {
-            onSuccess: response => {
-              if (response.two_factor) {
-                onTwoFactorChallenge();
-              }
-            },
-          });
-        }}
-      >
         {mobile_login ? (
+        <Form
+          form={form}
+          onSubmit={payload => {
+            login.mutate(payload, {
+              onSuccess: response => {
+                if (response.two_factor) {
+                  onTwoFactorChallenge();
+                }
+              },
+            });
+          }}
+        >
           <FormTextField
             className="mb-32"
             name="phone"
@@ -97,72 +97,89 @@ export function LoginPage({ onTwoFactorChallenge }: Props) {
             invalid={isInvalid}
             required={!showEmailForm}
           />
-        ) : <></>}
-
-        {
-          social?.email?.enable &&
           <Button
-            variant="outline"
-            className="mb-20 min-h-42 w-full"
-            startIcon={<EmailIcon />}
-            onClick={() => setShowEmailForm(prev => !prev)}
+            className="block w-full"
+            type="submit"
+            variant="flat"
+            color="primary"
+            size="md"
+            disabled={login.isPending}
           >
-            <span className="min-w-160 text-start">
-              <Trans message="Continue with email" />
-            </span>
+            <Trans message="Continue" />
           </Button>
-        }
-
-        {showEmailForm && (
-
-          <>
-            <FormTextField
-              className="mb-32"
-              name="email"
-              type="email"
-              label={<Trans message="Email" />}
-              disabled={!!searchParamsEmail}
-              invalid={isInvalid}
-              required
-            />
-            <FormTextField
-              className="mb-32"
-              name="password"
-              type="password"
-              label={<Trans message="Password" />}
-              invalid={isInvalid}
-              required
-            />
-
-          </>
-        )}
-
-        <FormCheckbox name="remember" className="mb-32 block">
-          <Trans message="Stay signed in for a month" />
-        </FormCheckbox>
-        <Button
-          className="block w-full"
-          type="submit"
-          variant="flat"
-          color="primary"
-          size="md"
-          disabled={login.isPending}
-        >
-          <Trans message="Continue" />
-        </Button>
-      </Form>
-
-
+        </Form>
+        ) : <></>}
 
       <SocialAuthSection
         dividerMessage={
-          social.compact_buttons ? (
-            <Trans message="Or sign in with" />
-          ) : (
-            <Trans message="OR" />
-          )
+          !mobile_login ? ''
+            : social.compact_buttons ? (
+              <Trans message="Or sign in with" />
+            ) : (
+              <Trans message="OR" />
+            )
         }
       />
+
+      {
+        social?.email?.enable &&
+        <Button
+          variant="outline"
+          className="mt-20 min-h-42 w-full"
+          startIcon={<EmailIcon />}
+          onClick={() => setShowEmailForm(prev => !prev)}
+        >
+          <span className="min-w-160 text-start">
+            <Trans message="Continue with email" />
+          </span>
+        </Button>
+      }
+
+      {showEmailForm && (
+
+        <Form
+          form={form}
+          className='mt-20'
+          onSubmit={payload => {
+            payload.phone = undefined;
+            login.mutate(payload, {
+              onSuccess: response => {
+                if (response.two_factor) {
+                  onTwoFactorChallenge();
+                }
+              },
+            });
+          }}
+        >
+          <FormTextField
+            className="mb-32"
+            name="email"
+            type="email"
+            label={<Trans message="Email" />}
+            disabled={!!searchParamsEmail}
+            invalid={isInvalid}
+            required
+          />
+          <FormTextField
+            className="mb-32"
+            name="password"
+            type="password"
+            label={<Trans message="Password" />}
+            invalid={isInvalid}
+            required
+          />
+          <Button
+            className="block w-full"
+            type="submit"
+            variant="flat"
+            color="primary"
+            size="md"
+            disabled={login.isPending}
+          >
+            <Trans message="Continue" />
+          </Button>
+        </Form>
+      )}
     </AuthLayout>
   );
 }
