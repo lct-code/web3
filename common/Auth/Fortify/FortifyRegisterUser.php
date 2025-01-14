@@ -24,7 +24,7 @@ class FortifyRegisterUser implements CreatesNewUsers
         if (settings('registration.disable')) {
             abort(404);
         }
-        if($mobile_login) {
+        if($mobile_login && isset($input['phone'])) {
             Validator::make($input, [
                 'phone' => ['required', 'string', 'regex:/^\d{9,25}$/', 'unique:users'], // 9 to 25 digits to include country codes for many countries
             ])->validate();
