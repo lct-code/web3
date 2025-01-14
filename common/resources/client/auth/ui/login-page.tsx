@@ -77,7 +77,7 @@ export function LoginPage({ onTwoFactorChallenge }: Props) {
         <Trans message="Login" />
       </StaticPageTitle>
 
-        {mobile_login ? (
+        {mobile_login && !showEmailForm ? (
         <Form
           form={form}
           onSubmit={payload => {

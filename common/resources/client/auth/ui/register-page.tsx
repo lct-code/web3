@@ -78,7 +78,7 @@ export function RegisterPage() {
         <Trans message="Register" />
       </StaticPageTitle>
 
-      {mobile_login ? (
+      {mobile_login && !showEmailForm ? (
       <Form
         form={form}
         onSubmit={async payload => {
