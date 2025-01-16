@@ -170,7 +170,10 @@ class ZainSd implements CommonSubscriptionGatewayActions
         //     $data['success'] = true;
         //     $data['error_code'] = 0;
         // }
-        $this->handleZainSdError($data, 'syncSubscriptionDetails');
+        $dataError = $data;
+        $dataError['phone'] = $phone;
+        $dataError['product_code'] = $productCode;
+        $this->handleZainSdError($dataError, 'syncSubscriptionDetails');
 
         $subscription = Subscription::where('gateway_id', $data['subscription_data']['id'])->first();
 
