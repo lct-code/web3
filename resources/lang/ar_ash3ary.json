@@ -31,7 +31,7 @@
     "Create a new account": "إنشاء حساب جديد",
     "Phone": "رقم التلفون",
     "Sign in to your account": "تسجيل الدخول لحسابك",
-    "Continue": "الإستمرار",
+    "Continue": "تاكيد",
     "Stay signed in for a month": "حفظ تسجيل الدخول لمدة شهر",
     "Album": "الألبوم",
     "Artist": "الشاعر",
@@ -77,7 +77,7 @@
     "Verify code": "الإستمرار",
     "Verification code": "رمز التحقق",
     "Checkout": "مرحلة الإشتراك",
-    "Send code": "ارسل رمز التحقق",
+    "Send code": "إشترك",
     "or": "أو",
     "Sending verification code": "سيتم استلام رمز التحقق حالا",
     "Summary": "مزايا الاشتراك",
@@ -235,7 +235,15 @@
     "Recently updated":"ترتيب بتاريخ التعديل",
     "Most viewed": "ترتيب بالأكثر مشاهدة",
     "Most played":"ترتيب بالأكثر إستماعا",
-    "Phone Number":"رقم التلفون",
-    "Please use the form below to send us a message and we'll get back to you as soon as possible.": "للتواصل معنا قم بارسال رسالة عبر النموذج أدناه"
+    "Phone Number":"رقم تلفون زين السودان",
+    "Please use the form below to send us a message and we'll get back to you as soon as possible.": "للتواصل معنا قم بارسال رسالة عبر النموذج أدناه",
+    "Library":"مكتبتي",
+    "The verification code has expired. You can request a new code.":"إنتهت مدة صلاحية الرمز. ارجو الضغط على اعادة ارسال الرمز",
+    "Unexpexted SUB server response.":"خطأ في المخدم، أرجو المحاولة مرة أخرى",
+    "Could not complete the verification. Please try again.":"أرجو محاولة الرمز مرة أخرى",
+    "Could not complete the request. Please try again later":"أرجو المحاولة مرة أخرى",
+    "Phone number entered is invalid. Please try again.": "ارجو ادخال رقم زين السودان",
+    "The SMS verification code has expired. You can request a new code below.": "إنتهت مدة صلاحية الرمز. ارجو الضغط على اعادة ارسال الرمز",
+    "Invalid phone number format":"ارجو ادخال رقم زين السودان"
 
 }
