@@ -56,10 +56,9 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::authenticateUsing(function (Request $request) {
 
             $mobileLogin = settings('mobile_login') === true;
-            Log::debug('LOG IN'. $mobileLogin . json_encode($request->all()));
             if ($mobileLogin && $request->has('phone')) {
-                Log::debug('logging in with hpone' . $request ->phone);
-                $user = User::where('phone', $request->phone)->first();
+                $phone = ltrim($request->get('phone'),'0');
+                $user = User::where('phone', $phone)->first();
                 if ($user) {
                     return $user;
                 }
