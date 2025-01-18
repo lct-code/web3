@@ -17,6 +17,7 @@ import {
 } from '../../core/settings/site-config-context';
 import {useSettings} from '../../core/settings/use-settings';
 import { EmailIcon } from '@common/icons/material/Email';
+import { PhoneIcon } from '@common/icons/material/Phone';
 
 interface Props {
   onTwoFactorChallenge: () => void;
@@ -111,33 +112,7 @@ export function LoginPage({ onTwoFactorChallenge }: Props) {
         </Form>
         ) : <></>}
 
-      <SocialAuthSection
-        dividerMessage={
-          !mobile_login ? ''
-            : social.compact_buttons ? (
-              <Trans message="Or sign in with" />
-            ) : (
-              <Trans message="OR" />
-            )
-        }
-      />
-
-      {
-        social?.email?.enable &&
-        <Button
-          variant="outline"
-          className="mt-20 min-h-42 w-full"
-          startIcon={<EmailIcon />}
-          onClick={() => setShowEmailForm(prev => !prev)}
-        >
-          <span className="min-w-160 text-start">
-            <Trans message="Continue with email" />
-          </span>
-        </Button>
-      }
-
       {showEmailForm && (
-
         <Form
           form={form}
           className='mt-20'
@@ -180,7 +155,39 @@ export function LoginPage({ onTwoFactorChallenge }: Props) {
             <Trans message="Continue" />
           </Button>
         </Form>
-      )}
+        )}
+
+      <SocialAuthSection
+        dividerMessage={
+          !mobile_login ? ''
+            : social.compact_buttons ? (
+              <Trans message="Or sign in with" />
+            ) : (
+              <Trans message="OR" />
+            )
+        }
+      />
+
+      {
+        social?.email?.enable &&
+        <Button
+          variant="outline"
+          className="mt-20 min-h-42 w-full"
+          startIcon={
+          showEmailForm && mobile_login?
+          <PhoneIcon/>
+          :<EmailIcon />
+        }
+          onClick={() => setShowEmailForm(prev => !prev)}
+        >
+          <span className="min-w-160 text-start">
+            { showEmailForm && mobile_login?
+            <Trans message="Continue with phone" />
+            :<Trans message="Continue with email" />
+            }
+          </span>
+        </Button>
+      }
     </AuthLayout>
   );
 }
