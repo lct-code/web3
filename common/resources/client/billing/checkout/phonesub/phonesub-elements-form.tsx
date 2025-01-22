@@ -42,7 +42,9 @@ export function PhonesubElementsForm({
   const {invalidateBootstrapData} = useBootstrapData();
   const [timeLeft, setTimeLeft] = useState<number>(90);
   const [canResend, setCanResend] = useState(false);
-  const [, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const  paramsStatus = searchParams.get('status') 
 
   const form = useForm<{auth_code:string, phone:string}>({
     defaultValues: {
@@ -67,6 +69,15 @@ export function PhonesubElementsForm({
         return newParams;
       });
     },[setSearchParams]);
+
+    useEffect(() => {
+      if(paramsStatus === 'start' && subStatus !=='start')
+      setSubStatus('start')
+    // if( paramsStatus === 'OTPVerify' && subStatus!== 'verify'  ){
+    // }
+    
+    }, [paramsStatus])
+    
   
   useEffect(() => {
 
