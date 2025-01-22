@@ -1,5 +1,5 @@
 {
-    "Artists": "الشعراء",
+    "Artists": "الفنانين",
     "Popular Albums": "الألبومات الأكثر استماعاً",
     "Popular Tracks": "الأكثر استماعاً",
     "Genres": "أنواع المسموعات",
@@ -246,8 +246,10 @@
     "Phone number entered is invalid. Please try again.": "ارجو ادخال رقم زين السعودية",
     "The SMS verification code has expired. You can request a new code below.": "إنتهت مدة صلاحية الرمز. ارجو الضغط على اعادة ارسال الرمز",
     "Invalid phone number format":"ارجو ادخال رقم زين السعودية",
-    "Poetry":"الشاعر",
-    "Poets":"الشعر",
+    "Poetry":"الشعر",
+    "Poets":"الشاعر",
     "Popular Poetry":"الشعر الأكثر إستماعا",
-    "Poetry Genres":"أنواع الشعر"
+    "Poetry Genres":"أنواع الشعر",
+    "Song Genres":"أنواع الأغاني"
+
 }
