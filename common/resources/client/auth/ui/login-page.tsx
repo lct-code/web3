@@ -18,6 +18,7 @@ import {
 import {useSettings} from '../../core/settings/use-settings';
 import { EmailIcon } from '@common/icons/material/Email';
 import { PhoneIcon } from '@common/icons/material/Phone';
+import { FormPhoneField } from '../../ui/forms/input-field/phone-field/phone-field';
 
 interface Props {
   onTwoFactorChallenge: () => void;
@@ -91,7 +92,7 @@ export function LoginPage({ onTwoFactorChallenge }: Props) {
             });
           }}
         >
-          <FormTextField
+          <FormPhoneField
             className="mb-32"
             name="phone"
             type="tel"
@@ -155,7 +156,7 @@ export function LoginPage({ onTwoFactorChallenge }: Props) {
             <Trans message="Continue" />
           </Button>
         </Form>
-        )}
+      )}
 
       <SocialAuthSection
         dividerMessage={
@@ -174,16 +175,16 @@ export function LoginPage({ onTwoFactorChallenge }: Props) {
           variant="outline"
           className="mt-20 min-h-42 w-full"
           startIcon={
-          showEmailForm && mobile_login?
-          <PhoneIcon/>
-          :<EmailIcon />
-        }
+            showEmailForm && mobile_login ?
+              <PhoneIcon />
+              : <EmailIcon />
+          }
           onClick={() => setShowEmailForm(prev => !prev)}
         >
           <span className="min-w-160 text-start">
-            { showEmailForm && mobile_login?
-            <Trans message="Continue with phone" />
-            :<Trans message="Continue with email" />
+            {showEmailForm && mobile_login ?
+              <Trans message="Continue with phone" />
+              : <Trans message="Continue with email" />
             }
           </span>
         </Button>

@@ -17,6 +17,7 @@ import {useContext, useState} from 'react';
 import {SiteConfigContext} from '@common/core/settings/site-config-context';
 import { EmailIcon } from '@common/icons/material/Email';
 import { PhoneIcon } from '@common/icons/material/Phone';
+import { FormPhoneField } from '@common/ui/forms/input-field/phone-field/phone-field';
 
 export function RegisterPage() {
   const {
@@ -92,7 +93,7 @@ export function RegisterPage() {
           }
         }}
       >
-          <FormTextField
+          <FormPhoneField
             className="mb-32"
             name="phone"
             type="tel"
