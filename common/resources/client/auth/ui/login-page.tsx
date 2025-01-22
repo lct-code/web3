@@ -19,6 +19,7 @@ import {useSettings} from '../../core/settings/use-settings';
 import { EmailIcon } from '@common/icons/material/Email';
 import { PhoneIcon } from '@common/icons/material/Phone';
 import { FormPhoneField } from '../../ui/forms/input-field/phone-field/phone-field';
+import { useBootstrapData } from '@common/core/bootstrap-data/bootstrap-data-context';
 
 interface Props {
   onTwoFactorChallenge: () => void;
@@ -33,6 +34,8 @@ export function LoginPage({ onTwoFactorChallenge }: Props) {
   const searchParamsForceEmail = searchParams.get('user') === 'admin';
 
   const { branding, registration, site, social, mobile_login, base_url } = useSettings();
+  const {data:{environment}} = useBootstrapData()
+
   const siteConfig = useContext(SiteConfigContext);
 
   const demoDefaults =
@@ -99,6 +102,9 @@ export function LoginPage({ onTwoFactorChallenge }: Props) {
             label={<Trans message="Phone Number" />}
             invalid={isInvalid}
             required={!showEmailForm}
+            onlyCountries={environment.ONLY_COUNTRIES?.split(',')}
+            excludeCountries={environment.EXCLUDED_COUNTRIES?.split(',')}
+            initialCountry={environment.ONLY_COUNTRIES?.split(',')[0]}
           />
           <Button
             className="block w-full"

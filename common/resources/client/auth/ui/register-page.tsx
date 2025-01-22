@@ -18,6 +18,7 @@ import {SiteConfigContext} from '@common/core/settings/site-config-context';
 import { EmailIcon } from '@common/icons/material/Email';
 import { PhoneIcon } from '@common/icons/material/Phone';
 import { FormPhoneField } from '@common/ui/forms/input-field/phone-field/phone-field';
+import { useBootstrapData } from '@common/core/bootstrap-data/bootstrap-data-context';
 
 export function RegisterPage() {
   const {
@@ -36,6 +37,7 @@ export function RegisterPage() {
   const isBillingRegister = searchParams.get('redirectFrom') === 'pricing';
   const searchParamsEmail = searchParams.get('email') || undefined;
   const searchParamsPhone = searchParams.get('phone') || undefined;
+  const {data:{environment}} = useBootstrapData()
 
   const form = useForm<RegisterPayload>({
     defaultValues: {phone: searchParamsPhone, email: searchParamsEmail},
@@ -100,6 +102,9 @@ export function RegisterPage() {
             label={<Trans message="Phone" />}
             invalid={isInvalid}
             required={!showEmailForm}
+            onlyCountries={environment.ONLY_COUNTRIES?.split(',')}
+            excludeCountries={environment.EXCLUDED_COUNTRIES?.split(',')}
+            initialCountry={environment.ONLY_COUNTRIES?.split(',')[0]}
           />
           {auth?.registerFields ? <auth.registerFields /> : null}
           <PolicyCheckboxes />
