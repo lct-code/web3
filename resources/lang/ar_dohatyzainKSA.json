@@ -1,5 +1,5 @@
 {
-    "Artists": "الشعراء والفنانين",
+    "Artists": "الشعراء",
     "Popular Albums": "الألبومات الأكثر استماعاً",
     "Popular Tracks": "الأكثر استماعاً",
     "Genres": "أنواع المسموعات",
@@ -34,7 +34,7 @@
     "Continue": "تاكيد",
     "Stay signed in for a month": "حفظ تسجيل الدخول لمدة شهر",
     "Album": "الألبوم",
-    "Artist": "الشعراء و الفنانين",
+    "Artist": "الفنانين",
     "Title": "الأغنية \/ الشعر",
     "Choose the right plan for you": "إختر نوع الإشتراك (يومي أو إسبوعي أو شهري)",
     "What's included": "المميزات",
@@ -245,5 +245,9 @@
     "Could not complete the request. Please try again later":"أرجو المحاولة مرة أخرى",
     "Phone number entered is invalid. Please try again.": "ارجو ادخال رقم زين السعودية",
     "The SMS verification code has expired. You can request a new code below.": "إنتهت مدة صلاحية الرمز. ارجو الضغط على اعادة ارسال الرمز",
-    "Invalid phone number format":"ارجو ادخال رقم زين السعودية"
+    "Invalid phone number format":"ارجو ادخال رقم زين السعودية",
+    "Poetry":"الشاعر",
+    "Poets":"الشعر",
+    "Popular Poetry":"الشعر الأكثر إستماعا",
+    "Poetry Genres":"أنواع الشعر"
 }
