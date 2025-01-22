@@ -56,7 +56,8 @@ export const PhoneField = forwardRef<HTMLDivElement, PhoneFieldProps>(
     const inputFieldClassNames = getInputFieldClassNames({
       ...props,
     });
-    inputProps.className = 'w-full' + inputFieldClassNames.input
+    inputProps.className = 'w-full ' + inputFieldClassNames.input
+    inputFieldClassNames.wrapper += ' [&_.iti]:w-full'
     const itiRef = useRef<IntlTelInputRef>(null);
 
     const handleNumberChange = (e: string) => {
@@ -81,6 +82,8 @@ export const PhoneField = forwardRef<HTMLDivElement, PhoneFieldProps>(
           inputProps={(inputProps as any)}
           initOptions={{
             onlyCountries,
+            initialCountry,
+            excludeCountries,
           }}
           onChangeNumber={handleNumberChange}
           onChangeValidity={onChangeValidity}
