@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PhonesubController extends BaseController
 {
@@ -26,6 +27,8 @@ class PhonesubController extends BaseController
             'phone' => 'required|string',
         ]);
 
+        $phone = $data['phone'];
+
         try {
             $data = $this->phonesub->subscribeStart(
                 $data['price_id'],
@@ -33,11 +36,11 @@ class PhonesubController extends BaseController
                 $this->request->user(),
             );
             // Login/register the user with the phone number
-            if ($this->request->user()?->phone != $data['phone']) {
-                $user = User::where('phone', $data['phone'])->first();
+            if ($this->request->user()?->phone != $phone) {
+                $user = User::where('phone', $phone)->first();
                 if (!$user) {
                     $user = app(FortifyRegisterUser::class)->create([
-                        'phone' => $data['phone'],
+                        'phone' => $phone,
                     ], true);
                 }
                 $this->switchUsers($user,$this->request->user()); 
