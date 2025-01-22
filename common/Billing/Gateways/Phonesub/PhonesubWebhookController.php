@@ -29,8 +29,15 @@ class PhonesubWebhookController extends Controller
     public function handleWebhook(Request $request): Response
     {
         // Retrieve incoming request data
-        $requestData = file_get_contents('php://input');
-
+        $requestData = $request->getContent();
+    
+        if (empty($requestData)) {
+            Log::debug('😥😥 trying the other way');
+            $requestData = file_get_contents('php://input');
+        } else {
+            Log::debug('New way worked ✅✅' . $requestData);
+        }
+        
         $filename = date('Ymd-His') . '.xml';
 
         try {
@@ -78,7 +85,13 @@ class PhonesubWebhookController extends Controller
         ]));
 
         if (empty($requestData)) {
-          return $this->respondXml(400, 'Missing sync data');
+            Log::error('phonesub webhook: Missing sync data', [
+                'method' => $request->method(),
+                'headers' => $request->headers->all(),
+                'input' => $request->all(),
+                'server' => $_SERVER,
+            ]);
+          return $this->respondXml(00000000, 'ok');
         }
 
         /*
@@ -144,7 +157,7 @@ class PhonesubWebhookController extends Controller
         }
         catch (\Exception $e) {
             Log::debug('phonesub api sync - handleSubscription - user NOT FOUND for phone: '.$phonesubUserId);
-            return $this->respondXml(400, 'Missing User data');
+            return $this->respondXml(00000000, 'ok');
         }
 
         Log::debug('phonesub api sync - handleSubscription - user: '.json_encode($user));

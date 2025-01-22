@@ -103,6 +103,16 @@ export function PriceForm({index, onRemovePrice}: PriceFormProps) {
         className="mb-20"
       />
 
+      <FormTextField
+        disabled={!allowPriceChanges}
+        label={<Trans message="OTP summary" />}
+        description={<Trans message="Optional text to display during OTP verification for phone subscriptions" />}
+        inputElementType='textarea'
+        type="text"
+        name={`prices.${index}.otp_summary`}
+        className="mb-20"
+      />
+
       <BillingPeriodSelect
         disabled={!allowPriceChanges}
         index={index}

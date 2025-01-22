@@ -11,7 +11,8 @@ trait HandlesPhoneSubscriptionErrors
         array|string $errorCode,
         string $context,
         array $errorMap = [],
-        array $metadata = []
+        array $metadata = [],
+        string $message = ""
     ): void {
         $defaultErrorMap = [
             'INVALID_PHONE' => __('Phone number entered is invalid. Please try again.'),
@@ -36,7 +37,7 @@ trait HandlesPhoneSubscriptionErrors
         ]);
 
         // Map error code to message or use default
-        $errorMessage = $errorMap[$errorCode] ?? __('Could not complete the request. Please try again later');
+        $errorMessage = $errorMap[$errorCode] ?? $message ?? __('Could not complete the request. Please try again later');
 
         throw new GatewayException($errorMessage);
     }
