@@ -27,7 +27,7 @@ class FortifyRegisterUser implements CreatesNewUsers
         if($mobile_login && isset($input['phone'])) {
             $input['phone'] = ltrim($input['phone'], '0');
             Validator::make($input, [
-                'phone' => ['required', 'string', 'regex:/^\d{9,25}$/', 'unique:users'], // 9 to 25 digits to include country codes for many countries
+                'phone' => ['required', 'string', 'regex:/^\+\d{9,25}$/', 'unique:users'], // 9 to 25 digits to include country codes for many countries
             ])->validate();
             // skipp for now adding validation for phone number
             // $input['phone_entered'] = trim($input['phone']);
