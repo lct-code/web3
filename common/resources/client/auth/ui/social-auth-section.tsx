@@ -62,11 +62,13 @@ export function SocialAuthSection({dividerMessage}: SocialAuthSectionProps) {
 
   return (
     <Fragment>
-      <div className="relative my-20 text-center before:absolute before:left-0 before:top-1/2 before:h-1 before:w-full before:-translate-y-1/2 before:bg-divider">
-        <span className="relative z-10 bg-paper px-10 text-sm text-muted">
-          {dividerMessage}
-        </span>
-      </div>
+      {dividerMessage &&
+        <div className="relative my-20 text-center before:absolute before:left-0 before:top-1/2 before:h-1 before:w-full before:-translate-y-1/2 before:bg-divider">
+          <span className="relative z-10 bg-paper px-10 text-sm text-muted">
+            {dividerMessage}
+          </span>
+        </div>
+      }
       <div
         className={clsx(
           'flex items-center justify-center gap-14',

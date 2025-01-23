@@ -13,8 +13,12 @@ import {CustomMenuItem} from '../../menus/custom-menu';
 import {useRecaptcha} from '../../recaptcha/use-recaptcha';
 import {StaticPageTitle} from '../../seo/static-page-title';
 import {useSettings} from '../../core/settings/use-settings';
-import {useContext} from 'react';
+import {useContext, useState} from 'react';
 import {SiteConfigContext} from '@common/core/settings/site-config-context';
+import { EmailIcon } from '@common/icons/material/Email';
+import { PhoneIcon } from '@common/icons/material/Phone';
+import { FormPhoneField } from '@common/ui/forms/input-field/phone-field/phone-field';
+import { useBootstrapData } from '@common/core/bootstrap-data/bootstrap-data-context';
 
 export function RegisterPage() {
   const {
@@ -33,11 +37,13 @@ export function RegisterPage() {
   const isBillingRegister = searchParams.get('redirectFrom') === 'pricing';
   const searchParamsEmail = searchParams.get('email') || undefined;
   const searchParamsPhone = searchParams.get('phone') || undefined;
+  const {data:{environment}} = useBootstrapData()
 
   const form = useForm<RegisterPayload>({
     defaultValues: {phone: searchParamsPhone, email: searchParamsEmail},
   });
 
+  const [showEmailForm, setShowEmailForm] = useState(!!searchParamsEmail);
   const isInvalid = !!Object.keys(form.formState.errors).length;
   const register = useRegister(form);
 
@@ -75,26 +81,58 @@ export function RegisterPage() {
       <StaticPageTitle>
         <Trans message="Register" />
       </StaticPageTitle>
+
+      {mobile_login && !showEmailForm ? (
       <Form
         form={form}
         onSubmit={async payload => {
+          payload.email = undefined;
+          payload.password = undefined;
+          payload.password_confirmation = undefined;
           const isValid = await verify();
           if (isValid) {
             register.mutate(payload);
           }
         }}
       >
-        {mobile_login ? (
-          <FormTextField
+          <FormPhoneField
             className="mb-32"
             name="phone"
             type="tel"
             label={<Trans message="Phone" />}
             invalid={isInvalid}
-            required
+            required={!showEmailForm}
+            onlyCountries={environment.ONLY_COUNTRIES?.split(',')}
+            excludeCountries={environment.EXCLUDED_COUNTRIES?.split(',')}
+            initialCountry={environment.ONLY_COUNTRIES?.split(',')[0]}
           />
-        ) : (
-          <>
+          {auth?.registerFields ? <auth.registerFields /> : null}
+          <PolicyCheckboxes />
+          <Button
+            className="block w-full"
+            type="submit"
+            variant="flat"
+            color="primary"
+            size="md"
+            disabled={register.isPending || isVerifying}
+          >
+            <Trans message="Create account" />
+          </Button>
+        </Form>
+      ) : <></>}
+
+      {showEmailForm && (
+        <Form
+          form={form}
+          className='mt-20'
+          onSubmit={async payload => {
+            payload.phone = undefined;
+            const isValid = await verify();
+            if (isValid) {
+              register.mutate(payload);
+            }
+          }}
+        >
             <FormTextField
               className="mb-32"
               name="email"
@@ -120,11 +158,6 @@ export function RegisterPage() {
               invalid={isInvalid}
               required
             />
-            <FormCheckbox name="remember" className="mb-32 block">
-              <Trans message="Stay signed in for a month" />
-            </FormCheckbox>
-          </>
-        )}
         {auth?.registerFields ? <auth.registerFields /> : null}
         <PolicyCheckboxes />
         <Button
@@ -137,16 +170,43 @@ export function RegisterPage() {
         >
           <Trans message="Create account" />
         </Button>
-        <SocialAuthSection
-          dividerMessage={
-            social.compact_buttons ? (
+        </Form>
+      )}
+
+      
+<SocialAuthSection
+        dividerMessage={
+          !mobile_login ? ''
+            : social.compact_buttons ? (
               <Trans message="Or sign up with" />
             ) : (
               <Trans message="OR" />
             )
-          }
+        }
         />
-      </Form>
+
+
+        {
+        social?.email?.enable &&
+        <Button
+          variant="outline"
+          className="mt-20 min-h-42 w-full"
+          startIcon={
+            showEmailForm && mobile_login ?
+              <PhoneIcon />
+              : <EmailIcon />
+          }
+          onClick={() => setShowEmailForm(prev => !prev)}
+        >
+          <span className="min-w-160 text-start">
+          {showEmailForm && mobile_login ?
+              <Trans message="Continue with phone" />
+              : <Trans message="Continue with email" />
+            }
+          </span>
+        </Button>
+        }
+
     </AuthLayout>
   );
 }

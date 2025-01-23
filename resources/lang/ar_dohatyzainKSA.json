@@ -34,7 +34,7 @@
     "Continue": "تاكيد",
     "Stay signed in for a month": "حفظ تسجيل الدخول لمدة شهر",
     "Album": "الألبوم",
-    "Artist": "الفنانين",
+    "Artist": "الفنان",
     "Title": "الأغنية \/ الشعر",
     "Choose the right plan for you": "إختر نوع الإشتراك (يومي أو إسبوعي أو شهري)",
     "What's included": "المميزات",
@@ -251,5 +251,4 @@
     "Popular Poetry":"الشعر الأكثر إستماعا",
     "Poetry Genres":"أنواع الشعر",
     "Song Genres":"أنواع الأغاني"
-
 }

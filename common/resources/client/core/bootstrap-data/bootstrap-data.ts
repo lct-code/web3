@@ -20,5 +20,7 @@ export interface BootstrapData {
   environment: {
     DEFAULT_REDIRECT_GATEWAY?: string;
     DEFAULT_REDIRECT_PRODUCT_CODE?: string;
+    ONLY_COUNTRIES?: string;
+    EXCLUDED_COUNTRIES?: string;
   };
 }

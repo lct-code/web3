@@ -12,6 +12,7 @@ import {toast} from '../../../ui/toast/toast';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {ProgressCircle} from '../../../ui/progress/progress-circle';
 import { useBootstrapData } from '@common/core/bootstrap-data/bootstrap-data-context';
+import { FormPhoneField } from '@common/ui/forms/input-field/phone-field/phone-field';
 
 interface PhonesubElementsFormProps {
   productId?: string;
@@ -39,10 +40,12 @@ export function PhonesubElementsForm({
   const [subStatus, setSubStatus] = useState<string>('start');
   const navigate = useNavigate();
   const {user} = useAuth();
-  const {invalidateBootstrapData} = useBootstrapData();
+  const {invalidateBootstrapData, data:{environment}} = useBootstrapData();
   const [timeLeft, setTimeLeft] = useState<number>(90);
   const [canResend, setCanResend] = useState(false);
-  const [, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const  paramsStatus = searchParams.get('status') 
 
   const form = useForm<{auth_code:string, phone:string}>({
     defaultValues: {
@@ -67,6 +70,15 @@ export function PhonesubElementsForm({
         return newParams;
       });
     },[setSearchParams]);
+
+    useEffect(() => {
+      if(paramsStatus === 'start' && subStatus !=='start')
+      setSubStatus('start')
+    // if( paramsStatus === 'OTPVerify' && subStatus!== 'verify'  ){
+    // }
+    
+    }, [paramsStatus])
+    
   
   useEffect(() => {
 
@@ -211,12 +223,16 @@ export function PhonesubElementsForm({
               <Trans message="The subscription will be renewed automatically" />
             }
             /> */}
-          <FormTextField
+          <FormPhoneField
             className="mb-12"
             name="phone"
             type="text"
             label={<Trans message="Phone number" />}
             required
+            dir='ltr'
+            onlyCountries={environment.ONLY_COUNTRIES?.split(',')}
+            excludeCountries={environment.EXCLUDED_COUNTRIES?.split(',')}
+            initialCountry={environment.ONLY_COUNTRIES?.split(',')[0]}
             inputRef={phoneRef}
           />
         </div>
