@@ -91,7 +91,7 @@ class PhonesubWebhookController extends Controller
                 'input' => $request->all(),
                 'server' => $_SERVER,
             ]);
-          return $this->respondXml(00000000, 'ok');
+          return $this->respondXml(400, 'Missing sync data');
         }
 
         /*
@@ -157,7 +157,8 @@ class PhonesubWebhookController extends Controller
         }
         catch (\Exception $e) {
             Log::debug('phonesub api sync - handleSubscription - user NOT FOUND for phone: '.$phonesubUserId);
-            return $this->respondXml(00000000, 'ok');
+            \Sentry\captureException($e);
+            return $this->respondXml(400, 'Missing User data');
         }
 
         Log::debug('phonesub api sync - handleSubscription - user: '.json_encode($user));
