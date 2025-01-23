@@ -106,7 +106,7 @@ export const FormPhoneField = forwardRef<HTMLDivElement, FormPhoneFieldProps>(
 
     const {
       field: { onChange, onBlur, value = '', ref: inputRef },
-      fieldState: { invalid, error },
+      fieldState: { invalid, error, isTouched },
       formState: { isSubmitting },
     } = useController({
       name,
@@ -127,9 +127,9 @@ export const FormPhoneField = forwardRef<HTMLDivElement, FormPhoneFieldProps>(
       },
     });
 
-    const handleValidationChange = (isNewValid: boolean|undefined, errorCode: number | null | undefined) => {
-      if (isNewValid !== undefined) setIsValid(isNewValid);
-      if (errorCode !== undefined) setErrorCode(errorCode);
+    const handleValidationChange = (isNewValid: boolean | undefined, errorCode: number | null | undefined) => {
+      if (isNewValid !== undefined) setIsValid(isNewValid || !isTouched);
+      if (errorCode !== undefined) setErrorCode(!isTouched ? null : errorCode);
 
       if (!isSubmitting) {
         // Use the latest value when triggering validation
