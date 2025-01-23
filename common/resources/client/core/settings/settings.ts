@@ -99,6 +99,9 @@ export interface Settings {
     facebook: {
       enable: boolean;
     };
+    email: {
+      enable: boolean;
+    };
     compact_buttons: boolean;
   };
   workspaces: {

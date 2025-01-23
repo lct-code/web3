@@ -10,25 +10,32 @@ import {SocialAuthSection} from './social-auth-section';
 import {AuthLayout} from './auth-layout/auth-layout';
 import {Trans} from '../../i18n/trans';
 import {StaticPageTitle} from '../../seo/static-page-title';
-import {useContext} from 'react';
+import { useContext, useState } from 'react';
 import {
   SiteConfigContext,
   SiteConfigContextValue,
 } from '../../core/settings/site-config-context';
 import {useSettings} from '../../core/settings/use-settings';
+import { EmailIcon } from '@common/icons/material/Email';
+import { PhoneIcon } from '@common/icons/material/Phone';
+import { FormPhoneField } from '../../ui/forms/input-field/phone-field/phone-field';
+import { useBootstrapData } from '@common/core/bootstrap-data/bootstrap-data-context';
 
 interface Props {
   onTwoFactorChallenge: () => void;
 }
-export function LoginPage({onTwoFactorChallenge}: Props) {
+export function LoginPage({ onTwoFactorChallenge }: Props) {
   const [searchParams] = useSearchParams();
-  const {pathname} = useLocation();
+  const { pathname } = useLocation();
 
   const isWorkspaceLogin = pathname.includes('workspace');
   const searchParamsEmail = searchParams.get('email') || undefined;
   const searchParamsPhone = searchParams.get('phone') || undefined;
+  const searchParamsForceEmail = searchParams.get('user') === 'admin';
 
-  const {branding, registration, site, social, mobile_login, base_url} = useSettings();
+  const { branding, registration, site, social, mobile_login, base_url } = useSettings();
+  const {data:{environment}} = useBootstrapData()
+
   const siteConfig = useContext(SiteConfigContext);
 
   const demoDefaults =
@@ -42,10 +49,10 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
     },
   });
   const login = useLogin(form);
-  
+
   const heading = isWorkspaceLogin ? (
     <Trans
-      values={{siteName: branding?.site_name}}
+      values={{ siteName: branding?.site_name }}
       message="To join your team on :siteName, login to your account"
     />
   ) : (
@@ -67,76 +74,127 @@ export function LoginPage({onTwoFactorChallenge}: Props) {
 
   const isInvalid = !!Object.keys(form.formState.errors).length;
 
+  const [showEmailForm, setShowEmailForm] = useState(!!searchParamsEmail || searchParamsForceEmail);
+
   return (
     <AuthLayout heading={heading} message={message}>
       <StaticPageTitle>
         <Trans message="Login" />
       </StaticPageTitle>
-      <Form
-        form={form}
-        onSubmit={payload => {
-          login.mutate(payload, {
-            onSuccess: response => {
-              if (response.two_factor) {
-                onTwoFactorChallenge();
-              }
-            },
-          });
-        }}
-      >
-        {mobile_login ? (
-          <FormTextField
+
+        {mobile_login && !showEmailForm ? (
+        <Form
+          form={form}
+          onSubmit={payload => {
+            login.mutate(payload, {
+              onSuccess: response => {
+                if (response.two_factor) {
+                  onTwoFactorChallenge();
+                }
+              },
+            });
+          }}
+        >
+          <FormPhoneField
             className="mb-32"
             name="phone"
             type="tel"
             label={<Trans message="Phone Number" />}
             invalid={isInvalid}
+            required={!showEmailForm}
+            onlyCountries={environment.ONLY_COUNTRIES?.split(',')}
+            excludeCountries={environment.EXCLUDED_COUNTRIES?.split(',')}
+            initialCountry={environment.ONLY_COUNTRIES?.split(',')[0]}
+          />
+          <Button
+            className="block w-full"
+            type="submit"
+            variant="flat"
+            color="primary"
+            size="md"
+            disabled={login.isPending}
+          >
+            <Trans message="Continue" />
+          </Button>
+        </Form>
+        ) : <></>}
+
+      {showEmailForm && (
+        <Form
+          form={form}
+          className='mt-20'
+          onSubmit={payload => {
+            payload.phone = undefined;
+            login.mutate(payload, {
+              onSuccess: response => {
+                if (response.two_factor) {
+                  onTwoFactorChallenge();
+                }
+              },
+            });
+          }}
+        >
+          <FormTextField
+            className="mb-32"
+            name="email"
+            type="email"
+            label={<Trans message="Email" />}
+            disabled={!!searchParamsEmail}
+            invalid={isInvalid}
             required
           />
-        ) : (
-          <>
-            <FormTextField
-              className="mb-32"
-              name="email"
-              type="email"
-              label={<Trans message="Email" />}
-              disabled={!!searchParamsEmail}
-              invalid={isInvalid}
-              required
-            />
-            <FormTextField
-              className="mb-32"
-              name="password"
-              type="password"
-              label={<Trans message="Password" />}
-              invalid={isInvalid}
-              required
-            />
-          </>
-        )}
-        <FormCheckbox name="remember" className="mb-32 block">
-          <Trans message="Stay signed in for a month" />
-        </FormCheckbox>
-        <Button
-          className="block w-full"
-          type="submit"
-          variant="flat"
-          color="primary"
-          size="md"
-          disabled={login.isPending}
-        >
-          <Trans message="Continue" />
-        </Button>
-      </Form>
+          <FormTextField
+            className="mb-32"
+            name="password"
+            type="password"
+            label={<Trans message="Password" />}
+            invalid={isInvalid}
+            required
+          />
+          <Button
+            className="block w-full"
+            type="submit"
+            variant="flat"
+            color="primary"
+            size="md"
+            disabled={login.isPending}
+          >
+            <Trans message="Continue" />
+          </Button>
+        </Form>
+      )}
+
       <SocialAuthSection
         dividerMessage={
-          social.compact_buttons ? (
-            <Trans message="Or sign in with" />
-          ) : (
-            <Trans message="OR" />
-          )
+          !mobile_login ? ''
+            : social.compact_buttons ? (
+              <Trans message="Or sign in with" />
+            ) : (
+              <Trans message="OR" />
+            )
         }
       />
+
+      {
+        social?.email?.enable &&
+        <Button
+          variant="outline"
+          className="mt-20 min-h-42 w-full"
+          startIcon={
+            showEmailForm && mobile_login ?
+              <PhoneIcon />
+              : <EmailIcon />
+          }
+          onClick={() => setShowEmailForm(prev => !prev)}
+        >
+          <span className="min-w-160 text-start">
+            {showEmailForm && mobile_login ?
+              <Trans message="Continue with phone" />
+              : <Trans message="Continue with email" />
+            }
+          </span>
+        </Button>
+      }
     </AuthLayout>
   );
 }

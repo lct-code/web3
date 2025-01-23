@@ -88,11 +88,11 @@ function PhoneSubSection() {
         name="client.billing.phonesub.enable"
         description={
           <div>
-            <Trans message="Enable PhoneSub payment gateway integration." />
+            <Trans message="Enable Zain KSA payment gateway integration." />
           </div>
         }
       >
-        <Trans message="PhoneSub gateway" />
+        <Trans message="Zain KSA gateway" />
       </FormSwitch>
       {phoneSubIsEnabled && (
         <SettingsErrorGroup name="phonesub_group">
@@ -103,11 +103,11 @@ function PhoneSubSection() {
                 invalid={isInvalid}
                 description={
                   <div>
-                    <Trans message="Allows testing PhoneSub payments." />
+                    <Trans message="Allows testing Zain KSA payments." />
                   </div>
                 }
               >
-                <Trans message="PhoneSub test mode" />
+                <Trans message="Zain KSA test mode" />
               </FormSwitch>
             </Fragment>
           )}

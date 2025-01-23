@@ -12,6 +12,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use SimpleXMLElement;
+use Common\Files\FileEntryPayload;
+use Common\Files\Actions\StoreFile;
 
 class PhonesubWebhookController extends Controller
 {
@@ -19,25 +21,54 @@ class PhonesubWebhookController extends Controller
 
     public function __construct(
         protected Subscription $subscription,
-        protected Phonesub $phonesub
+        protected Phonesub $phonesub,
+        protected StoreFile $storeFile
     ) {
     }
 
     public function handleWebhook(Request $request): Response
     {
         // Retrieve incoming request data
-        $requestData = file_get_contents('php://input');
-
-        // Store sync data
-        $storagePath = storage_path('sync/zainksa-'.date('Ymd-His').'.xml');
-        if ($bytes = file_put_contents(
-          $storagePath,
-          $requestData,
-        )) {
-          Log::debug('phonesub api sync request: '.$bytes.' bytes wrote to '.$storagePath);
+        $requestData = $request->getContent();
+    
+        if (empty($requestData)) {
+            Log::debug('😥😥 trying the other way');
+            $requestData = file_get_contents('php://input');
+        } else {
+            Log::debug('New way worked ✅✅' . $requestData);
         }
-        else {
-          Log::debug('phonesub api sync request: could not write to '.$storagePath);
+        
+        $filename = date('Ymd-His') . '.xml';
+
+        try {
+            $payload = new FileEntryPayload([
+                'name' => $filename,
+                'clientMime' => 'application/xml',
+                'clientName' => $filename,
+                'clientSize' => strlen($requestData),
+                'filename' => $filename,
+                'diskPrefix' => 'webhook-logs/zainksa',
+                'visibility' => 'public',
+                'public' => false, // This ensures it uses the 'uploads' disk instead of 'public'
+            ]);
+            // Use the existing StoreFile action with contents
+            $stored = $this->storeFile->execute($payload, [
+                'contents' => $requestData,
+            ]);
+
+            if (!$stored) {
+                Log::error('phonesub api sync request: could not write file', [
+                    'filename' => $filename,
+                    'disk' => 'uploads',
+                    'driver' => config('filesystems.disks.uploads.driver')
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('phonesub api sync request: failed to store file', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'config' => config('filesystems.disks.uploads')
+            ]);
         }
 
         $headers = [];
@@ -54,7 +85,13 @@ class PhonesubWebhookController extends Controller
         ]));
 
         if (empty($requestData)) {
-          return $this->respondXml(400, 'Missing sync data');
+            Log::error('phonesub webhook: Missing sync data', [
+                'method' => $request->method(),
+                'headers' => $request->headers->all(),
+                'input' => $request->all(),
+                'server' => $_SERVER,
+            ]);
+          return $this->respondXml(00000000, 'ok');
         }
 
         /*
@@ -120,7 +157,7 @@ class PhonesubWebhookController extends Controller
         }
         catch (\Exception $e) {
             Log::debug('phonesub api sync - handleSubscription - user NOT FOUND for phone: '.$phonesubUserId);
-            return $this->respondXml(400, 'Missing User data');
+            return $this->respondXml(00000000, 'ok');
         }
 
         Log::debug('phonesub api sync - handleSubscription - user: '.json_encode($user));

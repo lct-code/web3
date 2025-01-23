@@ -77,10 +77,19 @@ function ActionButtons() {
   const {isLoggedIn, hasPermission, isSubscribed} = useAuth();
   const showUploadButton =
     player?.show_upload_btn && isLoggedIn && hasPermission('music.create');
-    const showTryProButton =
+  const showTryProButton =
     billing?.enable && hasPermission('plans.view') && !isSubscribed;
-    const {environment, user} = getBootstrapData(); 
-    const subscriptionRedirectUrl = environment.DEFAULT_REDIRECT_GATEWAY === 'zainSD' ? `https://dsplp.sd.zain.com/?p=${environment.DEFAULT_REDIRECT_PRODUCT_CODE}` : '/pricing';
+  const {environment, user} = getBootstrapData(); 
+  let subscriptionRedirectUrl = '';
+  if (environment.DEFAULT_REDIRECT_GATEWAY === 'zainSD')
+    subscriptionRedirectUrl = `https://dsplp.sd.zain.com/?p=${environment.DEFAULT_REDIRECT_PRODUCT_CODE}`
+  else if (environment.DEFAULT_REDIRECT_GATEWAY?.startsWith('/'))
+    subscriptionRedirectUrl = environment.DEFAULT_REDIRECT_GATEWAY;
+  else
+    subscriptionRedirectUrl = '/pricing';
+
+  console.log("🚀 ~ file: player-navbar.tsx:161 ~ ActionButtons ~ environment.DEFAULT_REDIRECT_GATEWAY:", environment.DEFAULT_REDIRECT_GATEWAY);
+
     const cancelZainSdSubscription = useCancelZainSdSubscription();
 
     const handleCancelSubscription = () => {

@@ -1,14 +1,17 @@
 import {useAuth} from '../use-auth';
 import {ReactElement} from 'react';
-import {Navigate, Outlet} from 'react-router-dom';
+import {Navigate, Outlet, useLocation, useParams} from 'react-router-dom';
 
 interface GuestRouteProps {
   children: ReactElement;
 }
 export function NotSubscribedRoute({children}: GuestRouteProps) {
   const {isLoggedIn, isSubscribed} = useAuth();
-
-  if (!isLoggedIn) {
+  const {paymentMethodId} = useParams();
+  const {pathname} = useLocation();
+  const noLogin = paymentMethodId === 'zain_sd' || paymentMethodId === 'phonesub' || pathname.split('/').includes('phonesub') || pathname.split('/').includes('zain_sd') ;
+  
+  if (!isLoggedIn && !noLogin) {
     return <Navigate to="/register" replace />;
   }
 

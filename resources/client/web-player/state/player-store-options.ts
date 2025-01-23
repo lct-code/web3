@@ -120,6 +120,8 @@ export const playerStoreOptions: Partial<PlayerStoreOptions> = {
         if (environment.DEFAULT_REDIRECT_GATEWAY === 'zainSD') {
           const productCode = environment.DEFAULT_REDIRECT_PRODUCT_CODE || 'zainSD_product_code';
           window.location.href = `https://dsplp.sd.zain.com/?p=${productCode}`;
+        } else if (environment.DEFAULT_REDIRECT_GATEWAY?.startsWith('/')) {
+          window.location.href = environment.DEFAULT_REDIRECT_GATEWAY;
         } else {
           toast.danger(
             message('Your current plan does not allow music playback.')
