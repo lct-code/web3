@@ -8,15 +8,16 @@ import { useField } from '../use-field';
 import IntlTelInput from 'intl-tel-input/reactWithUtils';
 import 'intl-tel-input/build/css/intlTelInput.css';
 import { IntlTelInputRef } from 'intl-tel-input/react';
+import { message } from '@common/i18n/message';
 
 // Import utils directly from the package
 // import { loadUtils } from 'intl-tel-input/build/js/utils';
 const errorMap = [
-  "Invalid number",
-  "Invalid country code",
-  "Too short",
-  "Too long",
-  "Invalid number",
+  message("Invalid number"),
+  message("Invalid country code"),
+  message("Too short"),
+  message("Too long"),
+  message("Invalid number"),
 ];
 export interface PhoneFieldProps
   extends BaseFieldPropsWithDom<HTMLInputElement> {
@@ -115,7 +116,7 @@ export const FormPhoneField = forwardRef<HTMLDivElement, FormPhoneFieldProps>(
           phoneValid: (value) => {
             // Return true only if the number is valid
             if (!isValid) {
-              return errorMap[errorCode || 0];
+              return errorMap[errorCode || 0].message;
             }
             // Also validate that we have a value
             if (!latestValueRef.current?.trim()) {
@@ -147,7 +148,7 @@ export const FormPhoneField = forwardRef<HTMLDivElement, FormPhoneFieldProps>(
       value: value == null ? '' : value,
       invalid: invalid || !isValid,
       errorMessage: error?.message || (errorCode !== null ?
-        errorMap[errorCode] :
+        errorMap[errorCode]?.message :
         undefined),
       inputRef,
       name,
