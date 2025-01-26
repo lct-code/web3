@@ -9,7 +9,7 @@ export const usePaymentMethods = () => {
   const [paymentMethods, setPaymentMethods] = useState([
     { id: 'paypal', name: 'Paypal', enabled: paypal.enable },
     { id: 'stripe', name: 'Stripe', enabled: stripe.enable},
-    { id: 'phonesub', name: 'Phonesub', enabled: phonesub.enable},
+    { id: 'phonesub', name: 'Zain KSA', enabled: phonesub.enable},
     { id: 'zain_sd', name: 'Zain SD', enabled: zain_sd?.enable},
   ]);
 

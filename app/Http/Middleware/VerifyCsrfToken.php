@@ -11,5 +11,7 @@ class VerifyCsrfToken extends BaseVerifyCsrfToken
      *
      * @var array
      */
-    protected $except = [];
+    protected $except = [
+        'api/sync/zainksa',
+    ];
 }

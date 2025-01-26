@@ -25,7 +25,7 @@ export function Alert({title, message, type}: Props) {
         {title}
       </div>
     )}
-      <div className={`${colorClasses[type]?.body} border border-t-0 rounded-b px-8 py-6`}>
+      <div className={`${colorClasses[type]?.body} border ${ title? 'border-t-0 rounded-b' : 'rounded'} px-8 py-6`}>
         <p>{message}</p>
       </div>
     </div>

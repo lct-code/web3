@@ -34,7 +34,8 @@ export function CheckoutPhonesubDone() {
   return (
     <CheckoutLayout>
       <BillingRedirectMessage config={messageConfig} />
-      <CheckoutProductSummary showBillingLine={false} />
+      <></>
+      {/* <CheckoutProductSummary showBillingLine={false} /> */}
     </CheckoutLayout>
   );
 }

@@ -1,4 +1,4 @@
-import {Navigate, useParams} from 'react-router-dom';
+import {Navigate, useParams, useSearchParams} from 'react-router-dom';
 import {Trans} from '../../i18n/trans';
 import {CheckoutLayout} from './checkout-layout';
 import {CheckoutProductSummary} from './checkout-product-summary';
@@ -24,6 +24,9 @@ export function Checkout() {
     billing: {stripe, phonesub, paypal, zain_sd},
   } = useSettings();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isOTPStep = searchParams.get('status') === 'OTPVerify';
+  const isFirstStep = searchParams.get('status') === 'start';
 
   if (productQuery.isLoading) {
     return <FullPageLoader screen />;
@@ -93,24 +96,24 @@ export function Checkout() {
       ),
       enable: zain_sd?.enable && (price?.paymentMethods || []).includes('zain_sd'),
     },
-    {
-      key: 'go-back',
-      component: (
-        <Button
-          variant="flat"
-          color="chip"
-          size="md"
-          className="w-full"
-          type="button"
-          onClick={() => {
-            navigate('/pricing');
-          }}
-        >
-          <Trans message="Go back" />
-        </Button>
-      ),
-      enable: true,
-    }
+    // {
+    //   key: 'go-back',
+    //   component: (
+    //     <Button
+    //       variant="flat"
+    //       color="chip"
+    //       size="md"
+    //       className="w-full"
+    //       type="button"
+    //       onClick={() => {
+    //         navigate('/pricing');
+    //       }}
+    //     >
+    //       <Trans message="Go back" />
+    //     </Button>
+    //   ),
+    //   enable: true,
+    // }
   ];
 
   paymentMethodComponents.sort((a, b) => {
@@ -125,10 +128,14 @@ export function Checkout() {
 
   return (
     <CheckoutLayout>
+      {isOTPStep && (price.custom_summary || price.otp_summary ) ? (
+        <div dangerouslySetInnerHTML={{__html: price.otp_summary || ''}}></div>
+      ) : price.custom_summary && isFirstStep ? (
+        <div dangerouslySetInnerHTML={{__html: price.custom_summary}}></div>
+      ) : (
+        <></>
+      )}
       <Fragment>
-        <h1 className="mb-40 text-4xl">
-          <Trans message="Checkout" />
-        </h1>
         {enabledComponents.map((component, index) => (
           <Fragment key={component.key}>
             {component.component}
@@ -139,7 +146,6 @@ export function Checkout() {
           <Trans message="You’ll be charged until you cancel your subscription. Previous charges won’t be refunded when you cancel unless it’s legally required. Your payment data is encrypted and secure. By subscribing your agree to our terms of service and privacy policy." />
         </div>
       </Fragment>
-      <CheckoutProductSummary />
     </CheckoutLayout>
   );
 }

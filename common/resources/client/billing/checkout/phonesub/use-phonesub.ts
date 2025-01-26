@@ -25,6 +25,7 @@ export interface PhonesubResponse {
 export interface PhonesubPayload {
   auth_code?: string
   phone?:   string;
+  resend?: boolean;
 }
 
 export function usePhonesub({priceId}: UsePhonesubProps) {

@@ -1,4 +1,5 @@
-<?php namespace Common\Billing\Gateways\ZainSd;
+<?php
+namespace Common\Billing\Gateways\ZainSd;
 
 use App\Models\User;
 use Common\Billing\Gateways\Contracts\CommonSubscriptionGatewayActions;
@@ -12,13 +13,19 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Common\Auth\Fortify\FortifyRegisterUser;
 use Common\Core\Bootstrap\BaseBootstrapData;
+use Illuminate\Http\Request;
+use Common\Auth\Traits\HandlesPhoneVerification;
+use Common\Billing\Gateways\Traits\HandlesPhoneSubscriptionErrors;
 
 class ZainSd implements CommonSubscriptionGatewayActions
 {
     use InteractsWithZainSdRestApi;
+    use HandlesPhoneVerification;
+    use HandlesPhoneSubscriptionErrors;
 
     public function __construct(
-        protected Settings $settings
+        protected Settings $settings,
+        protected Request $request,
     ) {
     }
 
@@ -46,7 +53,7 @@ class ZainSd implements CommonSubscriptionGatewayActions
     ): bool {
         // First cancel the current subscription
         $this->cancelSubscription($subscription, false);
-        
+
         // Then create a new subscription with the new plan
         return $this->subscribe(
             $newPrice->zain_sd_product_code,
@@ -88,70 +95,41 @@ class ZainSd implements CommonSubscriptionGatewayActions
         throw new GatewayException(__('Subscription resumption not supported by Zain SD'));
     }
 
-    protected function storeSubscriptionLocally(array $subscriptionData, string $phone, string $productCode): Subscription 
+    protected function storeSubscriptionLocally(array $subscriptionData, string $phone, string $productCode): Subscription
     {
         $user = User::where('phone', $phone)->first();
         $loggedInUser = Auth::user();
 
         // Create new user if needed
         if (!$user) {
-            try {   
-                $loggedInUser = Auth::user();
+            try {
                 $user = app(FortifyRegisterUser::class)->create([
                     'phone' => $phone,
                 ], true);
-                    // Clear existing token if any
-                if ($loggedInUser) {
-                    $loggedInUser->tokens()->delete();
-                    // session()->flush();
-                    auth()->guard('web')->login($user, true);
-                    Log::info('Logged in user ' . $user->phone);    
-                    // Refresh token and bootstrap data
-                } else {
-                    Auth::login($user, true); // true for "remember me"
-                }
-                    // Generate API token if needed
-                $token = $user->createToken('default-token');
-                
-                // Load permissions and bootstrap data
-                $user->loadPermissions();
-                
-                // Set bootstrap data in session
-                app(BaseBootstrapData::class)
-                    ->init()
-                    ->set('user', $user);
+                // Clear existing token if any
+                // Log::info('storeSubscriptionLocally switchUsers when there is no user');
+                $this->switchUsers($user, $loggedInUser);
             } catch (\Exception $e) {
                 Log::error('Failed to create local subscription for Zain SD', [
-                    'error' => $e->getMessage(),
+                    'error' => $e,
                     'phone' => $phone,
+                    'session' => session()->all(),
+
                 ]);
                 throw new GatewayException(__('Could not create the subscription'));
             }
+        } else if ($user && !$loggedInUser || ($user && $loggedInUser && $user->id !== $loggedInUser->id)) {
+            // Log::info('storeSubscriptionLocally switchUsers when there is a user');
+            $this->switchUsers($user, $loggedInUser);
         }
 
-        // Update existing user
-        // if (!$user && $loggedInUser) {
-        //     try {
-        //         $user = $loggedInUser;
-        //         $user->phone = $phone;
-        //         $user->save();
-        //     } catch (\Exception $e) {
-        //         Log::error('Failed to add phone to user', [
-        //             'error' => $e->getMessage(),
-        //             'phone' => $phone,
-        //         ]);
-        //         throw new GatewayException(__('Could not update user phone'));
-        //     }
-        // }
-
-        // Switch authentication if needed
         $price = Price::where('zain_sd_product_code', $productCode)->firstOrFail();
-        
         return $user->subscribe('zain_sd', $subscriptionData['id'], $price);
     }
 
     public function syncSubscriptionDetails(string $phone, string $productCode): array
     {
+        session()->put('zain_sd_validated', true);
         // if the phone number start with + or 0, remove the + or 0
         $phone = ltrim($phone, '+');
         $phone = ltrim($phone, '0');
@@ -174,9 +152,9 @@ class ZainSd implements CommonSubscriptionGatewayActions
         }
 
         $data = $response->json();
-        // if( $data['error_code'] == 111) {
+        // if ($data['error_code'] == 111) {
         //     $data['subscription_data'] = [
-        //         "id" => "4",
+        //         "id" => '4439',
         //         "msisdn" => "249908723839",
         //         "operator_id" => "1",
         //         "product_id" => "3",
@@ -197,20 +175,15 @@ class ZainSd implements CommonSubscriptionGatewayActions
         $dataError['product_code'] = $productCode;
         $this->handleZainSdError($dataError, 'syncSubscriptionDetails');
 
-        // Find subscription by phone and product code
-        $subscription = Subscription::where('gateway_id',$data['subscription_data']['id'])->first();
+        $subscription = Subscription::where('gateway_id', $data['subscription_data']['id'])->first();
 
-        // If no subscription found and subscription is active on Zain SD, create it locally
         $subscriptionData = $data['subscription_data'];
         $isActive = (bool) ($subscriptionData['is_active'] ?? false);
 
+        // If no subscription found and subscription is active on Zain SD, create it locally
         if (!$subscription && $isActive) {
             try {
                 $subscription = $this->storeSubscriptionLocally($subscriptionData, $phone, $productCode);
-                Log::info('Created local subscription for Zain SD user', [
-                    'phone' => $phone,
-                    'product_code' => $productCode,
-                ]);
             } catch (\Exception $e) {
                 Log::error('Failed to create local subscription for Zain SD3', [
                     'error' => $e->getMessage(),
@@ -219,38 +192,23 @@ class ZainSd implements CommonSubscriptionGatewayActions
                 ]);
                 throw new GatewayException(__('Could not create local subscription record'));
             }
-        } 
-
-        if ($subscription) {
+        } else if ($subscription) {
             if ($isActive) {
                 // if we need to switch users:
                 $user = User::where('phone', $phone)->first();
                 $loggedInUser = Auth::user();
                 if ($user && !$loggedInUser || ($user && $loggedInUser && $user->id !== $loggedInUser->id)) {
                     // Clear existing token if any
-                    if ($loggedInUser) {
-                        $loggedInUser->tokens()->delete();
-                        // session()->flush();
-                    }
-                    
-                    auth()->guard('web')->login($user, true);
-                    Log::info('Logged in user ' . $user->phone);
-                    
-                    // Refresh token and bootstrap data
-                    $token = $user->createToken('default-token');
-                    $user->loadPermissions();
-                    
-                    app(BaseBootstrapData::class)
-                        ->init()
-                        ->set('user', $user);
+                    // Log::info('syncSubscriptionDetails switchUsers');
+                    $this->switchUsers($user, $loggedInUser);
                 }
-        
+
 
                 // Convert unix timestamp to datetime
-                $renewsAt = isset($subscriptionData['subdate_unix']) 
-                    ? Carbon::createFromTimestamp($subscriptionData['subdate_unix'])
+                $renewsAt = isset($subscriptionData['unsubdate_unix'])
+                    ? Carbon::createFromTimestamp($subscriptionData['unsubdate_unix'])
                     : null;
-                    
+
                 $subscription->update([
                     'ends_at' => null,
                     'renews_at' => $renewsAt,
@@ -260,7 +218,7 @@ class ZainSd implements CommonSubscriptionGatewayActions
                 $unsubDate = isset($subscriptionData['unsubdate_unix'])
                     ? Carbon::createFromTimestamp($subscriptionData['unsubdate_unix'])
                     : now();
-                    
+
                 $subscription->update([
                     'ends_at' => $unsubDate,
                 ]);
@@ -273,28 +231,46 @@ class ZainSd implements CommonSubscriptionGatewayActions
         ];
     }
 
+    public function switchUsers(User $user, User|null $loggedInUser): void
+    {
+        if ($loggedInUser) {
+            // Log::info('switchUsers old session', session()->all());
+            $loggedInUser->tokens()->delete();
+            auth()->guard('web')->logout();
+            session()->flush();
+        }
+        auth()->guard('web')->login($user, true);
+        // auth()->login($user, true);
+        session()->regenerate();
+        session()->regenerateToken();
+        session()->put('zain_sd_validated', true);
+        session()->put('user_id', $user->id);
+        // Log::info('switchUsers new session', session()->all());
+
+        $token = $user->createToken('default-token');
+        $user->loadPermissions();
+
+        // Log::info('switchUsers reinitialize bootstrap data with user id' . $user->id);
+        app(BaseBootstrapData::class)
+            ->set('user', $user)
+            ->init();
+        // Log::info('switchUsers reinitialize bootstrap data with user id done');
+    }
+
     public function subscribe(string $productCode, string $phone, User $user): bool
     {
         // TODO: When implementing subscription creation, use storeSubscriptionLocally helper
         throw new GatewayException(__('Subscription creation not implemented for Zain SD'));
     }
 
-    protected function handleZainSdError(array $data, string $context = ''): void 
+    protected function handleZainSdError(array $data, string $context = '', array $metadata = []): void
     {
         if (!$data['success']) {
-            Log::error("ZainSD {$context} error: " . json_encode($data));
-            
-            $errorMessage = match($data['error_code'] ?? null) {
-                111 => __('This number is not subscribed to this service'),
-                102 => __('Invalid phone number format'),
-                113 => __('You already have an active subscription'),
-                118 => __('Subscription is currently inactive'),
-                1000 => __('Could not verify subscription status. Please try again later'),
-                1003 => __('Could not verify subscription status. Please try again later'),
-                default => __('Could not complete the request. Please try again later')
-            };
-            
-            throw new GatewayException($errorMessage);
+            $this->handleCommonPhoneErrors(
+                $this->mapZainSdErrorCode($data['error_code'] ?? 'UNKNOWN_ERROR'),
+                $context,
+                metadata: $metadata
+            );
         }
     }
-} 
+}

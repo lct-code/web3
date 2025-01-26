@@ -79,6 +79,8 @@ class BaseBootstrapData implements BootstrapData
         $this->data['environment'] = [
             'DEFAULT_REDIRECT_GATEWAY' => env('DEFAULT_REDIRECT_GATEWAY'),
             'DEFAULT_REDIRECT_PRODUCT_CODE' => env('DEFAULT_REDIRECT_PRODUCT_CODE'),
+            'ONLY_COUNTRIES' => env('ONLY_COUNTRIES'),
+            'EXCLUDED_COUNTRIES' => env('EXCLUDED_COUNTRIES'),
         ];
         $this->data['guest_role'] = app('guestRole')?->load('permissions');
         $this->data['i18n'] =

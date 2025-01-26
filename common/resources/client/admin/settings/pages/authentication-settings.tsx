@@ -48,6 +48,7 @@ export function AuthenticationSettings() {
       </FormSwitch>
       <EnvatoSection />
       <MobileLoginSection />
+      <EmailSection />
       <GoogleSection />
       <FacebookSection />
       <TwitterSection />
@@ -305,6 +306,34 @@ function TwitterSection() {
                 required
               />
             </>
+          )}
+        </>
+      )}
+    </SettingsErrorGroup>
+  );
+}
+
+function EmailSection() {
+  const {watch} = useFormContext<AdminSettings>();
+  const emailLoginEnabled = watch('client.social.email.enable');
+
+  return (
+    <SettingsErrorGroup name="email_group" separatorBottom={false}>
+      {isInvalid => (
+        <>
+          <FormSwitch
+            invalid={isInvalid}
+            name="client.social.email.enable"
+            description={
+              <Trans message="Enable logging into the site via email and password." />
+            }
+          >
+            <Trans message="Email login" />
+          </FormSwitch>
+          {!!emailLoginEnabled && (
+            <div className="mt-30 text-sm">
+              <Trans message="Users will be able to login using their email address and password." />
+            </div>
           )}
         </>
       )}
