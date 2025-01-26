@@ -1,5 +1,5 @@
 import {MessageDescriptor} from '../i18n/message-descriptor';
-import {Link, To} from 'react-router-dom';
+import {Link, To, useNavigate} from 'react-router-dom';
 import {AnimatePresence, m} from 'framer-motion';
 import {TaskAltIcon} from '../icons/material/TaskAlt';
 import {ErrorIcon} from '../icons/material/Error';
@@ -8,6 +8,7 @@ import {Trans} from '../i18n/trans';
 import {Button} from '../ui/buttons/button';
 import {Skeleton} from '../ui/skeleton/skeleton';
 import {opacityAnimation} from '../ui/animation/opacity-animation';
+import { invalidateBootstrapData } from '@common/core/bootstrap-data/use-backend-bootstrap-data';
 
 export interface BillingRedirectMessageConfig {
   message: MessageDescriptor;
@@ -19,7 +20,13 @@ export interface BillingRedirectMessageConfig {
 interface BillingRedirectMessageProps {
   config?: BillingRedirectMessageConfig;
 }
+
 export function BillingRedirectMessage({config}: BillingRedirectMessageProps) {
+  const navigate = useNavigate();
+  setTimeout(()=>{
+    invalidateBootstrapData();
+    navigate('/');
+  },3000)
   return (
     <AnimatePresence initial={false} mode="wait">
       <div className="mt-80">
