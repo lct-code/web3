@@ -137,7 +137,7 @@ export function PhonesubElementsForm({
       if (result.status == 'verified') {
         updateSearchParams('verified');
         setSyncTimeout();
-        invalidateBootstrapData();
+        // invalidateBootstrapData();
       }
 
       if (result.status) {
