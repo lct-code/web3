@@ -383,6 +383,24 @@ abstract class BaseUser extends BaseModel implements
             }
 
             return $subscription->product;
+        } else if (!$subscription && env('DEFAULT_REDIRECT_GATEWAY') === 'zainSD' && !session()->get('zain_sd_validated')) {
+            // Get the Zain SD gateway instance
+            $zainSd = app(ZainSd::class);
+
+            // Sync subscription details
+            $result = $zainSd->syncSubscriptionDetails(
+                $this->phone,
+                env('DEFAULT_REDIRECT_PRODUCT_CODE')
+            );
+            // Mark as validated for this session
+            session()->put('zain_sd_validated', true);
+            // If subscription is not active anymore, return free plan
+            Log::debug('RESULT: ',$result);
+            if (!$result['is_active']) {
+                Log::debug('NOT ACTIVE');
+                return Product::where('free', true)->first();
+            } else
+            return $result['subscription']->product;            
         } else {
             return Product::where('free', true)->first();
         }
