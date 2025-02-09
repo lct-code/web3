@@ -8,6 +8,7 @@ import {useAuth} from '../use-auth';
 import {useBootstrapData} from '../../core/bootstrap-data/bootstrap-data-context';
 import {useCallback} from 'react';
 import {useSettings} from '../../core/settings/use-settings';
+import { invalidateBootstrapData } from '@common/core/bootstrap-data/use-backend-bootstrap-data';
 
 interface LoginResponse extends BackendResponse {
   bootstrapData: string;
@@ -50,6 +51,7 @@ export function useHandleLoginSuccess() {
     (response: LoginResponse) => {
       setBootstrapData(response.bootstrapData);
       navigate(getRedirectUri(), {replace: true});
+      setTimeout(invalidateBootstrapData,3000);
     },
     [navigate, setBootstrapData, getRedirectUri],
   );
