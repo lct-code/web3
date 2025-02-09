@@ -67,7 +67,7 @@ class ZainSd implements CommonSubscriptionGatewayActions
         bool $atPeriodEnd = true
     ): bool {
         $response = $this->zainSd()->post('/v1/json/cancel.php', [
-            'msisdn' => $this->processUserPhone($subscription->user->phone),
+            'msisdn' => $this->processUserPhone('0'.ltrim($subscription->user->phone,'+249')),
             'product_code' => $subscription->price->zain_sd_product_code,
         ]);
 
