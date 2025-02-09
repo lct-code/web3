@@ -67,7 +67,7 @@ class ZainSd implements CommonSubscriptionGatewayActions
         bool $atPeriodEnd = true
     ): bool {
         $response = $this->zainSd()->post('/v1/json/cancel.php', [
-            'msisdn' => $this->processUserPhone($subscription->user->phone),
+            'msisdn' => $this->processUserPhone('0'.ltrim($subscription->user->phone,'+249')),
             'product_code' => $subscription->price->zain_sd_product_code,
         ]);
 
@@ -101,8 +101,10 @@ class ZainSd implements CommonSubscriptionGatewayActions
         $loggedInUser = Auth::user();
 
         // Create new user if needed
+        // Log::info('user' . json_encode($user) . json_encode($loggedInUser));
         if (!$user) {
             try {
+                // Log::info('@Create user');
                 $user = app(FortifyRegisterUser::class)->create([
                     'phone' => $phone,
                 ], true);
@@ -146,6 +148,9 @@ class ZainSd implements CommonSubscriptionGatewayActions
         ];
         $response = $this->zainSd()->post('/v1/json/check.php', $input);
 
+        $phone = ltrim($phone, '0');
+        $phone = '+249' . $phone;
+
         if (!$response->successful()) {
             Log::error('ZainSD syncSubscriptionDetails HTTP error: ' . $response->status());
             throw new GatewayException(__('Could not connect to Zain SD service'));
@@ -154,7 +159,7 @@ class ZainSd implements CommonSubscriptionGatewayActions
         $data = $response->json();
         // if ($data['error_code'] == 111) {
         //     $data['subscription_data'] = [
-        //         "id" => '4439',
+        //         "id" => '14439',
         //         "msisdn" => "249908723839",
         //         "operator_id" => "1",
         //         "product_id" => "3",
@@ -193,6 +198,7 @@ class ZainSd implements CommonSubscriptionGatewayActions
                 throw new GatewayException(__('Could not create local subscription record'));
             }
         } else if ($subscription) {
+            // Log::debug('Subscription found');
             if ($isActive) {
                 // if we need to switch users:
                 $user = User::where('phone', $phone)->first();
