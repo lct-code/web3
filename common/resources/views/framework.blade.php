@@ -77,17 +77,20 @@
             @endif
         @endif
 
-        @if ($code = settings('analytics.tracking_code'))
-
+        @if ($code = settings('analytics.googletag_code'))
+            #TODO: Add googletag_code as field in the settings
             <!-- Google Tag Manager -->
             <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
             j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer',"{{ settings('analytics.tracking_code') }}");</script>
+            })(window,document,'script','dataLayer',"{{ settings('analytics.googletag_code') }}");</script>
             <!-- End Google Tag Manager -->
-        
-            <!-- Google tag (gtag.js)>
+        @endif
+
+        @if ($code = settings('analytics.tracking_code'))
+        #TODO: uncommented  - google analytic        
+            <Google tag (gtag.js)>
             <script
                 async
                 src="https://www.googletagmanager.com/gtag/js?id={{ settings('analytics.tracking_code') }}"
@@ -97,34 +100,40 @@
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
                 gtag('config', "{{ settings('analytics.tracking_code') }}");
-            </script-->
+            </script>
         @endif
 
+        @if ($code = settings('analytics.pixel_code'))
+        #TODO: add field pixel_code in the settings
+        #TODO: 1129834722127557 with the field pixel_code
         <!-- Meta Pixel Code -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '1129834722127557');
-fbq('track', 'PageView');
-</script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=1129834722127557&ev=PageView&noscript=1"
-/></noscript>
-<!-- End Meta Pixel Code -->
+            <script>
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '{{ settings('analytics.pixel_code')}}');
+            fbq('track', 'PageView');
+            </script>
+
+            <noscript><img height="1" width="1" style="display:none"
+            src="https://www.facebook.com/tr?id={{ settings('analytics.pixel_code') }}&ev=PageView&noscript=1"
+            /></noscript>
+        <!-- End Meta Pixel Code -->
+            @endif
         
         @yield('head-end')
     </head>
 
     <body>
-        @if ($code = settings('analytics.tracking_code'))
+        @if ($code = settings('analytics.googletag_code'))
+        #TODO: this section is added to and needs to get googletag_code from settings
             <!-- Google Tag Manager (noscript) -->
-            <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ settings('analytics.tracking_code') }}"
+            <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{settings('analytics.googletag_code') }}"
             height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <!-- End Google Tag Manager (noscript) -->
         @endif
@@ -142,3 +151,4 @@ src="https://www.facebook.com/tr?id=1129834722127557&ev=PageView&noscript=1"
         @yield('body-end')
     </body>
 </html>
+
