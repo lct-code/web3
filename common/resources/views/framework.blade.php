@@ -78,7 +78,6 @@
         @endif
 
         @if ($code = settings('analytics.googletag_code'))
-            #TODO: Add googletag_code as field in the settings
             <!-- Google Tag Manager -->
             <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -89,7 +88,6 @@
         @endif
 
         @if ($code = settings('analytics.tracking_code'))
-        #TODO: uncommented  - google analytic        
             <Google tag (gtag.js)>
             <script
                 async
@@ -104,8 +102,6 @@
         @endif
 
         @if ($code = settings('analytics.pixel_code'))
-        #TODO: add field pixel_code in the settings
-        #TODO: 1129834722127557 with the field pixel_code
         <!-- Meta Pixel Code -->
             <script>
             !function(f,b,e,v,n,t,s)
@@ -131,7 +127,6 @@
 
     <body>
         @if ($code = settings('analytics.googletag_code'))
-        #TODO: this section is added to and needs to get googletag_code from settings
             <!-- Google Tag Manager (noscript) -->
             <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{settings('analytics.googletag_code') }}"
             height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
