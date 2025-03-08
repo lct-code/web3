@@ -10,6 +10,8 @@ import {Track, TRACK_MODEL} from '@app/web-player/tracks/track';
 import {Playlist, PLAYLIST_MODEL} from '@app/web-player/playlists/playlist';
 import {User, USER_MODEL} from '@common/auth/user';
 import {Genre, GENRE_MODEL} from '@app/web-player/genres/genre';
+import { RBT_MODEL } from '@app/web-player/RBT/RBT';
+import { RBT } from '@app/web-player/RBT/RBT';
 
 export enum Sort {
   popular = 'popularity:desc',
@@ -45,6 +47,12 @@ const contentModels: ChannelContentConfig['models'] = {
   },
   [TRACK_MODEL]: {
     label: message('Tracks'),
+    sortMethods: [Sort.popular, Sort.recent],
+    layoutMethods: [Layout.grid, Layout.table, Layout.list, Layout.carousel],
+    autoUpdateMethods: [Auto.spotifyTopTracks, Auto.spotifyPlaylistTracks],
+  },
+  [RBT_MODEL]: {
+    label: message('RBT'),
     sortMethods: [Sort.popular, Sort.recent],
     layoutMethods: [Layout.grid, Layout.table, Layout.list, Layout.carousel],
     autoUpdateMethods: [Auto.spotifyTopTracks, Auto.spotifyPlaylistTracks],
@@ -150,6 +158,7 @@ export type ChannelContentModel = (
   | Artist
   | Album
   | Track
+  | RBT
   | Playlist
   | User
   | Genre

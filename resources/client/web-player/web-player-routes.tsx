@@ -11,6 +11,7 @@ import {LibraryAlbumsPage} from '@app/web-player/library/library-albums-page';
 import {LibraryArtistsPage} from '@app/web-player/library/library-artists-page';
 import {LibraryHistoryPage} from '@app/web-player/library/library-history-page';
 import {TrackPage} from '@app/web-player/tracks/track-page';
+import {RBTPage} from '@app/web-player/RBT/RBT-page';
 import {UserProfilePage} from '@app/web-player/user-profile/user-profile-page';
 import {TagMediaPage} from '@app/web-player/genres/tag-media-page';
 import {RadioPage} from '@app/web-player/radio/radio-page';
@@ -18,6 +19,7 @@ import {SearchResultsPage} from '@app/web-player/search/search-results-page';
 import {LibraryPage} from '@app/web-player/library/library-page';
 import {LibraryPlaylistsPage} from '@app/web-player/library/library-playlists-page';
 import {TrackEmbed} from '@app/web-player/tracks/track-embed';
+import {RBTEmbed} from '@app/web-player/RBT/RBT-embed';
 import {AlbumEmbed} from '@app/web-player/albums/album-embed';
 import {HomepageChannelPage} from '@app/web-player/channels/homepage-channel-page';
 import {NotFoundPage} from '@common/ui/not-found-page/not-found-page';
@@ -28,6 +30,10 @@ const RouteConfig: RouteObject[] = [
     path: 'track/:trackId/:trackName/embed',
     element: <TrackEmbed />,
   },
+  // {
+  //   path: 'RBT/:RBTId/:RBTName/embed',
+  //   element: <RBTEmbed />,
+  // },
   {
     path: 'album/:albumId/:artistName/:albumName/embed',
     element: <AlbumEmbed />,
@@ -68,6 +74,11 @@ const RouteConfig: RouteObject[] = [
         path: 'track/:trackId/:trackName',
         element: <TrackPage />,
       },
+      // // RBT
+      // {
+      //    path: 'RBT/:RBTId/:RBTName',
+      //    element: <RBTPage />,
+      // },
       // tags
       {
         path: 'tag/:tagName',
