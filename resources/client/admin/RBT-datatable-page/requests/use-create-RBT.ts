@@ -62,9 +62,13 @@ export function prepareRBTPayload(payload: CreateRBTPayload) {
   if (!payload.artists?.length) {
     console.warn('No artists provided in RBT payload');
   }
+  
+  // Ensure unique artists
+  const uniqueArtists = Array.from(new Set(payload.artists?.map(artist => artist.id)));
+
   return {
     ...payload,
     album_id: payload.album_id ? payload.album_id : null,
-    artists: payload.artists?.map(artist => artist.id) || [],
+    artists: uniqueArtists || [],
   };
 }

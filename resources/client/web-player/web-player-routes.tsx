@@ -30,10 +30,10 @@ const RouteConfig: RouteObject[] = [
     path: 'track/:trackId/:trackName/embed',
     element: <TrackEmbed />,
   },
-  // {
-  //   path: 'RBT/:RBTId/:RBTName/embed',
-  //   element: <RBTEmbed />,
-  // },
+  {
+    path: 'RBT/:RBTId/:RBTName/embed',
+    element: <RBTEmbed />,
+  },
   {
     path: 'album/:albumId/:artistName/:albumName/embed',
     element: <AlbumEmbed />,
@@ -74,11 +74,11 @@ const RouteConfig: RouteObject[] = [
         path: 'track/:trackId/:trackName',
         element: <TrackPage />,
       },
-      // // RBT
-      // {
-      //    path: 'RBT/:RBTId/:RBTName',
-      //    element: <RBTPage />,
-      // },
+      // RBT
+      {
+         path: 'RBT/:RBTId/:RBTName',
+         element: <RBTPage />,
+      },
       // tags
       {
         path: 'tag/:tagName',

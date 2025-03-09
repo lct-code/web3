@@ -56,18 +56,18 @@ class DeleteRBT
             ->delete();
 
         // detach from playlists
-        DB::table('playlist_RBT')
-            ->whereIn('RBT_id', $RBTIds)
+        DB::table('playlist_r_b_t')
+            ->whereIn('r_b_t_id', $RBTIds)
             ->delete();
 
         // detach from artists
         DB::table('artist_r_b_t')
-            ->whereIn('RBT_id', $RBTIds)
+            ->whereIn('r_b_t_id', $RBTIds)
             ->delete();
 
         // delete plays
-        DB::table('RBT_plays')
-            ->whereIn('RBT_id', $RBTIds)
+        DB::table('r_b_t_plays')
+            ->whereIn('r_b_t_id', $RBTIds)
             ->delete();
 
         // delete RBT
