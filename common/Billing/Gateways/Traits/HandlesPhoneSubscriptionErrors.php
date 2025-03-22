@@ -16,6 +16,7 @@ trait HandlesPhoneSubscriptionErrors
     ): void {
         $defaultErrorMap = [
             'INVALID_PHONE' => __('Phone number entered is invalid. Please try again.'),
+            'USER_DOES_NOT_EXIST' => __('Invalid phone number'),
             'ALREADY_SUBSCRIBED' => __('You\'re already subscribed to the service.'),
             'INVALID_AUTH' => __('Invalid verification code. Please try again.'),
             'AUTH_EXPIRED' => __('The verification code has expired. You can request a new code.'),
@@ -51,6 +52,7 @@ trait HandlesPhoneSubscriptionErrors
             '330158' => 'AUTH_EXPIRED',
             '000000' => 'SUCCESS',
             '22007219' => 'ALREADY_UNSUBSCRIBED',
+            '22007008' => 'USER_DOES_NOT_EXIST',
             '00000000' => 'SUCCESS_UNSUBSCRIBE',
             default => 'UNKNOWN_ERROR'
         };

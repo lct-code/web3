@@ -315,7 +315,7 @@ BODY;
 
             $mappedCode = $this->mapPhonesubErrorCode($resultCode);
 
-            if (in_array($mappedCode, ['SUCCESS_UNSUBSCRIBE', 'ALREADY_UNSUBSCRIBED'])) {
+            if (in_array($mappedCode, ['SUCCESS_UNSUBSCRIBE', 'ALREADY_UNSUBSCRIBED','USER_DOES_NOT_EXIST'])) {
                 return true;
             }
 
