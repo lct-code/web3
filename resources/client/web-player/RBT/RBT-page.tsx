@@ -1,10 +1,234 @@
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react';
+import { useRBT } from './requests/use-RBT.js';
+import { RBT } from './RBT.js';
+import './RBT.css';
+
+interface RBTCardProps {
+  rbt: RBT;
+}
+
+const RBTCard = ({ rbt }: RBTCardProps) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const progressContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const updateTime = () => {
+      setCurrentTime(audio.currentTime);
+    };
+
+    const updateDuration = () => {
+      setDuration(audio.duration || 0);
+    };
+
+    const onEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+
+    const updateProgressBar = () => {
+      if (!audio.duration) return;
+      
+      // Calculate progress as percentage
+      const progressPercent = (audio.currentTime / audio.duration) * 100;
+      
+      // Use the ref to directly access the container
+      if (progressContainerRef.current) {
+        progressContainerRef.current.style.setProperty('--progress-percent', `${progressPercent}%`);
+      }
+    };
+
+    // Single timeupdate handler that does both updates
+    const onTimeUpdate = () => {
+      updateTime();
+      updateProgressBar();
+    };
+
+    audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.addEventListener('loadedmetadata', updateDuration);
+    audio.addEventListener('ended', onEnded);
+
+    return () => {
+      audio.removeEventListener('timeupdate', onTimeUpdate);
+      audio.removeEventListener('loadedmetadata', updateDuration);
+      audio.removeEventListener('ended', onEnded);
+    };
+  }, []);
+
+  const togglePlay = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
+
+  // Refactored seek function that works reliably
+  const seekAudio = (clientX: number) => {
+    if (!progressContainerRef.current || !audioRef.current) return;
+    
+    const rect = progressContainerRef.current.getBoundingClientRect();
+    const containerWidth = rect.width;
+    const clickX = clientX - rect.left;
+    
+    // Calculate percentage position (clamped between 0-100%)
+    const percentage = Math.max(0, Math.min(1, clickX / containerWidth));
+    
+    // Calculate time to seek to
+    const seekTime = percentage * duration;
+    
+    // Only proceed if we have a valid time
+    if (isFinite(seekTime) && seekTime >= 0 && seekTime <= duration) {
+      // Set the audio time
+      audioRef.current.currentTime = seekTime;
+      
+      // Update the state
+      setCurrentTime(seekTime);
+      
+      // Update the visual progress immediately
+      progressContainerRef.current.style.setProperty('--progress-percent', `${percentage * 100}%`);
+    }
+  };
+  
+  // Mouse event handlers for seeking
+  const handleProgressClick = (e: React.MouseEvent) => {
+    seekAudio(e.clientX);
+  };
+  
+  // For drag functionality
+  const [isDragging, setIsDragging] = useState(false);
+  
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    seekAudio(e.clientX);
+    
+    // Add document listeners for dragging
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+  
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      seekAudio(e.clientX);
+    }
+  };
+  
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  };
+  
+  // Cleanup dragging listeners on unmount
+  useEffect(() => {
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
+  return (
+    <div className="rbt-card-horizontal">
+      <div className="rbt-image">
+        {rbt.image ? (
+          <img src={rbt.image} alt={rbt.name} />
+        ) : (
+          <div className="rbt-image-placeholder"></div>
+        )}
+      </div>
+      
+      <div className="rbt-content">
+        <h3 className="rbt-title">{rbt.name}</h3>
+        
+        <div className="custom-audio-player">
+          <button 
+            className="play-pause-button" 
+            onClick={togglePlay}
+            aria-label={isPlaying ? 'Pause' : 'Play'}
+          >
+            {isPlaying ? (
+              <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+                <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 5v14l11-7z" fill="currentColor"/>
+              </svg>
+            )}
+          </button>
+          
+          <div 
+            className="progress-container"
+            ref={progressContainerRef}
+            onClick={handleProgressClick}
+            onMouseDown={handleMouseDown}
+          >
+            <div className="progress-fill"></div>
+            <div className="progress-thumb"></div>
+          </div>
+          
+          <span className="time-display">
+            {formatTime(duration - currentTime)}
+          </span>
+          
+          <audio 
+            ref={audioRef}
+            src={rbt.src} 
+            className="hidden-audio"
+            preload="metadata"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const RBTPage = () => {
+  const query = useRBT();
+
+  // For debugging
+  useEffect(() => {
+    if (query.data) {
+      console.log('RBT data received:', query.data);
+      if (query.data.RBTs && query.data.RBTs.length > 0) {
+        console.log('First RBT artist data:', query.data.RBTs[0].artists);
+      }
+    }
+  }, [query.data]);
+
+  if (query.isLoading) {
+    return <div className="loading-state">Loading...</div>;
+  }
+
+  if (query.error) {
+    return <div className="error-state">Error loading RBTs</div>;
+  }
+
   return (
-    <div>
-    <audio controls ></audio>
+    <div className="rbt-page">
+      <h1 className="page-title">Ring Back Tones</h1>
+      <div className="rbt-list">
+        {query.data?.RBTs?.map((rbt: RBT) => (
+          <RBTCard key={rbt.id} rbt={rbt} />
+        ))}
+      </div>
     </div>
-  )
-}
+  );
+};
 

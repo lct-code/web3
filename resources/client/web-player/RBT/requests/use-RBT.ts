@@ -1,45 +1,26 @@
 import {useQuery} from '@tanstack/react-query';
 import {apiClient} from '@common/http/query-client';
 import {BackendResponse} from '@common/http/backend-response/backend-response';
-import {useParams} from 'react-router-dom';
-import {RBT} from '@app/web-player/RBT/RBT';
-import {assignAlbumToRBT} from '@app/web-player/albums/assign-album-to-RBT';
-import {getBootstrapData} from '@common/core/bootstrap-data/use-backend-bootstrap-data';
+import {useAuth} from '@common/auth/use-auth';
+import { RBT } from '@app/web-player/RBT/RBT';
 
-export interface getRBTResponse extends BackendResponse {
-  RBT: RBT;
-  loader: Params['loader'];
+interface GetRBTResponse extends BackendResponse {
+  RBTs: RBT[];
 }
 
-interface Params {
-  loader: 'RBT' | 'RBTPage' | 'editRBTPage';
-}
-
-export function useRBT(params: Params) {
-  const {RBTId} = useParams();
+export function useRBT() {
+  const {isLoggedIn, user} = useAuth();
   return useQuery({
-    queryKey: ['RBT', +RBTId!, params],
-    queryFn: () => fetchRBT(RBTId!, params),
-    initialData: () => {
-      const data = getBootstrapData().loaders?.[params.loader];
-      if (data?.RBT?.id == RBTId && data?.loader === params.loader) {
-        return data;
-      }
-      return undefined;
-    },
+    queryKey: ['RBT'],
+    queryFn: () => fetchRBT(),
   });
 }
 
-function fetchRBT(RBTId: number | string, params: Params) {
+function fetchRBT(): Promise<GetRBTResponse> {
   return apiClient
-    .get<getRBTResponse>(`RBT/${RBTId}`, {params})
+    .get('RBT', {params: {perPage: 100}} )
     .then(response => {
-      if (response.data.RBT.album) {
-        response.data.RBT = {
-          ...response.data.RBT,
-          album: assignAlbumToRBT(response.data.RBT.album),
-        };
-      }
-      return response.data;
+    console.log(response)
+      return {RBTs: response.data.pagination.data};
     });
 }
