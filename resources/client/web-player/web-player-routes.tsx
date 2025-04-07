@@ -19,7 +19,6 @@ import {SearchResultsPage} from '@app/web-player/search/search-results-page';
 import {LibraryPage} from '@app/web-player/library/library-page';
 import {LibraryPlaylistsPage} from '@app/web-player/library/library-playlists-page';
 import {TrackEmbed} from '@app/web-player/tracks/track-embed';
-import {RBTEmbed} from '@app/web-player/RBT/RBT-embed';
 import {AlbumEmbed} from '@app/web-player/albums/album-embed';
 import {HomepageChannelPage} from '@app/web-player/channels/homepage-channel-page';
 import {NotFoundPage} from '@common/ui/not-found-page/not-found-page';
@@ -29,10 +28,6 @@ const RouteConfig: RouteObject[] = [
   {
     path: 'track/:trackId/:trackName/embed',
     element: <TrackEmbed />,
-  },
-  {
-    path: 'RBT/:RBTId/:RBTName/embed',
-    element: <RBTEmbed />,
   },
   {
     path: 'album/:albumId/:artistName/:albumName/embed',
@@ -76,8 +71,8 @@ const RouteConfig: RouteObject[] = [
       },
       // RBT
       {
-         path: 'RBT/:RBTId/:RBTName',
-         element: <RBTPage />,
+        path: 'RBT',
+        element: <RBTPage/>,
       },
       // tags
       {
