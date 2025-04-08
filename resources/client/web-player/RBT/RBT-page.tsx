@@ -201,6 +201,40 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
 
 export const RBTPage = () => {
   const query = useRBT();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Calculate pagination values
+  const totalRBTs = query.data?.RBTs?.length || 0;
+  const totalPages = Math.ceil(totalRBTs / itemsPerPage);
+  
+  // Get current page items
+  const getCurrentPageItems = () => {
+    if (!query.data?.RBTs) return [];
+    
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return query.data.RBTs.slice(startIndex, endIndex);
+  };
+
+  // Handle page changes
+  const goToPage = (page: number) => {
+    // Ensure page is within bounds
+    const validPage = Math.max(1, Math.min(page, totalPages));
+    setCurrentPage(validPage);
+    
+    // Scroll to top of list when page changes
+    window.scrollTo(0, 0);
+  };
+
+  // Navigate to next/previous pages
+  const goToNextPage = () => goToPage(currentPage + 1);
+  const goToPreviousPage = () => goToPage(currentPage - 1);
+
+  // Reset to page 1 when data changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query.data]);
 
   // For debugging
   useEffect(() => {
@@ -220,14 +254,75 @@ export const RBTPage = () => {
     return <div className="error-state">Error loading RBTs</div>;
   }
 
+  // Get items for the current page
+  const currentItems = getCurrentPageItems();
+
   return (
     <div className="rbt-page">
       <h1 className="page-title">Ring Back Tones</h1>
+      
+      {/* Display current page RBTs */}
       <div className="rbt-list">
-        {query.data?.RBTs?.map((rbt: RBT) => (
+        {currentItems.map((rbt: RBT) => (
           <RBTCard key={rbt.id} rbt={rbt} />
         ))}
       </div>
+      
+      {/* Pagination controls */}
+      {totalPages > 1 && (
+        <div className="pagination-controls">
+          <button 
+            className="pagination-button"
+            onClick={goToPreviousPage}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          
+          <div className="pagination-info">
+            Page {currentPage} of {totalPages}
+          </div>
+          
+          {/* Page number buttons */}
+          <div className="pagination-numbers">
+            {[...Array(totalPages)].map((_, idx) => {
+              const pageNumber = idx + 1;
+              // Only show a few pages around the current page for large page counts
+              if (
+                totalPages <= 7 || 
+                pageNumber === 1 || 
+                pageNumber === totalPages || 
+                (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+              ) {
+                return (
+                  <button 
+                    key={pageNumber}
+                    className={`page-number ${pageNumber === currentPage ? 'active' : ''}`}
+                    onClick={() => goToPage(pageNumber)}
+                  >
+                    {pageNumber}
+                  </button>
+                );
+              } else if (
+                pageNumber === currentPage - 2 || 
+                pageNumber === currentPage + 2
+              ) {
+                // Show ellipsis for breaks in sequence
+                return <span key={pageNumber} className="page-ellipsis">...</span>;
+              }
+              return null;
+            })}
+          </div>
+          
+          <button 
+            className="pagination-button"
+            onClick={goToNextPage}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };
