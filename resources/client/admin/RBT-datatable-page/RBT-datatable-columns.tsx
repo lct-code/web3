@@ -79,32 +79,32 @@ export const RBTDatatableColumns: ColumnConfig<RBT>[] = [
     body: RBT =>
       RBT.updated_at ? <FormattedDate date={RBT.updated_at} /> : '',
   },
-  {
-    key: 'actions',
-    header: () => <Trans message="Actions" />,
-    hideHeader: true,
-    align: 'end',
-    visibleInMode: 'all',
-    width: 'w-128 flex-shrink-0',
-    body: RBT => (
-      <div className="text-muted">
-        <IconButton size="md" elementType={Link} to={`${RBT.id}/insights`}>
-          <BarChartIcon />
-        </IconButton>
-        <DialogTrigger type="modal">
-          <IconButton size="md">
-            <ClosedCaptionIcon />
-          </IconButton>
-          {RBT.lyric ? (
-            <UpdateLyricDialog lyric={RBT.lyric} />
-          ) : (
-            <CreateLyricDialog RBTId={RBT.id} />
-          )}
-        </DialogTrigger>
-        <IconButton size="md" elementType={Link} to={`${RBT.id}/edit`}>
-          <EditIcon />
-        </IconButton>
-      </div>
-    ),
-  },
+  // {
+  //   key: 'actions',
+  //   header: () => <Trans message="Actions" />,
+  //   hideHeader: true,
+  //   align: 'end',
+  //   visibleInMode: 'all',
+  //   width: 'w-128 flex-shrink-0',
+  //   body: RBT => (
+  //     <div className="text-muted">
+  //       {/* <IconButton size="md" elementType={Link} to={`${RBT.id}/insights`}>
+  //         <BarChartIcon />
+  //       </IconButton>
+  //       <DialogTrigger type="modal">
+  //         <IconButton size="md">
+  //           <ClosedCaptionIcon />
+  //         </IconButton>
+  //         {RBT.lyric ? (
+  //           <UpdateLyricDialog lyric={RBT.lyric} />
+  //         ) : (
+  //           <CreateLyricDialog RBTId={RBT.id} />
+  //         )}
+  //       </DialogTrigger>
+  //       <IconButton size="md" elementType={Link} to={`${RBT.id}/edit`}>
+  //         <EditIcon />
+  //       </IconButton> */}
+  //     </div>
+  //   ),
+  // },
 ];

@@ -256,8 +256,8 @@
 }
 
 .rbt-image {
-  width: 120px;
-  height: 120px;
+  width: 150px;
+  height: 150px;
   flex-shrink: 0;
   border-radius: 0.375rem;
   overflow: hidden;

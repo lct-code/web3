@@ -8,13 +8,7 @@ import {DataTableAddItemButton} from '@common/datatable/data-table-add-item-butt
 import {Link} from 'react-router-dom';
 import {RBTDatatableColumns} from '@app/admin/RBT-datatable-page/RBT-datatable-columns';
 import {RBTDatatableFilters} from '@app/admin/RBT-datatable-page/RBT-datatable-filters';
-import {useSettings} from '@common/core/settings/use-settings';
-import {useNavigate} from '@common/utils/hooks/use-navigate';
-import {DialogTrigger} from '@common/ui/overlays/dialog/dialog-trigger';
-import {Tooltip} from '@common/ui/tooltip/tooltip';
-import {IconButton} from '@common/ui/buttons/icon-button';
-import {ImportRBTDialog} from '@app/admin/RBT-datatable-page/import-RBT-dialog';
-import {PublishIcon} from '@common/icons/material/Publish';
+
 
 export function RBTDatatablePage() {
   return (
