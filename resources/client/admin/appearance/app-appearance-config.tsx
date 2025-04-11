@@ -90,6 +90,7 @@ export const AppAppearanceConfig: IAppearanceConfig = {
           '/admin/artists',
           '/admin/albums',
           '/admin/tracks',
+          '/admin/rbt',
           '/admin/genres',
           '/admin/lyrics',
           '/admin/playlists',
