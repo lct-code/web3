@@ -17,7 +17,7 @@ export function CreateRBTPage({wrapInContainer}: Props) {
   const {form, createRBT} = useCreateRBTForm({
     onRBTCreated: response => {
       if (pathname.includes('admin')) {
-        navigate(`/admin/RBT/${response.RBT.id}/edit`);
+        navigate(`/admin/RBT`);
       } else {
         navigate(getRBTLink(response.RBT));
       }

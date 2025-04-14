@@ -11,6 +11,7 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isMetadataLoaded, setIsMetadataLoaded] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressContainerRef = useRef<HTMLDivElement>(null);
 
@@ -18,12 +19,24 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const updateTime = () => {
-      setCurrentTime(audio.currentTime);
+    // Load audio metadata explicitly
+    const loadMetadata = () => {
+      if (audio.duration && isFinite(audio.duration)) {
+        setDuration(audio.duration);
+        setIsMetadataLoaded(true);
+      }
     };
 
-    const updateDuration = () => {
-      setDuration(audio.duration || 0);
+    const handleLoadedMetadata = () => {
+      loadMetadata();
+    };
+
+    const handleDurationChange = () => {
+      loadMetadata();
+    };
+
+    const updateTime = () => {
+      setCurrentTime(audio.currentTime);
     };
 
     const onEnded = () => {
@@ -31,31 +44,23 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
       setCurrentTime(0);
     };
 
-    const updateProgressBar = () => {
-      if (!audio.duration) return;
-      
-      // Calculate progress as percentage
-      const progressPercent = (audio.currentTime / audio.duration) * 100;
-      
-      // Use the ref to directly access the container
-      if (progressContainerRef.current) {
-        progressContainerRef.current.style.setProperty('--progress-percent', `${progressPercent}%`);
-      }
-    };
+    // Force load metadata
+    if (audio.readyState >= 1) {
+      loadMetadata();
+    }
 
-    // Single timeupdate handler that does both updates
-    const onTimeUpdate = () => {
-      updateTime();
-      updateProgressBar();
-    };
-
-    audio.addEventListener('timeupdate', onTimeUpdate);
-    audio.addEventListener('loadedmetadata', updateDuration);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('durationchange', handleDurationChange);
+    audio.addEventListener('timeupdate', updateTime);
     audio.addEventListener('ended', onEnded);
 
+    // Explicitly load the audio metadata
+    audio.load();
+
     return () => {
-      audio.removeEventListener('timeupdate', onTimeUpdate);
-      audio.removeEventListener('loadedmetadata', updateDuration);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('durationchange', handleDurationChange);
+      audio.removeEventListener('timeupdate', updateTime);
       audio.removeEventListener('ended', onEnded);
     };
   }, []);
@@ -155,6 +160,8 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
       <div className="rbt-content">
         <h3 className="rbt-title">{rbt.name}</h3>
         
+        <div className="rbt-artists">{rbt.artists}</div>
+        
         <div className="custom-audio-player">
           <button 
             className="play-pause-button" 
@@ -192,6 +199,8 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
             src={rbt.src} 
             className="hidden-audio"
             preload="metadata"
+            playsInline
+            crossOrigin="anonymous"
           />
         </div>
       </div>

@@ -52,36 +52,13 @@ export function RBTForm({
           required
           autoFocus
         />
-        {showAlbumField && (
-          <FormNormalizedModelField
-            className="mb-24"
-            label={<Trans message="Album" />}
-            name="album_id"
-            endpoint="search/suggestions/album"
-          />
-        )}
         <FormArtistPicker name="artists" className="mb-24" />
-        <FormNormalizedModelChipField
-          label={<Trans message="Genres" />}
-          placeholder={trans(message('+Add genre'))}
-          model={GENRE_MODEL}
-          name="genres"
-          allowCustomValue
-          className="mb-24"
-        />
         <FormNormalizedModelChipField
           label={<Trans message="Tags" />}
           placeholder={trans(message('+Add tag'))}
           model={TAG_MODEL}
           name="tags"
           allowCustomValue
-          className="mb-24"
-        />
-        <FormTextField
-          name="description"
-          label={<Trans message="Description" />}
-          inputElementType="textarea"
-          rows={5}
           className="mb-24"
         />
         <DurationField />
