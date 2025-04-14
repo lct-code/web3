@@ -85,7 +85,7 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
 
   // Refactored seek function that works reliably
   const seekAudio = (clientX: number) => {
-    if (!progressContainerRef.current || !audioRef.current) return;
+    if (!progressContainerRef.current || !audioRef.current || !isMetadataLoaded || duration <= 0) return;
     
     const rect = progressContainerRef.current.getBoundingClientRect();
     const containerWidth = rect.width;
@@ -104,11 +104,18 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
       
       // Update the state
       setCurrentTime(seekTime);
-      
-      // Update the visual progress immediately
-      progressContainerRef.current.style.setProperty('--progress-percent', `${percentage * 100}%`);
     }
   };
+  
+  // Calculate progress percentage for CSS custom property
+  const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+  // Update the CSS custom property whenever progress changes
+  useEffect(() => {
+    if (progressContainerRef.current) {
+      progressContainerRef.current.style.setProperty('--progress-percent', `${progressPercentage}%`);
+    }
+  }, [currentTime, duration, progressPercentage]);
   
   // Mouse event handlers for seeking
   const handleProgressClick = (e: React.MouseEvent) => {
@@ -185,6 +192,7 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
             ref={progressContainerRef}
             onClick={handleProgressClick}
             onMouseDown={handleMouseDown}
+            style={{ '--progress-percent': `${progressPercentage}%` } as React.CSSProperties}
           >
             <div className="progress-fill"></div>
             <div className="progress-thumb"></div>
@@ -211,7 +219,7 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
 export const RBTPage = () => {
   const query = useRBT();
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   // Calculate pagination values
   const totalRBTs = query.data?.RBTs?.length || 0;
