@@ -52,7 +52,12 @@ export function RBTForm({
           required
           autoFocus
         />
-        <FormArtistPicker name="artists" className="mb-24" />
+        <FormTextField
+          name="artist"
+          label={<Trans message="Artist" />}
+          className="mb-24"
+          required
+        />
         <FormTextField
           name="description"
           label={<Trans message="Description" />}

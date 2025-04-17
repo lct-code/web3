@@ -168,7 +168,9 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
         <div className="rbt-header">
           <div className="rbt-main-info">
             <h3 className="rbt-title">{rbt.name}</h3>
-            <div className="rbt-artists">{rbt.artists}</div>
+            <div className="rbt-artists">
+              {typeof rbt.artist === 'string' ? rbt.artist : rbt.artists}
+            </div>
           </div>
           
           {rbt.description && (
