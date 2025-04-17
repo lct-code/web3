@@ -53,13 +53,13 @@ export function RBTForm({
           autoFocus
         />
         <FormArtistPicker name="artists" className="mb-24" />
-        <FormNormalizedModelChipField
-          label={<Trans message="Tags" />}
-          placeholder={trans(message('+Add tag'))}
-          model={TAG_MODEL}
-          name="tags"
-          allowCustomValue
+        <FormTextField
+          name="description"
+          label={<Trans message="Description" />}
           className="mb-24"
+          multiline
+          minRows={2}
+          maxRows={6}
         />
         <DurationField />
         {showExternalIdFields && <SourceField />}

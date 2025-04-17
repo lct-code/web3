@@ -165,9 +165,16 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
       </div>
       
       <div className="rbt-content">
-        <h3 className="rbt-title">{rbt.name}</h3>
-        
-        <div className="rbt-artists">{rbt.artists}</div>
+        <div className="rbt-header">
+          <div className="rbt-main-info">
+            <h3 className="rbt-title">{rbt.name}</h3>
+            <div className="rbt-artists">{rbt.artists}</div>
+          </div>
+          
+          {rbt.description && (
+            <div className="rbt-description">{rbt.description}</div>
+          )}
+        </div>
         
         <div className="custom-audio-player">
           <button 

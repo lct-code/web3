@@ -25,7 +25,7 @@ class RBTController extends BaseController
             $this->request->all(),
         );
 
-        $pagination->makeVisible(['views', 'updated_at', 'plays']);
+        $pagination->makeVisible(['views', 'updated_at', 'plays', 'description']);
 
         return $this->success(['pagination' => $pagination]);
     }

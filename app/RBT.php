@@ -31,7 +31,6 @@ class RBT extends Model
         'spotify_id',
         'updated_at',
         'user_id',
-        'description',
     ];
 
     protected $casts = [
@@ -158,11 +157,10 @@ class RBT extends Model
 
         return [
             'id' => $this->id,
+            'description' => $this->description,
             'name' => $this->name,
             'image' => $image,
-            'description' => $this->relationLoaded('artists')
-                ? $this->artists->pluck('name')->implode(', ')
-                : null,
+            
             'model_type' => self::MODEL_TYPE,
         ];
     }
@@ -173,6 +171,7 @@ class RBT extends Model
             'id' => $this->id,
             'name' => $this->name,
             'album' => $this->album?->name,
+            'description' => $this->description,
             'spotify_id' => $this->spotify_id,
             'artists' => $this->artists->pluck('name'),
         ];
