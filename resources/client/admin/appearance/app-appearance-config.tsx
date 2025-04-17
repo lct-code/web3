@@ -97,6 +97,7 @@ export const AppAppearanceConfig: IAppearanceConfig = {
           '/admin/backstage-requests',
           '/admin/comments',
           '/backstage/requests',
+          '/RBT',
         ],
       } as MenuSectionConfig,
     },
