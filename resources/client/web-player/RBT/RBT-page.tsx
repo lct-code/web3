@@ -3,6 +3,41 @@ import { useRBT } from './requests/use-RBT.js';
 import { RBT } from './RBT.js';
 import './RBT.css';
 
+// Add this outside component to create a global audio controller
+const audioController = {
+  currentlyPlaying: null,
+  listeners: new Set(),
+  
+  play(id, audioElement) {
+    // If something else is playing, pause it
+    if (this.currentlyPlaying && this.currentlyPlaying.id !== id) {
+      this.currentlyPlaying.audio.pause();
+    }
+    
+    // Set this as the current audio
+    this.currentlyPlaying = { id, audio: audioElement };
+    
+    // Notify listeners about the change
+    this.notifyListeners();
+  },
+  
+  stop(id) {
+    if (this.currentlyPlaying && this.currentlyPlaying.id === id) {
+      this.currentlyPlaying = null;
+    }
+    this.notifyListeners();
+  },
+  
+  subscribe(callback) {
+    this.listeners.add(callback);
+    return () => this.listeners.delete(callback);
+  },
+  
+  notifyListeners() {
+    this.listeners.forEach(listener => listener(this.currentlyPlaying));
+  }
+};
+
 interface RBTCardProps {
   rbt: RBT;
 }
@@ -14,6 +49,20 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
   const [isMetadataLoaded, setIsMetadataLoaded] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressContainerRef = useRef<HTMLDivElement>(null);
+
+  // Listen for changes in the global audio controller
+  useEffect(() => {
+    const handleAudioChange = (currentlyPlaying) => {
+      if (!currentlyPlaying || currentlyPlaying.id !== rbt.id) {
+        // Another audio is playing or nothing is playing
+        setIsPlaying(false);
+      }
+    };
+    
+    // Subscribe to audio controller
+    const unsubscribe = audioController.subscribe(handleAudioChange);
+    return unsubscribe;
+  }, [rbt.id]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -42,6 +91,7 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
     const onEnded = () => {
       setIsPlaying(false);
       setCurrentTime(0);
+      audioController.stop(rbt.id);
     };
 
     // Force load metadata
@@ -49,10 +99,23 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
       loadMetadata();
     }
 
+    // Handle play event to update audioController
+    const handlePlay = () => {
+      audioController.play(rbt.id, audio);
+      setIsPlaying(true);
+    };
+
+    // Handle pause event
+    const handlePause = () => {
+      setIsPlaying(false);
+    };
+
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('durationchange', handleDurationChange);
     audio.addEventListener('timeupdate', updateTime);
     audio.addEventListener('ended', onEnded);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
 
     // Explicitly load the audio metadata
     audio.load();
@@ -62,8 +125,10 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
       audio.removeEventListener('durationchange', handleDurationChange);
       audio.removeEventListener('timeupdate', updateTime);
       audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
     };
-  }, []);
+  }, [rbt.id]);
 
   const togglePlay = () => {
     const audio = audioRef.current;
@@ -71,10 +136,11 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
 
     if (isPlaying) {
       audio.pause();
+      audioController.stop(rbt.id);
     } else {
-      audio.play();
+      audio.play().catch(error => console.error("Play error:", error));
+      // Note: audioController.play is called in the play event handler
     }
-    setIsPlaying(!isPlaying);
   };
 
   const formatTime = (time: number) => {
