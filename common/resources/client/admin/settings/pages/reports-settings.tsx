@@ -65,41 +65,11 @@ function AnalyticsSection() {
             label={<Trans message="Google tag manager measurement ID" />}
           />
           <FormTextField
-            className="mb-30"
             name="client.analytics.gchart_api_key"
             label={<Trans message="Google maps javascript API key" />}
             description={
               <Trans message="Only required in order to show world geochart on integrated analytics pages." />
             }
-          />
-          
-          {/*google tag code */}
-          <FormTextField
-            className="mb-30"
-            onChange={() => {
-              clearErrors();
-            }}
-            invalid={isInvalid}
-            name="client.analytics.googletag_code"
-            min="1"
-            max="20"
-            label={<Trans message="Google Tag Code " />}
-          />
-          {/*Meta pixle Code*/}
-          <FormTextField
-            className="mb-30"
-            onChange={() => {
-              clearErrors();
-            }}
-            invalid={isInvalid}
-            name="client.analytics.pixel_code"
-            placeholder=""
-            min="1"
-            max="20"
-            description={
-              <Trans message="track Facebook ad-driven visitor activity on your website." />
-            }
-            label={<Trans message="Meta Pixle_code" />}
           />
         </Fragment>
       )}

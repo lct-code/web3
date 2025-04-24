@@ -11,6 +11,7 @@ import {LibraryAlbumsPage} from '@app/web-player/library/library-albums-page';
 import {LibraryArtistsPage} from '@app/web-player/library/library-artists-page';
 import {LibraryHistoryPage} from '@app/web-player/library/library-history-page';
 import {TrackPage} from '@app/web-player/tracks/track-page';
+import {RBTPage} from '@app/web-player/RBT/RBT-page';
 import {UserProfilePage} from '@app/web-player/user-profile/user-profile-page';
 import {TagMediaPage} from '@app/web-player/genres/tag-media-page';
 import {RadioPage} from '@app/web-player/radio/radio-page';
@@ -67,6 +68,11 @@ const RouteConfig: RouteObject[] = [
       {
         path: 'track/:trackId/:trackName',
         element: <TrackPage />,
+      },
+      // RBT
+      {
+        path: 'RBT',
+        element: <RBTPage/>,
       },
       // tags
       {

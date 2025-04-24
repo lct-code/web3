@@ -18,6 +18,7 @@ use App\Http\Controllers\ArtistAlbumsController;
 use App\Http\Controllers\ArtistController;
 use App\Http\Controllers\BackstageRequestController;
 use App\Http\Controllers\DownloadLocalTrackController;
+use App\Http\Controllers\DownloadLocalRBTController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ImportMediaController;
 use App\Http\Controllers\InsightsReportController;
@@ -25,6 +26,7 @@ use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\LyricsController;
 use App\Http\Controllers\MinutesLimitController;
 use App\Http\Controllers\PlayerTracksController;
+use App\Http\Controllers\PlayerRBTController;
 use App\Http\Controllers\PlaylistController;
 use App\Http\Controllers\PlaylistTracksController;
 use App\Http\Controllers\PlaylistTracksOrderController;
@@ -37,6 +39,9 @@ use App\Http\Controllers\TagMediaController;
 use App\Http\Controllers\TrackController;
 use App\Http\Controllers\TrackFileMetadataController;
 use App\Http\Controllers\TrackPlaysController;
+use App\Http\Controllers\RBTController;
+use App\Http\Controllers\RBTFileMetadataController;
+use App\Http\Controllers\RBTPlaysController;
 use App\Http\Controllers\UserLibrary\UserLibraryAlbumsController;
 use App\Http\Controllers\UserLibrary\UserLibraryArtistsController;
 use App\Http\Controllers\UserLibrary\UserLibraryTracksController;
@@ -109,6 +114,21 @@ Route::group(['prefix' => 'v1', 'middleware' => ['optionalAuth:sanctum', 'verifi
     Route::post('player/tracks', [PlayerTracksController::class, 'index']);
     Route::get('tracks/plays/{userId}', [TrackPlaysController::class, 'index']);
     Route::post('tracks/plays/{track}/log', [TrackPlaysController::class, 'create']);
+
+    // RBT
+    Route::get('RBT', [RBTController::class, 'index']);
+    Route::get('RBT/{id}/download', [DownloadLocalRBTController::class, 'download']);
+    Route::post('RBT', [RBTController::class, 'store']);
+    Route::put('RBT/{id}', [RBTController::class, 'update']);
+    Route::get('RBT/{RBT}', [RBTController::class, 'show']);
+    Route::delete('RBT/{ids}', [RBTController::class, 'destroy']);
+    Route::post('RBT/{fileEntry}/extract-metadata', [RBTFileMetadataController::class, 'extract']);
+
+    // RBT PLAYS
+    Route::post('player/RBT', [PlayerRBTController::class, 'index']);
+    Route::get('RBT/plays/{userId}', [RBTPlaysController::class, 'index']);
+    Route::post('RBT/plays/{RBT}/log', [RBTPlaysController::class, 'create']);
+
 
     // LYRICS
     Route::get('lyrics', [LyricsController::class, 'index']);

@@ -137,16 +137,10 @@ const sentryDsn = data.settings.logging.sentry_public;
 if (sentryDsn && import.meta.env.PROD) {
   Sentry.init({
     dsn: sentryDsn,
-    integrations: [new Sentry.BrowserTracing(),
-    Sentry.replayIntegration({
-      maskAllText: false
-    })
-    ],
+    integrations: [new Sentry.BrowserTracing()],
     tracesSampleRate: 0.2,
     ignoreErrors: ignoredSentryErrors,
     release: data.sentry_release,
-    replaysSessionSampleRate: 0, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
-    replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.  
   });
 }
 

@@ -3,6 +3,9 @@ import React from 'react';
 import {TracksDatatablePage} from '@app/admin/tracks-datatable-page/tracks-datatable-page';
 import {CreateTrackPage} from '@app/admin/tracks-datatable-page/crupdate/create-track-page';
 import {UpdateTrackPage} from '@app/admin/tracks-datatable-page/crupdate/update-track-page';
+import {RBTDatatablePage} from '@app/admin/RBT-datatable-page/RBT-datatable-page';
+import {CreateRBTPage} from '@app/admin/RBT-datatable-page/crupdate/create-RBT-page';
+import {UpdateRBTPage} from '@app/admin/RBT-datatable-page/crupdate/update-RBT-page';
 import {AlbumsDatatablePage} from '@app/admin/albums-datatable-page/albums-datatable-page';
 import {UpdateAlbumPage} from '@app/admin/albums-datatable-page/update-album-page';
 import {UploadPage} from '@app/web-player/backstage/upload-page/upload-page';
@@ -22,6 +25,7 @@ import {AdminVisitorsReport} from '@app/admin/reports/admin-visitors-report';
 import {BackstageArtistInsights} from '@app/web-player/backstage/insights/backstage-artist-insights';
 import {BackstageAlbumInsights} from '@app/web-player/backstage/insights/backstage-album-insights';
 import {BackstageTrackInsights} from '@app/web-player/backstage/insights/backstage-track-insights';
+import {BackstageRBTInsights} from '@app/web-player/backstage/insights/backstage-RBT-insights';
 import {CreateChannelPage} from '@app/admin/channels/create-channel-page';
 import {EditChannelPage} from '@app/admin/channels/edit-channel-page';
 import {ChannelsDatatablePage} from '@common/admin/channels/channels-datatable-page';
@@ -66,6 +70,23 @@ export const AppAdminRoutes: RouteObject[] = [
   {
     path: 'tracks/:trackId/insights',
     element: <BackstageTrackInsights isNested />,
+  },
+  // RBT
+  {
+    path: 'RBT',
+    element: <RBTDatatablePage />,
+  },
+  {
+    path: 'RBT/new',
+    element: <CreateRBTPage />,
+  },
+  {
+    path: 'RBT/:RBTId/edit',
+    element: <UpdateRBTPage />,
+  },
+  {
+    path: 'RBT/:RBTId/insights',
+    element: <BackstageRBTInsights isNested />,
   },
   // Albums
   {
