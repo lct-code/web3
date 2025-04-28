@@ -32,7 +32,7 @@
 }
 
 .rbt-title {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: #1a1a1a;
   margin: 0;
@@ -44,7 +44,7 @@
 }
 
 .rbt-artists {
-  font-size: 1.25rem;
+  font-size: 1rem;
   color: #4CAF50;
   font-weight: 600;
   line-height: 1.4;
@@ -158,8 +158,8 @@
 }
 
 .play-pause-button {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   background-color: #4CAF50;
   border: 2px solid #43a047;
   border-radius: 50%;
@@ -183,8 +183,8 @@
 }
 
 .play-pause-button svg {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
 }
 
 .progress-container {
@@ -210,7 +210,7 @@
 .progress-thumb {
   position: absolute;
   top: 50%;
-  left: calc(var(--progress-percent, 0%) - 8px); /* 8px is half the width of the thumb */
+  left: calc(var(--progress-percent, 0%) - 8px);
   width: 16px;
   height: 16px;
   border-radius: 50%;
@@ -221,7 +221,7 @@
 }
 
 .time-display {
-  font-size: 1rem;
+  font-size: 0.875rem;
   color: #757575;
   min-width: 50px;
   text-align: right;
@@ -426,51 +426,101 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .rbt-card-horizontal {
-    padding: 1.25rem;
-  }
-  
-  .rbt-image {
-    width: 150px;
-    height: 150px;
-    margin-right: 1.25rem;
-  }
-  
-  .rbt-title {
-    font-size: 1.75rem;
-  }
-  
-  .rbt-artists {
-    font-size: 1.125rem;
-  }
-}
-
-@media (max-width: 640px) {
-  .rbt-card-horizontal {
+    flex-direction: column;
     padding: 1rem;
   }
   
   .rbt-image {
-    width: 120px;
-    height: 120px;
-    margin-right: 1rem;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+  
+  .rbt-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .rbt-main-info {
+    margin-top: 0;
+    padding-right: 0;
+  }
+  
+  .rbt-description {
+    width: 100%;
+    max-width: 100%;
+    margin: 1rem 0 0 0;
   }
   
   .rbt-title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
   
   .rbt-artists {
-    font-size: 1rem;
+    font-size: 0.875rem;
   }
   
   .play-pause-button {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
   }
   
   .play-pause-button svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .time-display {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .rbt-page {
+    padding: 1rem 0.5rem;
+    max-width: 100%;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .rbt-card-horizontal {
+    padding: 0.75rem;
+  }
+  
+  .rbt-description {
+    font-size: 0.8rem;
+    padding: 0.75rem 1rem;
+  }
+  
+  .play-pause-button {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto;
+  }
+  
+  .play-pause-button svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .progress-container {
+    height: 12px;
+    margin: 1rem 0;
+  }
+
+  .progress-thumb {
     width: 24px;
     height: 24px;
+    left: calc(var(--progress-percent, 0%) - 12px);
+  }
+
+  .custom-audio-player {
+    gap: 1rem;
   }
 }
 
@@ -557,72 +607,15 @@
   .pagination-info {
     order: -1;
   }
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .rbt-page {
-    padding: 1.25rem 0.75rem;
-    max-width: 98%;
+  
+  .pagination-numbers {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .page-number {
+    min-width: 2rem;
+    height: 2rem;
+    font-size: 0.875rem;
   }
 }
-
-@media (max-width: 640px) {
-  .rbt-page {
-    padding: 1rem 0.5rem;
-    max-width: 100%;
-  }
-}
-
-/* Style for the description */
-.rbt-description {
-  font-size: 0.875rem;
-  color: #4b5563;
-  margin-bottom: 1rem;
-  line-height: 1.5;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  max-width: 100%;
-}
-
-/* If needed, adjust the card layout to make more room */
-.rbt-card-horizontal {
-  display: flex;
-  padding: 1.5rem;
-}
-
-.rbt-content {
-  flex-grow: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-  .rbt-description {
-    max-width: 300px;
-  }
-}
-
-@media (max-width: 768px) {
-  .rbt-header {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .rbt-description {
-    width: 100%;
-    max-width: 100%;
-    margin: 0.5rem 0;
-    min-height: auto;
-  }
-
-  .rbt-main-info {
-    padding-right: 0;
-  }
-} 
