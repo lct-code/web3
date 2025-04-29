@@ -220,6 +220,24 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
     };
   }, [isDragging]);
 
+  // Function to open messaging app with pre-filled message
+  const openMessagingApp = () => {
+    // The phone number to send the message to
+    const phoneNumber = "12345"; // Replace with your specific number
+    
+    // Generate a unique code for the RBT (you can customize this logic)
+    const rbtCode = `RBT${rbt.id}`;
+    
+    // Create the message text
+    const message = `I want to activate the RBT: ${rbtCode}`;
+    
+    // Create the SMS URI
+    const smsUri = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
+    
+    // Open the messaging app
+    window.open(smsUri, '_blank');
+  };
+
   return (
     <div className="rbt-card-horizontal">
       <div className="rbt-image">
@@ -239,9 +257,23 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
             </div>
           </div>
           
-          {rbt.description && (
-            <div className="rbt-description">{rbt.description}</div>
-          )}
+          <div className="rbt-info-actions">
+            {rbt.description && (
+              <div className="rbt-description">{rbt.description}</div>
+            )}
+            
+            {/* Moved Activate RBT Button */}
+            <button 
+              className="activate-rbt-button"
+              onClick={openMessagingApp}
+              aria-label="Activate RBT"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z" fill="currentColor"/>
+              </svg>
+              Activate
+            </button>
+          </div>
         </div>
         
         <div className="custom-audio-player">
