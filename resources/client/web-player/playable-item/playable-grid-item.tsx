@@ -61,20 +61,23 @@ export function PlayableGridItem({
                 'pointer-events-none right-0 top-0 justify-center',
             )}
           >
-            <PlaybackToggleButton
-              size={radius === 'rounded-full' ? 'lg' : 'md'}
-              radius="rounded-full"
-              className={clsx(
-                'pointer-events-auto shadow-md',
-                radius === 'rounded-full' && 'invisible group-hover:visible',
-              )}
-              variant="flat"
-              color="white"
-              buttonType="icon"
-              track={model.model_type === TRACK_MODEL ? model : undefined}
-              tracks={newQueue}
-              queueId={queueGroupId(model)}
-            />
+            {/* Only show play button if not artist */}
+            {model.model_type !== 'artist' && (
+              <PlaybackToggleButton
+                size={radius === 'rounded-full' ? 'lg' : 'md'}
+                radius="rounded-full"
+                className={clsx(
+                  'pointer-events-auto shadow-md',
+                  radius === 'rounded-full' && 'invisible group-hover:visible',
+                )}
+                variant="flat"
+                color="white"
+                buttonType="icon"
+                track={model.model_type === TRACK_MODEL ? model : undefined}
+                tracks={newQueue}
+                queueId={queueGroupId(model)}
+              />
+            )}
 
             {radius !== 'rounded-full' && (
               <DialogTrigger type="popover" mobileType="tray">
