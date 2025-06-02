@@ -77,6 +77,7 @@ export function PlayerOverlay() {
 
   return (
     <div
+    dir = "ltr"
       ref={overlayRef}
       className={clsx(
         'fixed right-0 bg outline-none transition-all',
@@ -87,7 +88,8 @@ export function PlayerOverlay() {
       )}
     >
       {isMaximized && (
-        <div className="mb-10 flex flex-shrink-0 items-center p-10">
+        <div
+         dir = "ltr" className="mb-10 flex flex-shrink-0 items-center p-10">
           <IconButton
             iconSize="lg"
             className="mr-auto"

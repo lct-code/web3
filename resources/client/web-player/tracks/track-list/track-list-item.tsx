@@ -50,7 +50,7 @@ export const TrackListItem = memo(
       player?.seekbar_type === 'waveform' && trackIsLocallyUploaded(track);
 
     return (
-      <div
+      <div 
         className={clsx(
           'overflow-hidden',
           !hideArtwork && 'md:flex md:gap-24',

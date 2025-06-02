@@ -44,6 +44,7 @@ function PlayerControls() {
 
   return (
     <div
+    dir = "ltr"
       className="bg-chip rounded p-6 flex items-center gap-24 justify-between shadow relative"
       onClick={() => {
         playerOverlayState.toggle();

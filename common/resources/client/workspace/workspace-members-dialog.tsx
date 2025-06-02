@@ -115,7 +115,7 @@ interface MemberListItemProps {
 }
 function MemberListItem({workspace, member}: MemberListItemProps) {
   return (
-    <m.div
+    <m.div 
       initial={{x: '-100%', opacity: 0}}
       animate={{x: 0, opacity: 1}}
       exit={{x: '100%', opacity: 0}}
@@ -129,7 +129,7 @@ function MemberListItem({workspace, member}: MemberListItemProps) {
         alt=""
       />
       <div className="min-w-0 flex-auto items-center justify-between gap-14 md:flex">
-        <div className="mb-10 overflow-hidden md:mb-0 md:mr-10">
+        <div   className="mb-10 overflow-hidden md:mb-0 md:mr-10">
           <div className="flex items-center justify-start gap-6">
             <div className="overflow-hidden text-ellipsis whitespace-nowrap">
               {member.display_name}

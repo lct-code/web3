@@ -118,7 +118,7 @@ export function useSlider({
     return draggedThumbsRef.current?.[index] || false;
   };
 
-  const isRtl = (document.dir ?? 'ltr') == 'rtl';
+  const isRtl = false; // Force LTR behavior
 
   const getThumbValueLabel = (index: number) =>
     getFormattedValue(values[index]);

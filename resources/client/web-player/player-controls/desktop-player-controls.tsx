@@ -31,7 +31,7 @@ export function DesktopPlayerControls() {
   if (!mediaIsCued) return null;
 
   return (
-    <div className="dashboard-grid-footer z-30 flex h-96 items-center justify-between border-t bg px-16">
+    <div dir="ltr" className="dashboard-grid-footer z-30 flex h-96 items-center justify-between border-t bg px-16">
       <QueuedTrack />
       <PlaybackControls className="w-2/5 max-w-[722px]" />
       <SecondaryControls />

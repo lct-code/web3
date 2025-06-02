@@ -221,7 +221,7 @@ const RBTCard = ({ rbt }: RBTCardProps) => {
   }, [isDragging]);
 
   return (
-    <div className="rbt-card-horizontal">
+    <div dir = "ltr" className="rbt-card-horizontal">
       <div className="rbt-image">
         {rbt.image ? (
           <img src={rbt.image} alt={rbt.name} />
