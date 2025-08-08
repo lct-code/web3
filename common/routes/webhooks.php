@@ -3,6 +3,7 @@
 use Common\Billing\Gateways\Paypal\PaypalWebhookController;
 use Common\Billing\Gateways\Phonesub\PhonesubWebhookController;
 use Common\Billing\Gateways\Stripe\StripeWebhookController;
+use Common\Billing\Gateways\Xceed\XceedWebhookController;
 use Illuminate\Support\Facades\Route;
 
 // PAYPAL
@@ -24,5 +25,11 @@ Route::get('api/sync/zainksa', [
 ]);
 Route::post('api/sync/zainksa', [
     PhonesubWebhookController::class,
+    'handleWebhook',
+]);
+
+// XCEED
+Route::match(['get', 'post'], 'billing/xceed/webhook', [
+    XceedWebhookController::class,
     'handleWebhook',
 ]);
