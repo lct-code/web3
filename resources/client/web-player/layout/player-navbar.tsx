@@ -140,7 +140,7 @@ function ActionButtons() {
           size="xs"
           color="danger"
           disabled={cancelZainSdSubscription.isPending}
-          className={showCancelSubscriptionButton ? 'hidden' : ''}
+          className={showCancelSubscriptionButton ? '' : 'hidden'}
         >
           <Trans message="Cancel Subscription" />
         </Button>
