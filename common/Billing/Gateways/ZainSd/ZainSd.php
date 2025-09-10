@@ -78,6 +78,10 @@ class ZainSd implements CommonSubscriptionGatewayActions
         }
 
         $data = $response->json();
+        if ($data['error_code'] == 111) { // if the user is not subscribed, continue the flow
+            $data['success'] = true;
+            $data['error_code'] = 0;
+        }
         $this->handleZainSdError($data, 'cancelSubscription');
 
         // Update local subscription status
