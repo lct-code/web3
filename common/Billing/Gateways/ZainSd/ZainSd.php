@@ -180,6 +180,13 @@ class ZainSd implements CommonSubscriptionGatewayActions
         //     $data['success'] = true;
         //     $data['error_code'] = 0;
         // }
+        if ($data['error_code'] == 111) {
+            $data['success'] = true;
+            $data['error_code'] = 0;
+            $data['subscription_data'] = [
+                "is_active" => false,
+            ];
+        }
         $dataError = $data;
         $dataError['phone'] = $phone;
         $dataError['product_code'] = $productCode;
