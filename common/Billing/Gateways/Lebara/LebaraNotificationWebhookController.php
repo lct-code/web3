@@ -55,6 +55,19 @@ class LebaraNotificationWebhookController extends Controller
             ]);
         }
 
+        $headers = [];
+        foreach ($_SERVER as $key => $value) {
+            if (substr($key, 0, 5) == 'HTTP_') {
+                $headers[$key] = $value;
+            }
+        }
+
+        Log::debug('Lebara Notification Webhook request: ' . json_encode([
+            'method' => $_SERVER['REQUEST_METHOD'],
+            'request' => $_REQUEST,
+            'headers' => $headers,
+        ]));
+
         // Return 200 OK as requested
         return response('OK', 200);
     }
