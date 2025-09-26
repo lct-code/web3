@@ -4,6 +4,8 @@ use Common\Billing\Gateways\Paypal\PaypalWebhookController;
 use Common\Billing\Gateways\Phonesub\PhonesubWebhookController;
 use Common\Billing\Gateways\Stripe\StripeWebhookController;
 use Common\Billing\Gateways\Xceed\XceedWebhookController;
+use Common\Billing\Gateways\Lebara\LebaraBillingWebhookController;
+use Common\Billing\Gateways\Lebara\LebaraNotificationWebhookController;
 use Illuminate\Support\Facades\Route;
 
 // PAYPAL
@@ -31,5 +33,15 @@ Route::post('api/sync/zainksa', [
 // XCEED
 Route::match(['get', 'post'], 'billing/xceed/webhook', [
     XceedWebhookController::class,
+    'handleWebhook',
+]);
+
+// LEBARA
+Route::match(['get', 'post'], 'billing/lebara/webhook', [
+    LebaraBillingWebhookController::class,
+    'handleWebhook',
+]);
+Route::match(['get', 'post'], 'billing/lebara/notification', [
+    LebaraNotificationWebhookController::class,
     'handleWebhook',
 ]);
