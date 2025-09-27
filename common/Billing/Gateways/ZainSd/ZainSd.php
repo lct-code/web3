@@ -78,6 +78,10 @@ class ZainSd implements CommonSubscriptionGatewayActions
         }
 
         $data = $response->json();
+        if ($data['error_code'] == 111) { // if the user is not subscribed, continue the flow
+            $data['success'] = true;
+            $data['error_code'] = 0;
+        }
         $this->handleZainSdError($data, 'cancelSubscription');
 
         // Update local subscription status
@@ -96,7 +100,7 @@ class ZainSd implements CommonSubscriptionGatewayActions
         throw new GatewayException(__('Subscription resumption not supported by Zain SD'));
     }
 
-    protected function storeSubscriptionLocally(array $subscriptionData, string $phone, string $productCode): Subscription
+    protected function storeSubscriptionLocally(array $subscriptionData, string $phone, string $productCode, string $gatewayId): Subscription
     {
         $user = User::where('phone', $phone)->first();
         $loggedInUser = Auth::user();
@@ -127,7 +131,7 @@ class ZainSd implements CommonSubscriptionGatewayActions
         }
 
         $price = Price::where('zain_sd_product_code', $productCode)->firstOrFail();
-        return $user->subscribe('zain_sd', $subscriptionData['id'], $price);
+        return $user->subscribe('zain_sd', $gatewayId, $price);
     }
 
     public function syncSubscriptionDetails(string $phone, string $productCode): array
@@ -176,12 +180,20 @@ class ZainSd implements CommonSubscriptionGatewayActions
         //     $data['success'] = true;
         //     $data['error_code'] = 0;
         // }
+        if ($data['error_code'] == 111) {
+            $data['success'] = true;
+            $data['error_code'] = 0;
+            $data['subscription_data'] = [
+                "is_active" => false,
+            ];
+        }
         $dataError = $data;
         $dataError['phone'] = $phone;
         $dataError['product_code'] = $productCode;
         $this->handleZainSdError($dataError, 'syncSubscriptionDetails');
-
-        $subscription = Subscription::where('gateway_id', $data['subscription_data']['id'])->first();
+        
+        $gatewayId = $productCode . '_' . $phone;
+        $subscription = Subscription::where('gateway_id', $gatewayId)->first();
 
         $subscriptionData = $data['subscription_data'];
         $isActive = (bool) ($subscriptionData['is_active'] ?? false);
@@ -189,7 +201,7 @@ class ZainSd implements CommonSubscriptionGatewayActions
         // If no subscription found and subscription is active on Zain SD, create it locally
         if (!$subscription && $isActive) {
             try {
-                $subscription = $this->storeSubscriptionLocally($subscriptionData, $phone, $productCode);
+                $subscription = $this->storeSubscriptionLocally($subscriptionData, $phone, $productCode, $gatewayId);
             } catch (\Exception $e) {
                 Log::error('Failed to create local subscription for Zain SD3', [
                     'error' => $e->getMessage(),
