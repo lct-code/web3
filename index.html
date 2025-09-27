@@ -1,99 +1,149 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <title> Signup Page</title>
-    
-    <style>
-    button:hover {color: hotpink;}
-    .element { background-color: #438; 
-    color: hotpink;  
-    margin-top: 20px; 
-    text-align: center;
-    text-decoration-line: underline;}
-    input:hover {color:white; background-color:blue;}
-   
-    .text:hover  { color: hotpink; }
-    
-    </style>
+  <meta charset="utf-8" />
+  <title>Signup Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+      color: #222;
+    }
+
+    body:hover { color: hotpink; }
+
+    h1 {
+      background: #438;
+      color: hotpink;
+      text-align: center;
+      text-decoration: underline;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    form {
+      display: grid;
+      gap: 15px;
+    }
+
+    label { font-weight: 600; }
+
+    input, select, button {
+      padding: 8px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    input[type="radio"],
+    input[type="checkbox"] {
+      width: auto;
+      margin-right: 6px;
+    }
+
+    button:hover { color: hotpink; }
+    input:hover { color: white; background-color: blue; }
+
+    .radio-group, .checkbox-group {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .submit-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* 📱 Mobile-first: single column */
+    .row { display: flex; flex-direction: column; gap: 10px; }
+
+    /* 💻 Desktop: switch some rows to two-column layout */
+    @media (min-width: 768px) {
+      .row { flex-direction: row; }
+      .row > * { flex: 1; }
+    }
+  </style>
 </head>
+<body>
 
-<body class="text">
+  <h1>Registration Form</h1>
+  <hr />
 
-    <h1 class="element">Registration Form</h1>
-    <hr><br>
+  <form>
+    <label>Full name</label>
+    <div class="row">
+      <input type="text" name="fname" placeholder="First name">
+      <input type="text" name="mname" placeholder="Middle name">
+      <input type="text" name="lname" placeholder="Last name">
+    </div>
 
-    <h3>Fill in your details and hit the submit button.
-    </h3><br>
+    <label>Date of Birth</label>
+    <input type="date" id="date">
 
-    <form>
-        <label>Full Name:</label>
+    <label>Gender</label>
+    <div class="radio-group">
+      <label><input type="radio" name="gender" value="male"> Male</label>
+      <label><input type="radio" name="gender" value="female"> Female</label>
+    </div>
 
-        <input type="text" name="fname" placeholder="First Name" style="margin-left: 50px">
-        <input type="text" name="fname" placeholder="Middle Name">
-        <input type=" text" name="fname" placeholder="Last Name">
+    <label>Marital status</label>
+    <div class="radio-group">
+      <label><input type="radio" name="status" value="single"> Single</label>
+      <label><input type="radio" name="status" value="married"> Married</label>
+      <label><input type="radio" name="status" value="divorced"> Divorced</label>
+    </div>
 
-        <br><br>
+    <label>Address</label>
+    <div class="row">
+      <input type="text" placeholder="Street (e.g. 1 Bright Street)">
+      <input type="text" placeholder="State (e.g. Lagos State)">
+    </div>
 
-        <label for="date">Date of Birth:</label>
-        <input type="date" id="date" placeholder="21-Oct-2025"style="margin-left: 34px;"><br><br>
+    <label>Nationality</label>
+    <select>
+      <option>Nigeria</option>
+      <option>Australia</option>
+      <option>Brazil</option>
+      <option>Cameroun</option>
+      <option>Denmark</option>
+      <option>Egypt</option>
+      <option>France</option>
+      <option>Greece</option>
+      <option>Holland</option>
+    </select>
 
-        <label>Gender:</label>
+    <label>Phone No</label>
+    <input type="tel" name="phone" placeholder="+2348130123221">
 
-        <input type="radio" name="gender" style="margin-left: 70px;">Male
-        <input type="radio" name="gender">Female
-        <br><br>
+    <label>X (Twitter)</label>
+    <input type="text" name="twitter" placeholder="@twitter">
 
+    <label>Discord</label>
+    <input type="text" name="discord" placeholder="@discord">
 
+    <label>Telegram</label>
+    <input type="text" name="telegram" placeholder="@telegram">
 
-        <label for="radio">Marital Status:</label>
-        <input type="radio" id="radio" name="status" style="margin-left: 28px;">Single
-        <input type="radio" name="status">Married
-        <input type="radio" name="status">Divorced<br><br>
+    <label>EVM Wallet</label>
+    <input type="text" name="wallet" placeholder="0x...">
 
-        <label>Street:</label>
-        <input type="text"placeholder="1, Bright Street" style="margin-left: 80px;">
-        State:<input type="text" placeholder="Lagos State">
+    <div class="checkbox-group">
+      <label><input type="checkbox"> I agree that all information entered above is correct</label>
+    </div>
 
-        <label> Nationality:</label>
-        <select>
-            <option>Australia</option>
-            <option>Brazil</option>
-            <option>Cameroun</option>
-            <option>Denmark</option>
-            <option>Egypt</option>
-            <option>France</option>
-            <option>Greece</option>
-            <option>Holland</option>
-            <option>Nigeria</option>
-        </select>
-        <br><br>
-
-        <label>Phone No:</label>
-        <input type="text" name="phone" placeholder="+2348130123221" style="margin-left: 54px;"><br><br>
-
-        <label class="textbox">X (twitter):</label>
-        <input type="text" name="email" placeholder="@twitter" style="margin-left: 49px;"><br><br>
-
-        <label>Discord:</label>
-        <input type="text" name="discord" placeholder="@discord" style="margin-left: 66px;"><br><br>
-        <label>Telegram:</label>
-        <input type="text" name="telegram" placeholder="@telegram" style="margin-left: 56px;"><br><br>
-        <label>EVM Wallet:</label>
-        <input type="text" name="wallet" placeholder="0x..." size="50" style="margin-left: 35px;"><br><br>
-
-        <input type="checkbox">
-        <label>I agree that all information enter above are correct</label><br><br>
-
-        <input type="submit" value="Send">
-        
-        <a href="https://tosinchukwu.github.io/fav/">
-<button type="button">back</button></a>
-
-    </form>
-<br><br>
-
+    <div class="submit-row">
+      <input type="submit" value="Send">
+      <a href="https://tosinchukwu.github.io/fav"><button type="button">Back</button></a>
+    </div>
+  </form>
 
 </body>
-
 </html>
