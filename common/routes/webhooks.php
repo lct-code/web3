@@ -37,7 +37,7 @@ Route::match(['get', 'post'], 'billing/xceed/webhook', [
 ]);
 
 // LEBARA
-Route::match(['get', 'post'], 'billing/lebara/webhook', [
+Route::match(['get', 'post'], 'billing/lebara/billing', [
     LebaraBillingWebhookController::class,
     'handleWebhook',
 ]);
