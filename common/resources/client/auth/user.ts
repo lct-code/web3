@@ -18,6 +18,8 @@ export interface User {
   permissions?: Permission[];
   email: string;
   password: string;
+  phone: string;
+  phone_entered: string;
   language: string;
   timezone: string;
   country: string;

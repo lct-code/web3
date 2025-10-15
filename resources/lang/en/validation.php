@@ -66,6 +66,8 @@ return [
     ],
     'not_in'               => __('The selected :attribute is invalid.'),
     'numeric'              => __('The :attribute must be a number.'),
+    'phone'                => __('The :attribute field must be a valid number.'),
+    'phone_country'        => __('The number must be a valid phone number from a supported country.'),
     'present'              => __('The :attribute field must be present.'),
     'regex'                => __('The :attribute format is invalid.'),
     'required'             => __('The :attribute field is required.'),

@@ -12,6 +12,7 @@ interface Response extends BackendResponse {}
 interface Payload {
   first_name?: string;
   last_name?: string;
+  phone?: string;
 }
 
 export function useUpdateAccountDetails(form: UseFormReturn<Partial<User>>) {

@@ -137,4 +137,65 @@ class User extends BaseUser
     {
         return User::MODEL_TYPE;
     }
+
+    public function toArray(bool $showAll = false): array
+    {
+        if (
+            (!$showAll && !Auth::id()) ||
+            (Auth::id() !== $this->id &&
+                !Auth::user()?->hasPermission('users.update'))
+        ) {
+            $this->hidden = array_merge($this->hidden, [
+                'first_name',
+                'last_name',
+                'avatar_url',
+                'gender',
+                'email',
+                'phone',
+                'card_brand',
+                'has_password',
+                'confirmed',
+                'stripe_id',
+                'roles',
+                'permissions',
+                'card_last_four',
+                'created_at',
+                'updated_at',
+                'available_space',
+                'email_verified_at',
+                'timezone',
+                'confirmation_code',
+                'subscriptions',
+            ]);
+        }
+
+        return parent::toArray();
+    }
+
+    public function scopeCompact(Builder $query): Builder
+    {
+        return $query->select(
+            'users.id',
+            'users.avatar',
+            'users.email',
+            'users.phone',
+            'users.first_name',
+            'users.last_name',
+            'users.username',
+        );
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'username' => $this->username,
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'created_at' => $this->created_at->timestamp ?? '_null',
+            'updated_at' => $this->updated_at->timestamp ?? '_null',
+        ];
+    }
 }
