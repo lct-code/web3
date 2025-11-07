@@ -81,6 +81,11 @@ return [
         'client_username' => env('ZAIN_SD_CLIENT_USERNAME'),
         'client_password' => env('ZAIN_SD_CLIENT_PASSWORD'),
     ],
+    'lebara' => [
+        'base_url' => env('LEBARA_BASE_URL'),
+        'api_key' => env('LEBARA_API_KEY'),
+        'api_version' => env('LEBARA_API_VERSION'),
+        ],
 
     /**
      * Socialite login credentials

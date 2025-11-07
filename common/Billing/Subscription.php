@@ -7,6 +7,7 @@ use Common\Billing\Gateways\Paypal\Paypal;
 use Common\Billing\Gateways\Stripe\Stripe;
 use Common\Billing\Gateways\Phonesub\Phonesub;
 use Common\Billing\Gateways\ZainSd\ZainSd;
+use Common\Billing\Gateways\Lebara\Lebara;
 use Common\Billing\Models\Price;
 use Common\Billing\Models\Product;
 use Common\Billing\Subscriptions\SubscriptionFactory;
@@ -240,6 +241,8 @@ class Subscription extends BaseModel
             return app(Phonesub::class);
         } elseif ($this->gateway_name === 'zain_sd') {
             return app(ZainSd::class);
+        } elseif ($this->gateway_name === 'lebara') {
+            return app(Lebara::class);
         }
 
         return null;

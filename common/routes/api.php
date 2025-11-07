@@ -20,6 +20,7 @@ use Common\Auth\Roles\RolesController;
 use Common\Billing\Gateways\Paypal\PaypalController;
 use Common\Billing\Gateways\Stripe\StripeController;
 use Common\Billing\Gateways\Phonesub\PhonesubController;
+use Common\Billing\Gateways\Lebara\LebaraController;
 use Common\Billing\Gateways\ZainSd\ZainSdController;
 use Common\Billing\Gateways\SyncProductsController;
 use Common\Billing\Invoices\InvoiceController;
@@ -69,7 +70,7 @@ Route::group(['prefix' => 'v1'], function () {
         // FILE ENTRIES
         Route::get('file-entries/{fileEntry}/model', [FileEntriesController::class, 'showModel']);
         Route::get('file-entries/{fileEntry}', [FileEntriesController::class, 'show'])
-          ->withoutMiddleware(VerifyApiAccessMiddleware::class);
+            ->withoutMiddleware(VerifyApiAccessMiddleware::class);
         Route::get('file-entries', [FileEntriesController::class, 'index']);
         Route::post('file-entries/delete', [FileEntriesController::class, 'destroy']);
         Route::delete('file-entries/{entryIds}', [FileEntriesController::class, 'destroy']);
@@ -95,7 +96,7 @@ Route::group(['prefix' => 'v1'], function () {
         // TUS UPLOADS
         Route::post('tus/entries', [TusFileEntryController::class, 'store']);
         Route::any('/tus/upload/{any?}', function () {
-           return app(TusServer::class)->serve();
+            return app(TusServer::class)->serve();
         })->where('any', '.*');
 
         // NOTIFICATIONS
@@ -212,11 +213,14 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('billing/phonesub/subscribe-start', [PhonesubController::class, 'subscribeStart']);
         Route::post('billing/phonesub/subscribe-verify', [PhonesubController::class, 'subscribeVerify']);
         Route::post('billing/phonesub/sync-subscription-details', [PhonesubController::class, 'syncSubscriptionDetails']);
+        Route::post('billing/lebara/subscribe-start', [LebaraController::class, 'subscribeStart']);
+        Route::post('billing/lebara/subscribe-verify', [LebaraController::class, 'subscribeVerify']);
+        Route::post('billing/lebara/sync-subscription-details', [LebaraController::class, 'syncSubscriptionDetails']);
         Route::post('billing/zain-sd/sync-subscription-details', [ZainSdController::class, 'syncSubscriptionDetails']);
         Route::post('billing/zain-sd/cancel-subscription', [ZainSdController::class, 'cancelSubscription']);
         // INVOICES
         Route::get('billing/invoices', [InvoiceController::class, 'index']);
-        
+
 
         // CUSTOM DOMAINS
         Route::apiResource('custom-domain', CustomDomainController::class)->middleware('customDomainsEnabled');
@@ -253,7 +257,7 @@ Route::group(['prefix' => 'v1'], function () {
     // Mobile app auth
     $limiter = config('fortify.limiters.login');
     Route::post('auth/login', [MobileAuthController::class, 'login'])->middleware(array_filter([
-        $limiter ? 'throttle:'.$limiter : null,
+        $limiter ? 'throttle:' . $limiter : null,
     ]))->withoutMiddleware('verifyApiAccess');
     Route::post('auth/register', [MobileAuthController::class, 'register'])->withoutMiddleware('verifyApiAccess');
     // Route::post('auth/register-mobile', [MobileAuthController::class, 'registerMobile'])->withoutMiddleware('verifyApiAccess');

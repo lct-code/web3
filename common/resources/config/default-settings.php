@@ -60,6 +60,7 @@ return [
     ['name' => 'billing.paypal.enable', 'value' => false],
     ['name' => 'billing.phonesub.enable', 'value' => true],
     ['name' => 'billing.zain_sd.enable', 'value' => true],
+    ['name' => 'billing.lebara.enable', 'value' => true],
     ['name' => 'billing.phonesub_test_mode', 'value' => true],
     [
         'name' => 'billing.accepted_cards',
