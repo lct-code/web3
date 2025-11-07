@@ -5,6 +5,7 @@ import {CheckoutProductSummary} from './checkout-product-summary';
 import {usePaypal} from './paypal/use-paypal';
 import {StripeElementsForm} from './stripe/stripe-elements-form';
 import {PhonesubElementsForm} from './phonesub/phonesub-elements-form';
+import { LebaraElementsForm } from './lebara/lebara-elements-form';
 import {Fragment} from 'react';
 import {useProducts} from '../pricing-table/use-products';
 import {FullPageLoader} from '../../ui/progress/full-page-loader';
@@ -21,7 +22,7 @@ export function Checkout() {
   });
   const {
     base_url,
-    billing: {stripe, phonesub, paypal, zain_sd},
+    billing: { stripe, phonesub, paypal, zain_sd, lebara },
   } = useSettings();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -57,6 +58,21 @@ export function Checkout() {
         />
       ),
       enable: phonesub.enable && (price?.paymentMethods || []).includes('phonesub'),
+    },
+    {
+      key: 'lebara',
+      component: (
+        <LebaraElementsForm
+          productId={productId}
+          priceId={priceId}
+          submitLabel={<Trans message="Send code" />}
+          verifyLabel={<Trans message="Verify code" />}
+          resendLabel={<Trans message="Resend code" />}
+          type="subscription"
+          returnUrl={`/checkout/${productId}/${priceId}/lebara/done`}
+        />
+      ),
+      enable: lebara.enable && (price?.paymentMethods || []).includes('lebara'),
     },
     {
       key: 'stripe',

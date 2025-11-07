@@ -50,6 +50,9 @@ export function PriceForm({index, onRemovePrice}: PriceFormProps) {
   const isZainSelected = watch(`prices.${index}.paymentMethods`)?.includes(
     'zain_sd'
   );
+  const isLebaraSelected = watch(`prices.${index}.paymentMethods`)?.includes(
+    'lebara'
+  );
 
   const paymentMethods = usePaymentMethods();
 
@@ -148,6 +151,13 @@ export function PriceForm({index, onRemovePrice}: PriceFormProps) {
         label={<Trans message="Zain SD product code" />}
         type="text"
         name={`prices.${index}.zain_sd_product_code`}
+        className="mb-20"
+      />
+      <FormTextField
+        disabled={!allowPriceChanges || !isLebaraSelected}
+        label={<Trans message="Lebara service id" />}
+        type="text"
+        name={`prices.${index}.lebara_service_id`}
         className="mb-20"
       />
 

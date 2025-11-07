@@ -68,6 +68,9 @@ export interface Settings {
     zain_sd: {
       enable: boolean;
     };
+    lebara: {
+      enable: boolean;
+    };
   };
   notifications: {
     integrated: boolean;

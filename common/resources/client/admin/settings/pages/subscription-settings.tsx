@@ -48,6 +48,7 @@ export function SubscriptionSettings() {
             <PaypalSection />
             <StripeSection />
             <ZainSDSection />
+            <LebaraSection />
             <SettingsSeparator />
             <JsonChipField
               label={<Trans message="Accepted cards" />}
@@ -246,6 +247,24 @@ function ZainSDSection() {
         }
       >
         <Trans message="Zain SD gateway" />
+      </FormSwitch>
+    </div>
+  );
+}
+
+function LebaraSection() {
+  
+  return (
+    <div className="mb-30">
+      <FormSwitch
+        name="client.billing.lebara.enable"
+        description={
+          <div>
+            <Trans message="Enable Lebara payment gateway integration." />
+          </div>
+        }
+      >
+        <Trans message="Lebara gateway" />
       </FormSwitch>
     </div>
   );
